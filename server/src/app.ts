@@ -9,6 +9,8 @@ import propertyRoutes from "./routes/property.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import adminUploadRoutes from "./routes/admin/adminUpload.routes.js";
 import adminPropertyRoutes from "./routes/admin/adminProperty.routes.js";
+import newsletterRoutes from "./routes/newsletter.routes.js";
+import adminNewsletterRoutes from "./routes/admin/adminNewsletter.routes.js";
 
 
 
@@ -41,7 +43,8 @@ app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/admin/upload", adminUploadRoutes);
 app.use("/api/admin/properties", adminPropertyRoutes);
-
+app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/admin/newsletter", adminNewsletterRoutes);
 
 app.use(errorHandler);
 
