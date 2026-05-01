@@ -1,122 +1,134 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useMemo, useState } from 'react';
+import './App.css';
+import { getCurrentAdmin, logoutAdmin } from './api/admin';
+import AdminShell from './components/admin/AdminShell';
+import Footer from './components/Footer';
+import Header from './components/Header';
+import LoadingState from './components/LoadingState';
+import AboutPage from './pages/AboutPage';
+import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminNewsletterPage from './pages/admin/AdminNewsletterPage';
+import AdminPropertiesPage from './pages/admin/AdminPropertiesPage';
+import AdminPropertyEditorPage from './pages/admin/AdminPropertyEditorPage';
+import ContactPage from './pages/ContactPage';
+import HomePage from './pages/HomePage';
+import PropertiesPage from './pages/PropertiesPage';
+import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import type { AdminUser } from './types/admin';
+
+const normalizePath = (path: string) => {
+  if (!path || path === '') return '/';
+  return path.length > 1 ? path.replace(/\/$/, '') : path;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
+  const [admin, setAdmin] = useState<AdminUser | null>(null);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
+
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    getCurrentAdmin()
+      .then((response) => {
+        if (mounted) setAdmin(response.admin);
+      })
+      .catch(() => {
+        if (mounted) setAdmin(null);
+      })
+      .finally(() => {
+        if (mounted) setCheckingAdmin(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const navigate = (path: string) => {
+    const normalized = normalizePath(path);
+    window.history.pushState({}, '', normalized);
+    setCurrentPath(normalized);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogout = async () => {
+    await logoutAdmin();
+    setAdmin(null);
+    navigate('/admin/login');
+  };
+
+  const isAdminPath = currentPath === '/admin' || currentPath.startsWith('/admin/');
+
+  const adminPage = useMemo(() => {
+    if (!isAdminPath) return null;
+
+    if (checkingAdmin) {
+      return (
+        <main className="admin-loading-shell">
+          <LoadingState text="Checking admin session..." />
+        </main>
+      );
+    }
+
+    if (currentPath === '/admin/login') {
+      if (admin) return <AdminShell admin={admin} currentPath="/admin" navigate={navigate} onLogout={handleLogout}><AdminDashboardPage navigate={navigate} /></AdminShell>;
+      return <AdminLoginPage onLogin={setAdmin} navigate={navigate} />;
+    }
+
+    if (!admin) {
+      return <AdminLoginPage onLogin={setAdmin} navigate={navigate} />;
+    }
+
+    let content = <AdminDashboardPage navigate={navigate} />;
+
+    if (currentPath === '/admin/properties') {
+      content = <AdminPropertiesPage navigate={navigate} />;
+    } else if (currentPath === '/admin/properties/new') {
+      content = <AdminPropertyEditorPage navigate={navigate} />;
+    } else if (currentPath.startsWith('/admin/properties/') && currentPath.endsWith('/edit')) {
+      const propertyId = decodeURIComponent(currentPath.replace('/admin/properties/', '').replace('/edit', ''));
+      content = <AdminPropertyEditorPage propertyId={propertyId} navigate={navigate} />;
+    } else if (currentPath === '/admin/newsletter') {
+      content = <AdminNewsletterPage />;
+    }
+
+    return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout}>{content}</AdminShell>;
+  }, [admin, checkingAdmin, currentPath, isAdminPath]);
+
+  const publicPage = useMemo(() => {
+    if (currentPath === '/') return <HomePage navigate={navigate} />;
+    if (currentPath === '/about') return <AboutPage />;
+    if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" />;
+    if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" />;
+    if (currentPath === '/contact') return <ContactPage />;
+
+    if (currentPath.startsWith('/properties/')) {
+      const publicId = decodeURIComponent(currentPath.replace('/properties/', ''));
+      return <PropertyDetailsPage publicId={publicId} navigate={navigate} />;
+    }
+
+    return <PropertiesPage navigate={navigate} mode="commercial" />;
+  }, [currentPath]);
+
+  if (isAdminPath) {
+    return <div className="app-shell app-shell--admin">{adminPage}</div>;
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="app-shell">
+      <Header currentPath={currentPath} navigate={navigate} />
+      {publicPage}
+      <Footer navigate={navigate} />
+    </div>
+  );
 }
 
-export default App
+export default App;
