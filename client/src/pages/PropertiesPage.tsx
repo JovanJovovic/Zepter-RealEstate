@@ -5,6 +5,7 @@ import LoadingState from '../components/LoadingState';
 import PageHero from '../components/PageHero';
 import PropertyCard from '../components/PropertyCard';
 import PropertyFilters from '../components/PropertyFilters';
+import { getCopy } from '../data/localization';
 import type { PaginatedPropertiesResponse, Property, PropertyFiltersState, SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
@@ -40,6 +41,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
   const [allLocations, setAllLocations] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const copy = getCopy(language);
 
   useEffect(() => {
     setFilters(initialFilters);
@@ -57,7 +59,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : 'Properties could not be loaded.');
+        setError(err instanceof Error ? err.message : copy.properties.notLoaded);
         setData(defaultResponse);
       })
       .finally(() => {
@@ -82,17 +84,17 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const title = mode === 'projects' ? 'Projects in Development' : 'Commercial properties';
+  const title = mode === 'projects' ? copy.properties.projectsTitle : copy.properties.commercialTitle;
   const text =
     mode === 'projects'
-      ? 'A dedicated space for future Zepter Real Estate development projects and portfolio growth.'
-      : 'Browse offices, retail spaces, warehouses, industrial locations and selected commercial assets from the Zepter portfolio.';
+      ? copy.properties.projectsText
+      : copy.properties.commercialText;
 
   return (
     <main>
       <PageHero
         compact
-        eyebrow="Zepter portfolio"
+        eyebrow={copy.properties.portfolioEyebrow}
         title={title}
         text={text}
         image={mode === 'projects' ? publicImage('what we do Zepter Real Estate.jpg') : publicImage('portfolio Zepter Real Estate.jpg')}
@@ -112,27 +114,27 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
           <div className="properties-content">
             <div className="properties-toolbar">
               <div>
-                <span className="eyebrow">Results</span>
-                <h2>{data.pagination.total} properties</h2>
+                <span className="eyebrow">{copy.properties.results}</span>
+                <h2>{data.pagination.total} {copy.properties.properties}</h2>
               </div>
               <p>
-                Page {data.pagination.page || 1} of {Math.max(data.pagination.pages, 1)}
+                {copy.properties.page} {data.pagination.page || 1} {copy.properties.of} {Math.max(data.pagination.pages, 1)}
               </p>
             </div>
 
-            {loading && <LoadingState text="Loading properties..." />}
+            {loading && <LoadingState text={copy.properties.loading} />}
 
-            {!loading && error && <EmptyState title="Unable to load properties" text={error} />}
+            {!loading && error && <EmptyState title={copy.properties.unableTitle} text={error} />}
 
             {!loading && !error && data.items.length === 0 && (
               <EmptyState
-                title={mode === 'projects' ? 'No projects currently published' : 'No properties found'}
+                title={mode === 'projects' ? copy.properties.noProjects : copy.properties.noProperties}
                 text={
                   mode === 'projects'
-                    ? 'This page is ready for future project-development entries from the admin panel.'
-                    : 'Try removing some filters or searching by a broader location.'
+                    ? copy.properties.noProjectsText
+                    : copy.properties.noPropertiesText
                 }
-                actionLabel="Reset filters"
+                actionLabel={copy.properties.resetFilters}
                 onAction={() => setFilters(initialFilters)}
               />
             )}
@@ -152,7 +154,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
                   disabled={data.pagination.page <= 1}
                   onClick={() => changePage(data.pagination.page - 1)}
                 >
-                  Previous
+                  {copy.properties.previous}
                 </button>
                 <div className="pagination__numbers">
                   {Array.from({ length: data.pagination.pages }).map((_, index) => {
@@ -173,7 +175,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
                   disabled={data.pagination.page >= data.pagination.pages}
                   onClick={() => changePage(data.pagination.page + 1)}
                 >
-                  Next
+                  {copy.properties.next}
                 </button>
               </div>
             )}

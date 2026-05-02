@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getPropertyByPublicId } from '../api/properties';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
+import { getCopy } from '../data/localization';
 import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions, getSpecialRequirementOptions } from '../data/propertyOptions';
 import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage, resolveMediaUrl } from '../utils/asset';
@@ -26,11 +27,16 @@ const normalizeYoutubeUrl = (url?: string) => {
   return url;
 };
 
+const formatSize = (property: Property, fallback: string) => {
+  return property.sizeLabel || (property.sizeSqm ? `${property.sizeSqm.toLocaleString('en-US')} m²` : fallback);
+};
+
 const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPageProps) => {
   const [property, setProperty] = useState<Property | null>(null);
   const [activeImage, setActiveImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const copy = getCopy(language);
 
   useEffect(() => {
     let mounted = true;
@@ -45,7 +51,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
       })
       .catch((err) => {
         if (!mounted) return;
-        setError(err instanceof Error ? err.message : 'Property could not be loaded.');
+        setError(err instanceof Error ? err.message : copy.details.notLoaded);
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -54,7 +60,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
     return () => {
       mounted = false;
     };
-  }, [publicId, language]);
+  }, [copy.details.notLoaded, publicId, language]);
 
   const orderedImages = useMemo(() => {
     return [...(property?.images || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -63,7 +69,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
   if (loading) {
     return (
       <main className="details-page-shell">
-        <LoadingState text="Loading property details..." />
+        <LoadingState text={copy.details.loading} />
       </main>
     );
   }
@@ -71,7 +77,12 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
   if (error || !property) {
     return (
       <main className="details-page-shell">
-        <EmptyState title="Property not found" text={error || 'The selected property is not available.'} actionLabel="Back to commercial" onAction={() => navigate('/commercial')} />
+        <EmptyState
+          title={copy.details.notFoundTitle}
+          text={error || copy.details.notFoundText}
+          actionLabel={copy.details.backToCommercial}
+          onAction={() => navigate('/commercial')}
+        />
       </main>
     );
   }
@@ -83,6 +94,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
   const conditionLabel = getLabel(property.condition, conditionOptions);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const videoUrl = normalizeYoutubeUrl(property.videoUrl);
+  const sizeLabel = formatSize(property, copy.details.onRequest);
 
   return (
     <main>
@@ -91,7 +103,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
         <div className="container property-details-intro__grid">
           <div className="property-details-intro__content reveal-on-load">
             <button className="back-link back-link--dark" onClick={() => navigate('/commercial')}>
-              ← Back to properties
+              ← {copy.details.backToProperties}
             </button>
             <span className="eyebrow">{categoryLabels[property.category]}</span>
             <h1>{property.title}</h1>
@@ -101,16 +113,16 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
             </p>
             <div className="details-quick-facts">
               <div>
-                <span>Size</span>
-                <strong>{property.sizeLabel || (property.sizeSqm ? `${property.sizeSqm.toLocaleString('en-US')} m²` : 'On request')}</strong>
+                <span>{copy.details.size}</span>
+                <strong>{sizeLabel}</strong>
               </div>
               <div>
-                <span>Condition</span>
+                <span>{copy.details.condition}</span>
                 <strong>{conditionLabel}</strong>
               </div>
               <div>
-                <span>Type</span>
-                <strong>{typeLabel || 'On request'}</strong>
+                <span>{copy.details.type}</span>
+                <strong>{typeLabel || copy.details.onRequest}</strong>
               </div>
             </div>
           </div>
@@ -130,7 +142,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
                       key={`${image.url}-${image.order}`}
                       className={activeImage === fullImageUrl ? 'thumbnail thumbnail--active' : 'thumbnail'}
                       onClick={() => setActiveImage(fullImageUrl)}
-                      aria-label={`Show image ${image.order || ''}`}
+                      aria-label={`${copy.details.showImage} ${image.order || ''}`}
                     >
                       <img src={imageUrl} alt={image.alt || property.title} />
                     </button>
@@ -146,21 +158,21 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
         <div className="container details-grid">
           <div className="details-main">
             <article className="details-card details-card--lead">
-              <span className="eyebrow">About property</span>
+              <span className="eyebrow">{copy.details.aboutProperty}</span>
               <h2>{property.shortDescription || property.title}</h2>
               <p>{property.aboutProperty || property.fullDescription || property.shortDescription}</p>
             </article>
 
             {property.fullDescription && property.fullDescription !== property.aboutProperty && (
               <article className="details-card">
-                <span className="eyebrow">Description</span>
+                <span className="eyebrow">{copy.details.description}</span>
                 <p>{property.fullDescription}</p>
               </article>
             )}
 
             {videoUrl && (
               <article className="details-card">
-                <span className="eyebrow">Video presentation</span>
+                <span className="eyebrow">{copy.details.video}</span>
                 <div className="video-frame">
                   <iframe src={videoUrl} title={`${property.title} video`} allowFullScreen />
                 </div>
@@ -169,12 +181,12 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
 
             {property.floorPlans.length > 0 && (
               <article className="details-card">
-                <span className="eyebrow">Floor plans</span>
+                <span className="eyebrow">{copy.details.floorPlans}</span>
                 <div className="floor-plan-list">
                   {property.floorPlans.map((plan) => (
                     <a key={plan.fileUrl} href={resolveMediaUrl(plan.fileUrl)} target="_blank" rel="noreferrer">
-                      <span>{plan.title || 'Floor plan'}</span>
-                      <strong>Open PDF</strong>
+                      <span>{plan.title || copy.details.floorPlan}</span>
+                      <strong>{copy.details.openPdf}</strong>
                     </a>
                   ))}
                 </div>
@@ -184,29 +196,29 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
 
           <aside className="details-sidebar">
             <div className="details-sidebar__card">
-              <h2>Property facts</h2>
+              <h2>{copy.details.facts}</h2>
               <dl className="facts-list">
                 <div>
-                  <dt>Size</dt>
-                  <dd>{property.sizeLabel || (property.sizeSqm ? `${property.sizeSqm.toLocaleString('en-US')} m²` : 'On request')}</dd>
+                  <dt>{copy.details.size}</dt>
+                  <dd>{sizeLabel}</dd>
                 </div>
                 <div>
-                  <dt>Type</dt>
-                  <dd>{typeLabel || 'On request'}</dd>
+                  <dt>{copy.details.type}</dt>
+                  <dd>{typeLabel || copy.details.onRequest}</dd>
                 </div>
                 <div>
-                  <dt>Condition</dt>
+                  <dt>{copy.details.condition}</dt>
                   <dd>{conditionLabel}</dd>
                 </div>
                 {property.rooms && (
                   <div>
-                    <dt>Rooms</dt>
+                    <dt>{copy.details.rooms}</dt>
                     <dd>{property.rooms}</dd>
                   </div>
                 )}
                 {property.floorLabel && (
                   <div>
-                    <dt>Floors</dt>
+                    <dt>{copy.details.floors}</dt>
                     <dd>{property.floorLabel}</dd>
                   </div>
                 )}
@@ -214,15 +226,15 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
             </div>
 
             <div className="details-sidebar__card details-sidebar__card--blue">
-              <h2>Contact</h2>
-              <p>For more information about this property, contact Zepter Real Estate.</p>
+              <h2>{copy.details.contact}</h2>
+              <p>{copy.details.contactText}</p>
               <a href={`tel:${property.contactPhone || '+381112019170'}`}>{property.contactPhone || '+381 11 20 19 170'}</a>
               <a href={`mailto:${property.contactEmail || 'realestate@zepter.rs'}`}>{property.contactEmail || 'realestate@zepter.rs'}</a>
             </div>
 
             {property.specialRequirements.length > 0 && (
               <div className="details-sidebar__card">
-                <h2>Special requirements</h2>
+                <h2>{copy.details.specialRequirements}</h2>
                 <div className="details-tags">
                   {property.specialRequirements.map((requirement) => (
                     <span key={requirement}>{getLabel(requirement, specialRequirementOptions)}</span>

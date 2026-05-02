@@ -56,6 +56,10 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
   const navigate = (path: string) => {
     const normalized = normalizePath(path);
     window.history.pushState({}, '', normalized);
@@ -119,10 +123,10 @@ function App() {
 
   const publicPage = useMemo(() => {
     if (currentPath === '/') return <HomePage navigate={navigate} language={language} />;
-    if (currentPath === '/about') return <AboutPage />;
+    if (currentPath === '/about') return <AboutPage language={language} />;
     if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" language={language} />;
     if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" language={language} />;
-    if (currentPath === '/contact') return <ContactPage />;
+    if (currentPath === '/contact') return <ContactPage language={language} />;
 
     if (currentPath.startsWith('/properties/')) {
       const publicId = decodeURIComponent(currentPath.replace('/properties/', ''));
@@ -140,7 +144,7 @@ function App() {
     <div className="app-shell">
       <Header currentPath={currentPath} navigate={navigate} language={language} onLanguageChange={setLanguage} />
       {publicPage}
-      <Footer navigate={navigate} />
+      <Footer navigate={navigate} language={language} />
     </div>
   );
 }

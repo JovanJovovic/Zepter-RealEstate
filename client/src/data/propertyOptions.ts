@@ -65,6 +65,17 @@ export const sizeOptions = [
   { label: 'from 400 sqm', min: '400', max: '' },
 ];
 
+const sizeLabelsSr = [
+  'od 20 do 35 m²',
+  'od 35 do 50 m²',
+  'od 50 do 75 m²',
+  'od 75 do 100 m²',
+  'od 100 do 150 m²',
+  'od 150 do 200 m²',
+  'od 200 do 400 m²',
+  'od 400 m²',
+];
+
 export const specialRequirementOptions = [
   { value: 'phone', label: 'Phone' },
   { value: 'internet', label: 'Internet' },
@@ -111,6 +122,11 @@ export const getConditionOptions = (language: SupportedLanguage = 'en') => {
 export const getSpecialRequirementOptions = (language: SupportedLanguage = 'en') => {
   const labels = specialRequirementLabels[language] || specialRequirementLabels.en;
   return specialRequirementOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
+};
+
+export const getSizeOptions = (language: SupportedLanguage = 'en') => {
+  if (language !== 'sr') return sizeOptions;
+  return sizeOptions.map((option, index) => ({ ...option, label: sizeLabelsSr[index] || option.label }));
 };
 
 export const getCategoryLabels = (language: SupportedLanguage = 'en') => {

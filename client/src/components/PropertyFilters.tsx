@@ -4,11 +4,12 @@ import type { PropertyFiltersState } from '../types/property';
 import {
   getConditionOptions,
   getPropertyTypeOptions,
+  getSizeOptions,
   getSpecialRequirementOptions,
   roomOptions,
-  sizeOptions,
 } from '../data/propertyOptions';
 import type { SupportedLanguage } from '../types/property';
+import { getCopy } from '../data/localization';
 
 interface PropertyFiltersProps {
   initialFilters: PropertyFiltersState;
@@ -24,6 +25,8 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
   const propertyTypeOptions = getPropertyTypeOptions(language);
   const conditionOptions = getConditionOptions(language);
   const specialRequirementOptions = getSpecialRequirementOptions(language);
+  const sizeOptions = getSizeOptions(language);
+  const copy = getCopy(language);
 
   const locationOptions = useMemo(() => {
     const unique = Array.from(new Set(locations.filter(Boolean)));
@@ -67,17 +70,17 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
     <aside className="filters-panel">
       <form onSubmit={handleSubmit}>
         <div className="filters-panel__heading">
-          <span className="eyebrow">Refine search</span>
-          <h2>{mode === 'projects' ? 'Project filters' : 'Commercial filters'}</h2>
+          <span className="eyebrow">{copy.filters.refine}</span>
+          <h2>{mode === 'projects' ? copy.filters.projectFilters : copy.filters.commercialFilters}</h2>
         </div>
 
         <div className="field-group">
-          <label htmlFor="search">Search</label>
+          <label htmlFor="search">{copy.filters.search}</label>
           <input
             id="search"
             type="text"
             value={filters.search || ''}
-            placeholder="Title, location, description..."
+            placeholder={copy.filters.searchPlaceholder}
             onChange={(event) => setValue('search', event.target.value)}
           />
         </div>
@@ -99,9 +102,9 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
 
         <div className="field-grid">
           <div className="field-group">
-            <label htmlFor="location">Location</label>
+            <label htmlFor="location">{copy.filters.location}</label>
             <select id="location" value={filters.location || ''} onChange={(event) => setValue('location', event.target.value)}>
-              <option value="">All locations</option>
+              <option value="">{copy.filters.allLocations}</option>
               {locationOptions.map((location) => (
                 <option key={location} value={location}>
                   {location}
@@ -111,9 +114,9 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
           </div>
 
           <div className="field-group">
-            <label htmlFor="size">Size</label>
+            <label htmlFor="size">{copy.filters.size}</label>
             <select id="size" value={selectedSize} onChange={(event) => handleSizeChange(event.target.value)}>
-              <option value="">Any size</option>
+              <option value="">{copy.filters.anySize}</option>
               {sizeOptions.map((option) => (
                 <option key={option.label} value={option.label}>
                   {option.label}
@@ -123,9 +126,9 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
           </div>
 
           <div className="field-group">
-            <label htmlFor="condition">Condition</label>
+            <label htmlFor="condition">{copy.filters.condition}</label>
             <select id="condition" value={filters.condition || ''} onChange={(event) => setValue('condition', event.target.value)}>
-              <option value="">Any condition</option>
+              <option value="">{copy.filters.anyCondition}</option>
               {conditionOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -135,9 +138,9 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
           </div>
 
           <div className="field-group">
-            <label htmlFor="rooms">Rooms</label>
+            <label htmlFor="rooms">{copy.filters.rooms}</label>
             <select id="rooms" value={filters.rooms || ''} onChange={(event) => setValue('rooms', event.target.value)}>
-              <option value="">Any number</option>
+              <option value="">{copy.filters.anyNumber}</option>
               {roomOptions.map((room) => (
                 <option key={room} value={room}>
                   {room}
@@ -148,7 +151,7 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
         </div>
 
         <div className="requirements-group">
-          <label>Special requirements</label>
+          <label>{copy.filters.specialRequirements}</label>
           <div className="requirements-grid">
             {specialRequirementOptions.map((option) => (
               <button
@@ -169,7 +172,7 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
 
         <div className="filters-actions">
           <button className="btn btn--primary" type="submit">
-            Submit
+            {copy.filters.submit}
           </button>
           <button
             className="btn btn--ghost"
@@ -179,7 +182,7 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
               onReset();
             }}
           >
-            Reset
+            {copy.filters.reset}
           </button>
         </div>
       </form>

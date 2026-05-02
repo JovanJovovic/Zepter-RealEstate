@@ -1,33 +1,35 @@
+import { getCopy } from '../data/localization';
+import type { SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
 interface FooterProps {
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
-const Footer = ({ navigate }: FooterProps) => {
+const Footer = ({ navigate, language }: FooterProps) => {
+  const copy = getCopy(language);
+
   return (
     <footer className="site-footer">
       <div className="footer-pattern" />
       <div className="container footer-grid">
         <div className="footer-brand">
           <img src={publicImage('ZepterRealEstateLogo.png')} alt="Zepter Real Estate" />
-          <p>
-            A leading comprehensive and regional real estate company by facilitating transactions that benefit all involved
-            parties, resulting in client satisfaction and long-term relationships.
-          </p>
+          <p>{copy.footer.text}</p>
         </div>
 
         <div className="footer-column">
-          <h3>Navigation</h3>
-          <button onClick={() => navigate('/')}>Home</button>
-          <button onClick={() => navigate('/about')}>About</button>
-          <button onClick={() => navigate('/commercial')}>Commercial</button>
-          <button onClick={() => navigate('/projects-in-development')}>Project in Development</button>
-          <button onClick={() => navigate('/contact')}>Contact</button>
+          <h3>{copy.footer.navigation}</h3>
+          <button onClick={() => navigate('/')}>{copy.nav.home}</button>
+          <button onClick={() => navigate('/about')}>{copy.nav.about}</button>
+          <button onClick={() => navigate('/commercial')}>{copy.nav.commercial}</button>
+          <button onClick={() => navigate('/projects-in-development')}>{copy.nav.projects}</button>
+          <button onClick={() => navigate('/contact')}>{copy.nav.contact}</button>
         </div>
 
         <div className="footer-column">
-          <h3>Contact</h3>
+          <h3>{copy.footer.contact}</h3>
           <a href="tel:+381698900003">+381 69 89 00 003</a>
           <a href="tel:+381112019170">+381 11 20 19 170</a>
           <a href="mailto:realestate@zepter.rs">realestate@zepter.rs</a>
@@ -36,8 +38,8 @@ const Footer = ({ navigate }: FooterProps) => {
       </div>
 
       <div className="container footer-bottom">
-        <span>Copyright © Zepter Real Estate {new Date().getFullYear()}.</span>
-        <span>All rights reserved.</span>
+        <span>{copy.footer.copyright} {new Date().getFullYear()}.</span>
+        <span>{copy.footer.rights}</span>
       </div>
     </footer>
   );

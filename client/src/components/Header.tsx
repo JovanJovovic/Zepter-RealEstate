@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { languageOptions } from '../data/languages';
+import { getCopy } from '../data/localization';
 import type { SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
@@ -10,17 +11,26 @@ interface HeaderProps {
   onLanguageChange: (language: SupportedLanguage) => void;
 }
 
-const navItems = [
-  { label: 'Home', path: '/' },
-  { label: 'About', path: '/about' },
-  { label: 'Commercial', path: '/commercial' },
-  { label: 'Project in Development', path: '/projects-in-development' },
-  { label: 'Contact', path: '/contact' },
-];
-
 const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const copy = getCopy(language);
+  const navItems = [
+    { label: copy.nav.home, path: '/' },
+    { label: copy.nav.about, path: '/about' },
+    { label: copy.nav.commercial, path: '/commercial' },
+    { label: copy.nav.projects, path: '/projects-in-development' },
+    { label: copy.nav.contact, path: '/contact' },
+  ];
+  const localizedLanguageOptions =
+    language === 'sr'
+      ? [
+          { value: 'en' as const, label: 'Engleski' },
+          { value: 'sr' as const, label: 'Srpski' },
+          { value: 'ru' as const, label: 'Ruski' },
+          { value: 'de' as const, label: 'Nemački' },
+        ]
+      : languageOptions;
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 24);
@@ -37,7 +47,7 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
   return (
     <header className={`site-header ${isScrolled ? 'site-header--scrolled' : ''}`}>
       <div className="container header-inner">
-        <button className="brand" onClick={() => handleNavigate('/')} aria-label="Zepter Real Estate home">
+        <button className="brand" onClick={() => handleNavigate('/')} aria-label={copy.nav.homeAria}>
           <img src={publicImage('ZepterRealEstateLogo.png')} alt="Zepter Real Estate" />
         </button>
 
@@ -55,9 +65,9 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
 
         <div className="header-actions">
           <label className="language-select">
-            <span>Language</span>
+            <span>{copy.nav.language}</span>
             <select value={language} onChange={(event) => onLanguageChange(event.target.value as SupportedLanguage)}>
-              {languageOptions.map((option) => (
+              {localizedLanguageOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -65,12 +75,12 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
             </select>
           </label>
           <button className="btn btn--small btn--primary" onClick={() => handleNavigate('/commercial')}>
-            View properties
+            {copy.nav.viewProperties}
           </button>
           <button
             className={`menu-toggle ${isOpen ? 'menu-toggle--active' : ''}`}
             onClick={() => setIsOpen((value) => !value)}
-            aria-label="Toggle menu"
+            aria-label={copy.nav.toggleMenu}
           >
             <span />
             <span />
