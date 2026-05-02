@@ -10,11 +10,12 @@ import EmptyState from '../../components/EmptyState';
 import LoadingState from '../../components/LoadingState';
 import { categoryLabels, conditionOptions } from '../../data/propertyOptions';
 import type { AdminMessage, AdminPropertiesQuery, PaginatedPropertiesResponse } from '../../types/admin';
-import type { PropertyStatus } from '../../types/property';
+import type { PropertyStatus, SupportedLanguage } from '../../types/property';
 import { getMainImage } from '../../utils/asset';
 
 interface AdminPropertiesPageProps {
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
 const defaultResponse: PaginatedPropertiesResponse = {
@@ -29,8 +30,8 @@ const statusOptions: Array<{ value: '' | PropertyStatus; label: string }> = [
   { value: 'archived', label: 'Archived' },
 ];
 
-const AdminPropertiesPage = ({ navigate }: AdminPropertiesPageProps) => {
-  const [filters, setFilters] = useState<AdminPropertiesQuery>({ page: 1, limit: 10 });
+const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) => {
+  const [filters, setFilters] = useState<AdminPropertiesQuery>({ page: 1, limit: 10, language });
   const [data, setData] = useState(defaultResponse);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<AdminMessage | null>(null);
@@ -39,7 +40,7 @@ const AdminPropertiesPage = ({ navigate }: AdminPropertiesPageProps) => {
     setLoading(true);
     setMessage(null);
 
-    getAdminProperties(filters)
+    getAdminProperties({ ...filters, language })
       .then(setData)
       .catch((err) => {
         setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Nekretnine nisu učitane.' });
@@ -51,7 +52,7 @@ const AdminPropertiesPage = ({ navigate }: AdminPropertiesPageProps) => {
   useEffect(() => {
     loadProperties();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters, language]);
 
   const counts = useMemo(() => {
     return {
@@ -152,7 +153,7 @@ const AdminPropertiesPage = ({ navigate }: AdminPropertiesPageProps) => {
             {conditionOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
-        <button onClick={() => setFilters({ page: 1, limit: 10 })}>Reset</button>
+        <button onClick={() => setFilters({ page: 1, limit: 10, language })}>Reset</button>
       </section>
 
       {loading && <LoadingState text="Loading properties..." />}

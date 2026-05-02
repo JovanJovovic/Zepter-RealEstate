@@ -5,12 +5,13 @@ import LoadingState from '../components/LoadingState';
 import PageHero from '../components/PageHero';
 import PropertyCard from '../components/PropertyCard';
 import PropertyFilters from '../components/PropertyFilters';
-import type { PaginatedPropertiesResponse, Property, PropertyFiltersState } from '../types/property';
+import type { PaginatedPropertiesResponse, Property, PropertyFiltersState, SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
 interface PropertiesPageProps {
   navigate: (path: string) => void;
   mode?: 'commercial' | 'projects';
+  language: SupportedLanguage;
 }
 
 const defaultResponse: PaginatedPropertiesResponse = {
@@ -23,14 +24,15 @@ const defaultResponse: PaginatedPropertiesResponse = {
   },
 };
 
-const PropertiesPage = ({ navigate, mode = 'commercial' }: PropertiesPageProps) => {
+const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesPageProps) => {
   const initialFilters: PropertyFiltersState = useMemo(
     () => ({
       category: mode === 'projects' ? 'project-development' : 'commercial',
+      language,
       page: 1,
       limit: 9,
     }),
-    [mode]
+    [mode, language]
   );
 
   const [filters, setFilters] = useState<PropertyFiltersState>(initialFilters);
@@ -68,12 +70,12 @@ const PropertiesPage = ({ navigate, mode = 'commercial' }: PropertiesPageProps) 
   }, [filters]);
 
   useEffect(() => {
-    getProperties({ category: mode === 'projects' ? 'project-development' : 'commercial', limit: 100 })
+    getProperties({ category: mode === 'projects' ? 'project-development' : 'commercial', language, limit: 100 })
       .then((response) => {
         setAllLocations(response.items.map((item: Property) => item.location.fullLocation));
       })
       .catch(() => setAllLocations([]));
-  }, [mode]);
+  }, [mode, language]);
 
   const changePage = (page: number) => {
     setFilters((current) => ({ ...current, page }));
@@ -102,6 +104,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial' }: PropertiesPageProps) 
             initialFilters={initialFilters}
             locations={allLocations}
             mode={mode}
+            language={language}
             onApply={(nextFilters) => setFilters({ ...nextFilters, category: initialFilters.category, page: 1, limit: 9 })}
             onReset={() => setFilters(initialFilters)}
           />
@@ -137,7 +140,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial' }: PropertiesPageProps) 
             {!loading && !error && data.items.length > 0 && (
               <div className="property-grid">
                 {data.items.map((property) => (
-                  <PropertyCard key={property._id} property={property} navigate={navigate} />
+                  <PropertyCard key={property._id} property={property} navigate={navigate} language={language} />
                 ))}
               </div>
             )}

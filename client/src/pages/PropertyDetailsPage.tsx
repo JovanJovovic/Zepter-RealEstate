@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { getPropertyByPublicId } from '../api/properties';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
-import { categoryLabels, conditionOptions, propertyTypeOptions, specialRequirementOptions } from '../data/propertyOptions';
-import type { Property } from '../types/property';
+import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions, getSpecialRequirementOptions } from '../data/propertyOptions';
+import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage, resolveMediaUrl } from '../utils/asset';
 
 interface PropertyDetailsPageProps {
   publicId: string;
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
 const getLabel = (value: string, options: Array<{ value: string; label: string }>) => {
@@ -25,7 +26,7 @@ const normalizeYoutubeUrl = (url?: string) => {
   return url;
 };
 
-const PropertyDetailsPage = ({ publicId, navigate }: PropertyDetailsPageProps) => {
+const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPageProps) => {
   const [property, setProperty] = useState<Property | null>(null);
   const [activeImage, setActiveImage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -36,7 +37,7 @@ const PropertyDetailsPage = ({ publicId, navigate }: PropertyDetailsPageProps) =
     setLoading(true);
     setError('');
 
-    getPropertyByPublicId(publicId)
+    getPropertyByPublicId(publicId, language)
       .then((data) => {
         if (!mounted) return;
         setProperty(data);
@@ -53,7 +54,7 @@ const PropertyDetailsPage = ({ publicId, navigate }: PropertyDetailsPageProps) =
     return () => {
       mounted = false;
     };
-  }, [publicId]);
+  }, [publicId, language]);
 
   const orderedImages = useMemo(() => {
     return [...(property?.images || [])].sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -75,6 +76,10 @@ const PropertyDetailsPage = ({ publicId, navigate }: PropertyDetailsPageProps) =
     );
   }
 
+  const categoryLabels = getCategoryLabels(language);
+  const conditionOptions = getConditionOptions(language);
+  const propertyTypeOptions = getPropertyTypeOptions(language);
+  const specialRequirementOptions = getSpecialRequirementOptions(language);
   const conditionLabel = getLabel(property.condition, conditionOptions);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const videoUrl = normalizeYoutubeUrl(property.videoUrl);

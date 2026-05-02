@@ -1,4 +1,4 @@
-import type { PropertyCondition, PropertyType } from '../types/property';
+import type { PropertyCondition, PropertyType, SupportedLanguage } from '../types/property';
 
 export const propertyTypeOptions: Array<{ value: PropertyType; label: string }> = [
   { value: 'houses', label: 'Houses' },
@@ -12,6 +12,23 @@ export const propertyTypeOptions: Array<{ value: PropertyType; label: string }> 
   { value: 'other', label: 'Other' },
 ];
 
+const propertyTypeLabels: Record<SupportedLanguage, Record<PropertyType, string>> = {
+  en: Object.fromEntries(propertyTypeOptions.map((option) => [option.value, option.label])) as Record<PropertyType, string>,
+  sr: {
+    houses: 'Kuće',
+    retails: 'Lokali',
+    offices: 'Kancelarije',
+    warehouses: 'Magacini',
+    industrial: 'Industrijski prostor',
+    agricultural: 'Poljoprivredno zemljište',
+    apartments: 'Stanovi',
+    land: 'Zemljište',
+    other: 'Ostalo',
+  },
+  ru: Object.fromEntries(propertyTypeOptions.map((option) => [option.value, option.label])) as Record<PropertyType, string>,
+  de: Object.fromEntries(propertyTypeOptions.map((option) => [option.value, option.label])) as Record<PropertyType, string>,
+};
+
 export const conditionOptions: Array<{ value: PropertyCondition; label: string }> = [
   { value: 'available', label: 'Available' },
   { value: 'ongoing-reconstruction', label: 'Ongoing reconstruction' },
@@ -20,6 +37,20 @@ export const conditionOptions: Array<{ value: PropertyCondition; label: string }
   { value: 'in-construction', label: 'In construction' },
   { value: 'not-specified', label: 'Not specified' },
 ];
+
+const conditionLabels: Record<SupportedLanguage, Record<PropertyCondition, string>> = {
+  en: Object.fromEntries(conditionOptions.map((option) => [option.value, option.label])) as Record<PropertyCondition, string>,
+  sr: {
+    available: 'Dostupno',
+    'ongoing-reconstruction': 'Rekonstrukcija u toku',
+    'major-refitting': 'Veće adaptacije',
+    'minor-refitting': 'Manje adaptacije',
+    'in-construction': 'U izgradnji',
+    'not-specified': 'Nije navedeno',
+  },
+  ru: Object.fromEntries(conditionOptions.map((option) => [option.value, option.label])) as Record<PropertyCondition, string>,
+  de: Object.fromEntries(conditionOptions.map((option) => [option.value, option.label])) as Record<PropertyCondition, string>,
+};
 
 export const roomOptions = ['0.5', '1', '1.5', '2', '2.5', '3', '3.5', '4', '>4'];
 
@@ -45,8 +76,51 @@ export const specialRequirementOptions = [
   { value: 'water', label: 'Water' },
 ];
 
+const specialRequirementLabels: Record<SupportedLanguage, Record<string, string>> = {
+  en: Object.fromEntries(specialRequirementOptions.map((option) => [option.value, option.label])),
+  sr: {
+    phone: 'Telefon',
+    internet: 'Internet',
+    parking: 'Parking',
+    'invalid-access': 'Pristup za osobe sa invaliditetom',
+    'video-surveillance': 'Video-nadzor',
+    security: 'Obezbeđenje',
+    electricity: 'Struja',
+    water: 'Voda',
+  },
+  ru: Object.fromEntries(specialRequirementOptions.map((option) => [option.value, option.label])),
+  de: Object.fromEntries(specialRequirementOptions.map((option) => [option.value, option.label])),
+};
+
 export const categoryLabels = {
   commercial: 'Commercial',
   private: 'Private',
   'project-development': 'Project in Development',
+};
+
+export const getPropertyTypeOptions = (language: SupportedLanguage = 'en') => {
+  const labels = propertyTypeLabels[language] || propertyTypeLabels.en;
+  return propertyTypeOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
+};
+
+export const getConditionOptions = (language: SupportedLanguage = 'en') => {
+  const labels = conditionLabels[language] || conditionLabels.en;
+  return conditionOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
+};
+
+export const getSpecialRequirementOptions = (language: SupportedLanguage = 'en') => {
+  const labels = specialRequirementLabels[language] || specialRequirementLabels.en;
+  return specialRequirementOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
+};
+
+export const getCategoryLabels = (language: SupportedLanguage = 'en') => {
+  if (language === 'sr') {
+    return {
+      commercial: 'Komercijalne nekretnine',
+      private: 'Privatne nekretnine',
+      'project-development': 'Projekti u razvoju',
+    };
+  }
+
+  return categoryLabels;
 };

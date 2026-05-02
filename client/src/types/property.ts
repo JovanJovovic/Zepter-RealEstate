@@ -21,6 +21,8 @@ export type PropertyCondition =
 
 export type PropertyStatus = 'draft' | 'published' | 'archived';
 
+export type SupportedLanguage = 'en' | 'sr' | 'ru' | 'de';
+
 export interface PropertyImage {
   url: string;
   thumbnailUrl?: string;
@@ -45,6 +47,18 @@ export interface PropertyLocation {
   longitude?: number;
 }
 
+export interface PropertyTranslation {
+  language: SupportedLanguage;
+  title?: string;
+  location?: Partial<PropertyLocation>;
+  sizeLabel?: string;
+  floorLabel?: string;
+  floors?: string[];
+  shortDescription?: string;
+  fullDescription?: string;
+  aboutProperty?: string;
+}
+
 export interface Property {
   _id: string;
   title: string;
@@ -62,6 +76,7 @@ export interface Property {
   shortDescription?: string;
   fullDescription?: string;
   aboutProperty?: string;
+  translations?: PropertyTranslation[];
   specialRequirements: string[];
   images: PropertyImage[];
   floorPlans: FloorPlan[];
@@ -70,6 +85,9 @@ export interface Property {
   contactEmail?: string;
   isFeatured: boolean;
   status: PropertyStatus;
+  language?: SupportedLanguage;
+  requestedLanguage?: SupportedLanguage;
+  availableLanguages?: SupportedLanguage[];
   createdAt: string;
   updatedAt: string;
 }
@@ -97,6 +115,7 @@ export interface PropertyFiltersState {
   specialRequirement?: string[];
   search?: string;
   featured?: string;
+  language?: SupportedLanguage;
   page?: number;
   limit?: number;
 }

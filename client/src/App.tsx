@@ -5,6 +5,7 @@ import AdminShell from './components/admin/AdminShell';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import LoadingState from './components/LoadingState';
+import { defaultLanguage, normalizeLanguage } from './data/languages';
 import AboutPage from './pages/AboutPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -16,6 +17,7 @@ import HomePage from './pages/HomePage';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import type { AdminUser } from './types/admin';
+import type { SupportedLanguage } from './types/property';
 
 const normalizePath = (path: string) => {
   if (!path || path === '') return '/';
@@ -26,6 +28,8 @@ function App() {
   const [currentPath, setCurrentPath] = useState(() => normalizePath(window.location.pathname));
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const [language, setLanguageState] = useState<SupportedLanguage>(() => normalizeLanguage(localStorage.getItem('zre_language')));
+  const [adminLanguage, setAdminLanguageState] = useState<SupportedLanguage>(() => normalizeLanguage(localStorage.getItem('zre_admin_language') || defaultLanguage));
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
@@ -59,6 +63,16 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const setLanguage = (nextLanguage: SupportedLanguage) => {
+    localStorage.setItem('zre_language', nextLanguage);
+    setLanguageState(nextLanguage);
+  };
+
+  const setAdminLanguage = (nextLanguage: SupportedLanguage) => {
+    localStorage.setItem('zre_admin_language', nextLanguage);
+    setAdminLanguageState(nextLanguage);
+  };
+
   const handleLogout = async () => {
     await logoutAdmin();
     setAdmin(null);
@@ -79,7 +93,7 @@ function App() {
     }
 
     if (currentPath === '/admin/login') {
-      if (admin) return <AdminShell admin={admin} currentPath="/admin" navigate={navigate} onLogout={handleLogout}><AdminDashboardPage navigate={navigate} /></AdminShell>;
+      if (admin) return <AdminShell admin={admin} currentPath="/admin" navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}><AdminDashboardPage navigate={navigate} /></AdminShell>;
       return <AdminLoginPage onLogin={setAdmin} navigate={navigate} />;
     }
 
@@ -90,7 +104,7 @@ function App() {
     let content = <AdminDashboardPage navigate={navigate} />;
 
     if (currentPath === '/admin/properties') {
-      content = <AdminPropertiesPage navigate={navigate} />;
+      content = <AdminPropertiesPage navigate={navigate} language={adminLanguage} />;
     } else if (currentPath === '/admin/properties/new') {
       content = <AdminPropertyEditorPage navigate={navigate} />;
     } else if (currentPath.startsWith('/admin/properties/') && currentPath.endsWith('/edit')) {
@@ -100,23 +114,23 @@ function App() {
       content = <AdminNewsletterPage />;
     }
 
-    return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout}>{content}</AdminShell>;
-  }, [admin, checkingAdmin, currentPath, isAdminPath]);
+    return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}>{content}</AdminShell>;
+  }, [admin, adminLanguage, checkingAdmin, currentPath, isAdminPath]);
 
   const publicPage = useMemo(() => {
-    if (currentPath === '/') return <HomePage navigate={navigate} />;
+    if (currentPath === '/') return <HomePage navigate={navigate} language={language} />;
     if (currentPath === '/about') return <AboutPage />;
-    if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" />;
-    if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" />;
+    if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" language={language} />;
+    if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" language={language} />;
     if (currentPath === '/contact') return <ContactPage />;
 
     if (currentPath.startsWith('/properties/')) {
       const publicId = decodeURIComponent(currentPath.replace('/properties/', ''));
-      return <PropertyDetailsPage publicId={publicId} navigate={navigate} />;
+      return <PropertyDetailsPage publicId={publicId} navigate={navigate} language={language} />;
     }
 
-    return <PropertiesPage navigate={navigate} mode="commercial" />;
-  }, [currentPath]);
+    return <PropertiesPage navigate={navigate} mode="commercial" language={language} />;
+  }, [currentPath, language]);
 
   if (isAdminPath) {
     return <div className="app-shell app-shell--admin">{adminPage}</div>;
@@ -124,7 +138,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Header currentPath={currentPath} navigate={navigate} />
+      <Header currentPath={currentPath} navigate={navigate} language={language} onLanguageChange={setLanguage} />
       {publicPage}
       <Footer navigate={navigate} />
     </div>

@@ -15,8 +15,9 @@ import {
   roomOptions,
   specialRequirementOptions,
 } from '../../data/propertyOptions';
+import { languageOptions } from '../../data/languages';
 import type { AdminMessage, AdminPropertyPayload } from '../../types/admin';
-import type { FloorPlan, PropertyCategory, PropertyCondition, PropertyImage, PropertyStatus, PropertyType } from '../../types/property';
+import type { FloorPlan, PropertyCategory, PropertyCondition, PropertyImage, PropertyStatus, PropertyTranslation, PropertyType, SupportedLanguage } from '../../types/property';
 import { resolveMediaUrl } from '../../utils/asset';
 
 interface AdminPropertyEditorPageProps {
@@ -53,6 +54,22 @@ type PropertyFormState = {
   videoUrl: string;
   contactPhone: string;
   contactEmail: string;
+  translations: TranslationFormState[];
+};
+
+type TranslationFormState = {
+  language: SupportedLanguage;
+  title: string;
+  city: string;
+  municipality: string;
+  fullLocation: string;
+  address: string;
+  sizeLabel: string;
+  floorLabel: string;
+  floorsText: string;
+  shortDescription: string;
+  fullDescription: string;
+  aboutProperty: string;
 };
 
 const defaultForm: PropertyFormState = {
@@ -84,7 +101,38 @@ const defaultForm: PropertyFormState = {
   videoUrl: '',
   contactPhone: '+381 11 20 19 170',
   contactEmail: 'realestate@zepter.rs',
+  translations: [],
 };
+
+const defaultTranslation = (language: SupportedLanguage): TranslationFormState => ({
+  language,
+  title: '',
+  city: '',
+  municipality: '',
+  fullLocation: '',
+  address: '',
+  sizeLabel: '',
+  floorLabel: '',
+  floorsText: '',
+  shortDescription: '',
+  fullDescription: '',
+  aboutProperty: '',
+});
+
+const formTranslationFromProperty = (translation: PropertyTranslation): TranslationFormState => ({
+  language: translation.language,
+  title: translation.title || '',
+  city: translation.location?.city || '',
+  municipality: translation.location?.municipality || '',
+  fullLocation: translation.location?.fullLocation || '',
+  address: translation.location?.address || '',
+  sizeLabel: translation.sizeLabel || '',
+  floorLabel: translation.floorLabel || '',
+  floorsText: translation.floors?.join(', ') || '',
+  shortDescription: translation.shortDescription || '',
+  fullDescription: translation.fullDescription || '',
+  aboutProperty: translation.aboutProperty || '',
+});
 
 const toStringNumber = (value?: number) => (value === undefined || value === null ? '' : String(value));
 
@@ -117,6 +165,7 @@ const formFromProperty = (property: AdminPropertyPayload & { _id?: string; creat
   videoUrl: property.videoUrl || '',
   contactPhone: property.contactPhone || '+381 11 20 19 170',
   contactEmail: property.contactEmail || 'realestate@zepter.rs',
+  translations: property.translations?.map(formTranslationFromProperty) || [],
 });
 
 const numberOrUndefined = (value: string) => {
@@ -163,6 +212,42 @@ const toPayload = (form: PropertyFormState): AdminPropertyPayload => {
     contactEmail: form.contactEmail.trim() || undefined,
     isFeatured: form.isFeatured,
     status: form.status,
+    translations: form.translations
+      .filter((translation) => {
+        if (translation.language === 'en') return false;
+        return [
+          translation.title,
+          translation.city,
+          translation.municipality,
+          translation.fullLocation,
+          translation.address,
+          translation.sizeLabel,
+          translation.floorLabel,
+          translation.floorsText,
+          translation.shortDescription,
+          translation.fullDescription,
+          translation.aboutProperty,
+        ].some((value) => value.trim());
+      })
+      .map((translation) => ({
+        language: translation.language,
+        title: translation.title.trim() || undefined,
+        location: {
+          city: translation.city.trim() || undefined,
+          municipality: translation.municipality.trim() || undefined,
+          fullLocation: translation.fullLocation.trim() || undefined,
+          address: translation.address.trim() || undefined,
+        },
+        sizeLabel: translation.sizeLabel.trim() || undefined,
+        floorLabel: translation.floorLabel.trim() || undefined,
+        floors: translation.floorsText
+          .split(',')
+          .map((floor) => floor.trim())
+          .filter(Boolean),
+        shortDescription: translation.shortDescription.trim() || undefined,
+        fullDescription: translation.fullDescription.trim() || undefined,
+        aboutProperty: translation.aboutProperty.trim() || undefined,
+      })),
   };
 };
 
@@ -173,6 +258,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<AdminMessage | null>(null);
+  const [activeTranslationLanguage, setActiveTranslationLanguage] = useState<SupportedLanguage>('sr');
 
   useEffect(() => {
     if (!propertyId) {
@@ -229,6 +315,40 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
           : [...current.specialRequirements, requirement],
       };
     });
+  };
+
+  const activeTranslation = form.translations.find((translation) => translation.language === activeTranslationLanguage);
+
+  const addTranslation = (language: SupportedLanguage) => {
+    if (language === 'en') return;
+
+    setForm((current) => {
+      if (current.translations.some((translation) => translation.language === language)) return current;
+      return {
+        ...current,
+        translations: [...current.translations, defaultTranslation(language)],
+      };
+    });
+  };
+
+  const updateTranslation = <K extends keyof TranslationFormState>(
+    language: SupportedLanguage,
+    key: K,
+    value: TranslationFormState[K]
+  ) => {
+    setForm((current) => ({
+      ...current,
+      translations: current.translations.map((translation) =>
+        translation.language === language ? { ...translation, [key]: value } : translation
+      ),
+    }));
+  };
+
+  const removeTranslation = (language: SupportedLanguage) => {
+    setForm((current) => ({
+      ...current,
+      translations: current.translations.filter((translation) => translation.language !== language),
+    }));
   };
 
   const uploadImage = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -521,6 +641,108 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
                 <input value={form.videoUrl} onChange={(event) => setField('videoUrl', event.target.value)} placeholder="https://www.youtube.com/embed/..." />
               </label>
             </div>
+          </section>
+
+          <section className="admin-form-card">
+            <span className="admin-kicker">Translations</span>
+            <div className="admin-form-grid admin-form-grid--two">
+              <label className="admin-field">
+                Translation language
+                <select
+                  value={activeTranslationLanguage}
+                  onChange={(event) => setActiveTranslationLanguage(event.target.value as SupportedLanguage)}
+                >
+                  {languageOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}{option.value === 'en' ? ' (base content)' : ''}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="admin-translation-actions">
+                <button
+                  type="button"
+                  disabled={activeTranslationLanguage === 'en' || Boolean(activeTranslation)}
+                  onClick={() => addTranslation(activeTranslationLanguage)}
+                >
+                  Add translation
+                </button>
+                {activeTranslation && (
+                  <button type="button" onClick={() => removeTranslation(activeTranslation.language)}>
+                    Remove translation
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {activeTranslationLanguage === 'en' && (
+              <p className="admin-side-note">English is edited in the main fields above. Other languages override only the fields filled here.</p>
+            )}
+
+            {activeTranslationLanguage !== 'en' && !activeTranslation && (
+              <p className="admin-side-note">Add this language first, then fill only the translated fields you need.</p>
+            )}
+
+            {activeTranslation && (
+              <div className="admin-form-grid admin-form-grid--two">
+                <label className="admin-field admin-field--wide">
+                  Translated title
+                  <input
+                    value={activeTranslation.title}
+                    onChange={(event) => updateTranslation(activeTranslation.language, 'title', event.target.value)}
+                    placeholder={form.title || 'Property title'}
+                  />
+                </label>
+                <label className="admin-field">
+                  City
+                  <input value={activeTranslation.city} onChange={(event) => updateTranslation(activeTranslation.language, 'city', event.target.value)} />
+                </label>
+                <label className="admin-field">
+                  Municipality
+                  <input value={activeTranslation.municipality} onChange={(event) => updateTranslation(activeTranslation.language, 'municipality', event.target.value)} />
+                </label>
+                <label className="admin-field admin-field--wide">
+                  Full location
+                  <input
+                    value={activeTranslation.fullLocation}
+                    onChange={(event) => updateTranslation(activeTranslation.language, 'fullLocation', event.target.value)}
+                    placeholder={form.fullLocation || 'Beograd Stari Grad'}
+                  />
+                </label>
+                <label className="admin-field admin-field--wide">
+                  Address
+                  <input value={activeTranslation.address} onChange={(event) => updateTranslation(activeTranslation.language, 'address', event.target.value)} />
+                </label>
+                <label className="admin-field">
+                  Size label
+                  <input value={activeTranslation.sizeLabel} onChange={(event) => updateTranslation(activeTranslation.language, 'sizeLabel', event.target.value)} />
+                </label>
+                <label className="admin-field">
+                  Floor label
+                  <input value={activeTranslation.floorLabel} onChange={(event) => updateTranslation(activeTranslation.language, 'floorLabel', event.target.value)} />
+                </label>
+                <label className="admin-field admin-field--wide">
+                  Floors
+                  <input
+                    value={activeTranslation.floorsText}
+                    onChange={(event) => updateTranslation(activeTranslation.language, 'floorsText', event.target.value)}
+                    placeholder={form.floorsText || '7, 6, 5, 4, Pr'}
+                  />
+                </label>
+                <label className="admin-field admin-field--wide">
+                  Short description
+                  <textarea value={activeTranslation.shortDescription} onChange={(event) => updateTranslation(activeTranslation.language, 'shortDescription', event.target.value)} rows={3} />
+                </label>
+                <label className="admin-field admin-field--wide">
+                  Full description
+                  <textarea value={activeTranslation.fullDescription} onChange={(event) => updateTranslation(activeTranslation.language, 'fullDescription', event.target.value)} rows={6} />
+                </label>
+                <label className="admin-field admin-field--wide">
+                  About property
+                  <textarea value={activeTranslation.aboutProperty} onChange={(event) => updateTranslation(activeTranslation.language, 'aboutProperty', event.target.value)} rows={8} />
+                </label>
+              </div>
+            )}
           </section>
 
           <section className="admin-form-card">

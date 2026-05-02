@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
+import { languageOptions } from '../data/languages';
+import type { SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
 interface HeaderProps {
   currentPath: string;
   navigate: (path: string) => void;
+  language: SupportedLanguage;
+  onLanguageChange: (language: SupportedLanguage) => void;
 }
 
 const navItems = [
@@ -14,7 +18,7 @@ const navItems = [
   { label: 'Contact', path: '/contact' },
 ];
 
-const Header = ({ currentPath, navigate }: HeaderProps) => {
+const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -50,6 +54,16 @@ const Header = ({ currentPath, navigate }: HeaderProps) => {
         </nav>
 
         <div className="header-actions">
+          <label className="language-select">
+            <span>Language</span>
+            <select value={language} onChange={(event) => onLanguageChange(event.target.value as SupportedLanguage)}>
+              {languageOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <button className="btn btn--small btn--primary" onClick={() => handleNavigate('/commercial')}>
             View properties
           </button>

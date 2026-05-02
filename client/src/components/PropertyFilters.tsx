@@ -1,12 +1,14 @@
-import { FormEvent, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { FormEvent } from 'react';
 import type { PropertyFiltersState } from '../types/property';
 import {
-  conditionOptions,
-  propertyTypeOptions,
+  getConditionOptions,
+  getPropertyTypeOptions,
+  getSpecialRequirementOptions,
   roomOptions,
   sizeOptions,
-  specialRequirementOptions,
 } from '../data/propertyOptions';
+import type { SupportedLanguage } from '../types/property';
 
 interface PropertyFiltersProps {
   initialFilters: PropertyFiltersState;
@@ -14,10 +16,14 @@ interface PropertyFiltersProps {
   onApply: (filters: PropertyFiltersState) => void;
   onReset: () => void;
   mode?: 'commercial' | 'projects';
+  language: SupportedLanguage;
 }
 
-const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = 'commercial' }: PropertyFiltersProps) => {
+const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = 'commercial', language }: PropertyFiltersProps) => {
   const [filters, setFilters] = useState<PropertyFiltersState>(initialFilters);
+  const propertyTypeOptions = getPropertyTypeOptions(language);
+  const conditionOptions = getConditionOptions(language);
+  const specialRequirementOptions = getSpecialRequirementOptions(language);
 
   const locationOptions = useMemo(() => {
     const unique = Array.from(new Set(locations.filter(Boolean)));

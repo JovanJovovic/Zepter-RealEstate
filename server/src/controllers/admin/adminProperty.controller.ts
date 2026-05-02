@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import Property from "../../models/Property.js";
 import { slugifyText } from "../../utils/slugifyText.js";
 import { generatePublicId } from "../../utils/generatePublicId.js";
+import { localizeProperty, normalizeLanguage } from "../../utils/propertyTranslations.js";
 
 
 const parsePositiveNumber = (value: unknown): number | undefined => {
@@ -30,6 +31,7 @@ const buildAdminPropertyFilter = (query: Request["query"]) => {
         status,
         featured,
         search,
+        language: _language,
     } = query;
 
     const filter: Record<string, unknown> = {};
@@ -103,6 +105,12 @@ const buildAdminPropertyFilter = (query: Request["query"]) => {
             { aboutProperty: { $regex: String(search), $options: "i" } },
             { "location.fullLocation": { $regex: String(search), $options: "i" } },
             { "location.address": { $regex: String(search), $options: "i" } },
+            { "translations.title": { $regex: String(search), $options: "i" } },
+            { "translations.shortDescription": { $regex: String(search), $options: "i" } },
+            { "translations.fullDescription": { $regex: String(search), $options: "i" } },
+            { "translations.aboutProperty": { $regex: String(search), $options: "i" } },
+            { "translations.location.fullLocation": { $regex: String(search), $options: "i" } },
+            { "translations.location.address": { $regex: String(search), $options: "i" } },
         ];
     }
 
@@ -115,6 +123,7 @@ export const getAdminProperties = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const filter = buildAdminPropertyFilter(req.query);
+    const language = normalizeLanguage(req.query.language);
 
     const [items, total] = await Promise.all([
         Property.find(filter)
@@ -125,7 +134,7 @@ export const getAdminProperties = async (req: Request, res: Response) => {
     ]);
 
     res.json({
-        items,
+        items: items.map((property) => localizeProperty(property, language)),
         pagination: {
             total,
             page,

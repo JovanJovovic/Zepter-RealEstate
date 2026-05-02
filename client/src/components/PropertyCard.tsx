@@ -1,18 +1,23 @@
 import type { Property } from '../types/property';
-import { categoryLabels, conditionOptions, propertyTypeOptions } from '../data/propertyOptions';
+import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions } from '../data/propertyOptions';
+import type { SupportedLanguage } from '../types/property';
 import { getMainImage } from '../utils/asset';
 
 interface PropertyCardProps {
   property: Property;
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
 const getLabel = (value: string, options: Array<{ value: string; label: string }>) => {
   return options.find((option) => option.value === value)?.label || value;
 };
 
-const PropertyCard = ({ property, navigate }: PropertyCardProps) => {
+const PropertyCard = ({ property, navigate, language }: PropertyCardProps) => {
   const mainImage = getMainImage(property);
+  const categoryLabels = getCategoryLabels(language);
+  const conditionOptions = getConditionOptions(language);
+  const propertyTypeOptions = getPropertyTypeOptions(language);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const conditionLabel = getLabel(property.condition, conditionOptions);
 

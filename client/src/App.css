@@ -181,6 +181,26 @@
   gap: 10px;
 }
 
+.language-select,
+.admin-language-select {
+  display: grid;
+  gap: 4px;
+  color: #32536f;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.language-select select,
+.admin-language-select select {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 12px;
+  color: var(--blue-700);
+  background: #fff;
+  font-weight: 900;
+}
+
 .menu-toggle {
   display: none;
   width: 44px;
@@ -2029,6 +2049,7 @@
 .admin-heading-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
 }
 
@@ -2623,6 +2644,27 @@
   width: 18px;
   height: 18px;
   accent-color: var(--blue-700);
+}
+
+.admin-translation-actions {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.admin-translation-actions button {
+  min-height: 46px;
+  border: 0;
+  border-radius: 16px;
+  padding: 0 14px;
+  color: var(--blue-700);
+  background: rgba(3, 88, 151, 0.08);
+  font-weight: 900;
+}
+
+.admin-translation-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .admin-chip-grid {

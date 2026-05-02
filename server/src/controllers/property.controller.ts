@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import slugify from "slugify";
 import Property from "../models/Property.js";
+import { localizeProperty, normalizeLanguage } from "../utils/propertyTranslations.js";
 
 const createSlug = (title: string): string => {
   return slugify(title, {
@@ -35,6 +36,7 @@ const buildPropertyFilter = (query: Request["query"]) => {
     status = "published",
     featured,
     search,
+    language: _language,
   } = query;
 
   const filter: Record<string, unknown> = {};
@@ -104,6 +106,12 @@ const buildPropertyFilter = (query: Request["query"]) => {
       { aboutProperty: { $regex: String(search), $options: "i" } },
       { "location.fullLocation": { $regex: String(search), $options: "i" } },
       { "location.address": { $regex: String(search), $options: "i" } },
+      { "translations.title": { $regex: String(search), $options: "i" } },
+      { "translations.shortDescription": { $regex: String(search), $options: "i" } },
+      { "translations.fullDescription": { $regex: String(search), $options: "i" } },
+      { "translations.aboutProperty": { $regex: String(search), $options: "i" } },
+      { "translations.location.fullLocation": { $regex: String(search), $options: "i" } },
+      { "translations.location.address": { $regex: String(search), $options: "i" } },
     ];
   }
 
@@ -116,6 +124,7 @@ export const getProperties = async (req: Request, res: Response) => {
   const skip = (page - 1) * limit;
 
   const filter = buildPropertyFilter(req.query);
+  const language = normalizeLanguage(req.query.language);
 
   const [items, total] = await Promise.all([
     Property.find(filter).sort({ isFeatured: -1, createdAt: -1 }).skip(skip).limit(limit),
@@ -123,7 +132,7 @@ export const getProperties = async (req: Request, res: Response) => {
   ]);
 
   res.json({
-    items,
+    items: items.map((property) => localizeProperty(property, language)),
     pagination: {
       total,
       page,
@@ -133,7 +142,8 @@ export const getProperties = async (req: Request, res: Response) => {
   });
 };
 
-export const getFeaturedProperties = async (_req: Request, res: Response) => {
+export const getFeaturedProperties = async (req: Request, res: Response) => {
+  const language = normalizeLanguage(req.query.language);
   const properties = await Property.find({
     status: "published",
     isFeatured: true,
@@ -141,10 +151,11 @@ export const getFeaturedProperties = async (_req: Request, res: Response) => {
     .sort({ createdAt: -1 })
     .limit(6);
 
-  res.json(properties);
+  res.json(properties.map((property) => localizeProperty(property, language)));
 };
 
 export const getPropertyBySlug = async (req: Request, res: Response) => {
+  const language = normalizeLanguage(req.query.language);
   const property = await Property.findOne({
     slug: req.params.slug,
     status: "published",
@@ -156,10 +167,11 @@ export const getPropertyBySlug = async (req: Request, res: Response) => {
     });
   }
 
-  res.json(property);
+  res.json(localizeProperty(property, language));
 };
 
 export const getPropertyByPublicId = async (req: Request, res: Response) => {
+  const language = normalizeLanguage(req.query.language);
   const property = await Property.findOne({
     publicId: req.params.publicId,
     status: "published",
@@ -171,7 +183,7 @@ export const getPropertyByPublicId = async (req: Request, res: Response) => {
     });
   }
 
-  res.json(property);
+  res.json(localizeProperty(property, language));
 };
 
 export const createProperty = async (req: Request, res: Response) => {

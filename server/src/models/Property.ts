@@ -23,6 +23,8 @@ export type PropertyCondition =
 
 export type PropertyStatus = "draft" | "published" | "archived";
 
+export type SupportedLanguage = "en" | "sr" | "ru" | "de";
+
 export interface IPropertyImage {
   url: string;
   thumbnailUrl?: string;
@@ -45,6 +47,18 @@ export interface IPropertyLocation {
   address?: string;
   latitude?: number;
   longitude?: number;
+}
+
+export interface IPropertyTranslation {
+  language: SupportedLanguage;
+  title?: string;
+  location?: Partial<IPropertyLocation>;
+  sizeLabel?: string;
+  floorLabel?: string;
+  floors?: string[];
+  shortDescription?: string;
+  fullDescription?: string;
+  aboutProperty?: string;
 }
 
 export interface IProperty extends Document {
@@ -70,6 +84,8 @@ export interface IProperty extends Document {
   shortDescription?: string;
   fullDescription?: string;
   aboutProperty?: string;
+
+  translations: IPropertyTranslation[];
 
   specialRequirements: string[];
 
@@ -156,6 +172,74 @@ const propertyLocationSchema = new Schema<IPropertyLocation>(
     },
     longitude: {
       type: Number,
+    },
+  },
+  { _id: false }
+);
+
+const propertyTranslationLocationSchema = new Schema<Partial<IPropertyLocation>>(
+  {
+    city: {
+      type: String,
+      trim: true,
+    },
+    municipality: {
+      type: String,
+      trim: true,
+    },
+    fullLocation: {
+      type: String,
+      trim: true,
+    },
+    address: {
+      type: String,
+      trim: true,
+    },
+    latitude: {
+      type: Number,
+    },
+    longitude: {
+      type: Number,
+    },
+  },
+  { _id: false }
+);
+
+const propertyTranslationSchema = new Schema<IPropertyTranslation>(
+  {
+    language: {
+      type: String,
+      enum: ["en", "sr", "ru", "de"],
+      required: true,
+    },
+    title: {
+      type: String,
+      trim: true,
+    },
+    location: {
+      type: propertyTranslationLocationSchema,
+    },
+    sizeLabel: {
+      type: String,
+      trim: true,
+    },
+    floorLabel: {
+      type: String,
+      trim: true,
+    },
+    floors: {
+      type: [String],
+      default: undefined,
+    },
+    shortDescription: {
+      type: String,
+      trim: true,
+    },
+    fullDescription: {
+      type: String,
+    },
+    aboutProperty: {
+      type: String,
     },
   },
   { _id: false }
@@ -262,6 +346,11 @@ const propertySchema = new Schema<IProperty>(
       type: String,
     },
 
+    translations: {
+      type: [propertyTranslationSchema],
+      default: [],
+    },
+
     specialRequirements: {
       type: [String],
       enum: [
@@ -326,6 +415,12 @@ propertySchema.index({
   aboutProperty: "text",
   "location.fullLocation": "text",
   "location.address": "text",
+  "translations.title": "text",
+  "translations.shortDescription": "text",
+  "translations.fullDescription": "text",
+  "translations.aboutProperty": "text",
+  "translations.location.fullLocation": "text",
+  "translations.location.address": "text",
 });
 
 export default mongoose.model<IProperty>("Property", propertySchema, "properties");

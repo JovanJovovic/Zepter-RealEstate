@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react';
+import { languageOptions } from '../../data/languages';
 import type { AdminUser } from '../../types/admin';
+import type { SupportedLanguage } from '../../types/property';
 
 interface AdminShellProps {
   admin: AdminUser;
   currentPath: string;
   navigate: (path: string) => void;
   onLogout: () => void;
+  language: SupportedLanguage;
+  onLanguageChange: (language: SupportedLanguage) => void;
   children: ReactNode;
 }
 
@@ -20,7 +24,7 @@ const isActive = (currentPath: string, itemPath: string) => {
   return currentPath.startsWith(itemPath);
 };
 
-const AdminShell = ({ admin, currentPath, navigate, onLogout, children }: AdminShellProps) => {
+const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLanguageChange, children }: AdminShellProps) => {
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
@@ -69,6 +73,16 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, children }: AdminS
             <h1>Zepter Real Estate CMS</h1>
           </div>
           <div className="admin-topbar__actions">
+            <label className="admin-language-select">
+              Translation preview
+              <select value={language} onChange={(event) => onLanguageChange(event.target.value as SupportedLanguage)}>
+                {languageOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
             <button className="admin-topbar__public" onClick={() => navigate('/commercial')}>
               Commercial page
             </button>

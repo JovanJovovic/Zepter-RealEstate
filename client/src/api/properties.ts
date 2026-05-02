@@ -1,4 +1,4 @@
-import type { PaginatedPropertiesResponse, Property, PropertyFiltersState } from '../types/property';
+import type { PaginatedPropertiesResponse, Property, PropertyFiltersState, SupportedLanguage } from '../types/property';
 import { API_URL } from '../utils/asset';
 
 const buildQuery = (params: PropertyFiltersState = {}) => {
@@ -40,12 +40,12 @@ export const getProperties = (params: PropertyFiltersState = {}) => {
   return request<PaginatedPropertiesResponse>(`${API_URL}/properties${buildQuery(params)}`);
 };
 
-export const getFeaturedProperties = () => {
-  return request<Property[]>(`${API_URL}/properties/featured`);
+export const getFeaturedProperties = (language?: SupportedLanguage) => {
+  return request<Property[]>(`${API_URL}/properties/featured${buildQuery({ language })}`);
 };
 
-export const getPropertyByPublicId = (publicId: string) => {
-  return request<Property>(`${API_URL}/properties/${publicId}`);
+export const getPropertyByPublicId = (publicId: string, language?: SupportedLanguage) => {
+  return request<Property>(`${API_URL}/properties/${publicId}${buildQuery({ language })}`);
 };
 
 export const subscribeToNewsletter = (email: string, source = 'website') => {

@@ -3,21 +3,22 @@ import { getFeaturedProperties } from '../api/properties';
 import NewsletterBlock from '../components/NewsletterBlock';
 import PropertyCard from '../components/PropertyCard';
 import LoadingState from '../components/LoadingState';
-import type { Property } from '../types/property';
+import type { Property, SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
 interface HomePageProps {
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
-const HomePage = ({ navigate }: HomePageProps) => {
+const HomePage = ({ navigate, language }: HomePageProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
-    getFeaturedProperties()
+    getFeaturedProperties(language)
       .then((data) => {
         if (mounted) setProperties(data);
       })
@@ -31,7 +32,7 @@ const HomePage = ({ navigate }: HomePageProps) => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [language]);
 
   return (
     <main>
@@ -97,7 +98,7 @@ const HomePage = ({ navigate }: HomePageProps) => {
           {loading ? (
             <LoadingState text="Loading featured properties..." />
           ) : (
-            properties.map((property) => <PropertyCard key={property._id} property={property} navigate={navigate} />)
+            properties.map((property) => <PropertyCard key={property._id} property={property} navigate={navigate} language={language} />)
           )}
         </div>
       </section>

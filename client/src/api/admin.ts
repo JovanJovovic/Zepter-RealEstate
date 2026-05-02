@@ -23,10 +23,10 @@ export const clearAdminToken = () => {
   localStorage.removeItem(ADMIN_TOKEN_KEY);
 };
 
-const buildQuery = (params: Record<string, unknown> = {}) => {
+const buildQuery = (params: object = {}) => {
   const searchParams = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
+  Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') return;
 
     if (Array.isArray(value)) {
