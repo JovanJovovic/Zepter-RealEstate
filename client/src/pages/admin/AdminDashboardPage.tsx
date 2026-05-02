@@ -3,12 +3,15 @@ import { getAdminProperties, getNewsletterSubscribers } from '../../api/admin';
 import AdminStatCard from '../../components/admin/AdminStatCard';
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge';
 import LoadingState from '../../components/LoadingState';
-import { categoryLabels } from '../../data/propertyOptions';
+import { getCopy } from '../../data/localization';
+import { getCategoryLabels } from '../../data/propertyOptions';
 import type { PaginatedNewsletterResponse, PaginatedPropertiesResponse } from '../../types/admin';
+import type { SupportedLanguage } from '../../types/property';
 import { getMainImage } from '../../utils/asset';
 
 interface AdminDashboardPageProps {
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
 const defaultProperties: PaginatedPropertiesResponse = {
@@ -21,17 +24,19 @@ const defaultNewsletter: PaginatedNewsletterResponse = {
   pagination: { total: 0, page: 1, limit: 100, pages: 0 },
 };
 
-const AdminDashboardPage = ({ navigate }: AdminDashboardPageProps) => {
+const AdminDashboardPage = ({ navigate, language }: AdminDashboardPageProps) => {
   const [properties, setProperties] = useState(defaultProperties);
   const [newsletter, setNewsletter] = useState(defaultNewsletter);
   const [loading, setLoading] = useState(true);
+  const copy = getCopy(language).admin;
+  const categoryLabels = getCategoryLabels(language);
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
 
     Promise.all([
-      getAdminProperties({ limit: 100 }),
+      getAdminProperties({ limit: 100, language }),
       getNewsletterSubscribers({ limit: 100 }),
     ])
       .then(([propertiesResponse, newsletterResponse]) => {
@@ -51,7 +56,7 @@ const AdminDashboardPage = ({ navigate }: AdminDashboardPageProps) => {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [language]);
 
   const stats = useMemo(() => {
     const published = properties.items.filter((property) => property.status === 'published').length;
@@ -65,35 +70,35 @@ const AdminDashboardPage = ({ navigate }: AdminDashboardPageProps) => {
   const recentProperties = properties.items.slice(0, 5);
 
   if (loading) {
-    return <LoadingState text="Loading admin dashboard..." />;
+    return <LoadingState text={copy.dashboard.loading} />;
   }
 
   return (
     <div className="admin-page admin-page--dashboard">
       <section className="admin-hero-panel">
         <div>
-          <span className="admin-kicker">Overview</span>
-          <h2>Real estate portfolio control center</h2>
-          <p>Track published assets, prepare draft properties and keep Zepter Real Estate portfolio content ready for presentation.</p>
+          <span className="admin-kicker">{copy.dashboard.overview}</span>
+          <h2>{copy.dashboard.title}</h2>
+          <p>{copy.dashboard.text}</p>
         </div>
-        <button onClick={() => navigate('/admin/properties/new')}>Create property</button>
+        <button onClick={() => navigate('/admin/properties/new')}>{copy.dashboard.createProperty}</button>
       </section>
 
       <section className="admin-stats-grid">
-        <AdminStatCard label="Total properties" value={properties.pagination.total} text="All records in the admin collection." />
-        <AdminStatCard label="Published" value={stats.published} text="Visible on the public website." />
-        <AdminStatCard label="Drafts" value={stats.draft} text="Prepared but not currently public." />
-        <AdminStatCard label="Newsletter" value={stats.activeSubscribers} text="Active subscribers in the database." />
+        <AdminStatCard label={copy.dashboard.totalProperties} value={properties.pagination.total} text={copy.dashboard.totalText} />
+        <AdminStatCard label={copy.common.published} value={stats.published} text={copy.dashboard.publishedText} />
+        <AdminStatCard label={copy.dashboard.drafts} value={stats.draft} text={copy.dashboard.draftsText} />
+        <AdminStatCard label={copy.common.newsletter} value={stats.activeSubscribers} text={copy.dashboard.newsletterText} />
       </section>
 
       <section className="admin-dashboard-grid">
         <article className="admin-panel admin-panel--wide">
           <div className="admin-panel__head">
             <div>
-              <span className="admin-kicker">Latest updates</span>
-              <h3>Recently updated properties</h3>
+              <span className="admin-kicker">{copy.dashboard.latestUpdates}</span>
+              <h3>{copy.dashboard.recentProperties}</h3>
             </div>
-            <button onClick={() => navigate('/admin/properties')}>Manage all</button>
+            <button onClick={() => navigate('/admin/properties')}>{copy.dashboard.manageAll}</button>
           </div>
 
           <div className="admin-recent-list">
@@ -106,20 +111,17 @@ const AdminDashboardPage = ({ navigate }: AdminDashboardPageProps) => {
                   <strong>{property.title}</strong>
                   <small>{categoryLabels[property.category]} · {property.location.fullLocation}</small>
                 </div>
-                <AdminStatusBadge value={property.status} />
+                <AdminStatusBadge value={property.status} language={language} />
               </button>
             ))}
           </div>
         </article>
 
         <article className="admin-panel">
-          <span className="admin-kicker">Portfolio quality</span>
-          <h3>Publishing checklist</h3>
+          <span className="admin-kicker">{copy.dashboard.portfolioQuality}</span>
+          <h3>{copy.dashboard.checklistTitle}</h3>
           <ul className="admin-checklist">
-            <li>Main image selected for each published property</li>
-            <li>Short description concise enough for cards</li>
-            <li>Location and size labels aligned with public filters</li>
-            <li>Floor plans attached where available</li>
+            {copy.dashboard.checklist.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </article>
       </section>

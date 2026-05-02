@@ -119,6 +119,10 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
             <h3>{copy.home.clientRelationships}</h3>
             <p>{copy.home.clientRelationshipsText}</p>
           </div>
+          <div className="service-card">
+            <h3>{copy.home.investmentAdvisory}</h3>
+            <p>{copy.home.investmentAdvisoryText}</p>
+          </div>
         </div>
       </section>
 

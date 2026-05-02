@@ -1,6 +1,10 @@
+import { getCopy } from '../../data/localization';
+import type { SupportedLanguage } from '../../types/property';
+
 interface AdminStatusBadgeProps {
   value?: string | boolean;
   tone?: 'published' | 'draft' | 'archived' | 'active' | 'inactive' | 'featured' | 'neutral';
+  language?: SupportedLanguage;
 }
 
 const toneFromValue = (value?: string | boolean): AdminStatusBadgeProps['tone'] => {
@@ -14,17 +18,23 @@ const toneFromValue = (value?: string | boolean): AdminStatusBadgeProps['tone'] 
   return 'neutral';
 };
 
-const labelFromValue = (value?: string | boolean) => {
-  if (value === true) return 'Featured';
-  if (value === false) return 'Standard';
-  if (!value) return 'Not set';
+const labelFromValue = (value: string | boolean | undefined, language: SupportedLanguage) => {
+  const copy = getCopy(language).admin.common;
+  if (value === true) return copy.featured;
+  if (value === false) return copy.standard;
+  if (!value) return copy.notSet;
+  if (value === 'published') return copy.published;
+  if (value === 'draft') return copy.draft;
+  if (value === 'archived') return copy.archived;
+  if (value === 'active') return copy.active;
+  if (value === 'inactive') return copy.inactive;
   return String(value).replace(/-/g, ' ');
 };
 
-const AdminStatusBadge = ({ value, tone }: AdminStatusBadgeProps) => {
+const AdminStatusBadge = ({ value, tone, language = 'en' }: AdminStatusBadgeProps) => {
   const badgeTone = tone || toneFromValue(value);
 
-  return <span className={`admin-status admin-status--${badgeTone}`}>{labelFromValue(value)}</span>;
+  return <span className={`admin-status admin-status--${badgeTone}`}>{labelFromValue(value, language)}</span>;
 };
 
 export default AdminStatusBadge;

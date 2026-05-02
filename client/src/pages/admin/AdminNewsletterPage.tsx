@@ -8,18 +8,25 @@ import AdminNotice from '../../components/admin/AdminNotice';
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge';
 import EmptyState from '../../components/EmptyState';
 import LoadingState from '../../components/LoadingState';
+import { getCopy } from '../../data/localization';
 import type { AdminMessage, NewsletterFiltersState, PaginatedNewsletterResponse } from '../../types/admin';
+import type { SupportedLanguage } from '../../types/property';
+
+interface AdminNewsletterPageProps {
+  language: SupportedLanguage;
+}
 
 const defaultResponse: PaginatedNewsletterResponse = {
   items: [],
   pagination: { total: 0, page: 1, limit: 12, pages: 0 },
 };
 
-const AdminNewsletterPage = () => {
+const AdminNewsletterPage = ({ language }: AdminNewsletterPageProps) => {
   const [filters, setFilters] = useState<NewsletterFiltersState>({ page: 1, limit: 12 });
   const [data, setData] = useState(defaultResponse);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<AdminMessage | null>(null);
+  const copy = getCopy(language).admin;
 
   const loadSubscribers = () => {
     setLoading(true);
@@ -28,7 +35,7 @@ const AdminNewsletterPage = () => {
     getNewsletterSubscribers(filters)
       .then(setData)
       .catch((err) => {
-        setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Newsletter lista nije učitana.' });
+        setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.newsletter.loadFailed });
         setData(defaultResponse);
       })
       .finally(() => setLoading(false));
@@ -37,7 +44,7 @@ const AdminNewsletterPage = () => {
   useEffect(() => {
     loadSubscribers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [filters, language]);
 
   const stats = useMemo(() => {
     return {
@@ -53,23 +60,23 @@ const AdminNewsletterPage = () => {
   const unsubscribe = async (id: string) => {
     try {
       await unsubscribeNewsletterSubscriber(id);
-      setMessage({ type: 'success', text: 'Newsletter prijava je deaktivirana.' });
+      setMessage({ type: 'success', text: copy.newsletter.deactivated });
       loadSubscribers();
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Prijava nije deaktivirana.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.newsletter.deactivateFailed });
     }
   };
 
   const remove = async (id: string, email: string) => {
-    const confirmed = window.confirm(`Da li sigurno želiš da obrišeš newsletter prijavu za ${email}?`);
+    const confirmed = window.confirm(`${copy.newsletter.deleteConfirm} ${email}?`);
     if (!confirmed) return;
 
     try {
       await deleteNewsletterSubscriber(id);
-      setMessage({ type: 'success', text: 'Newsletter prijava je obrisana.' });
+      setMessage({ type: 'success', text: copy.newsletter.deleted });
       loadSubscribers();
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Prijava nije obrisana.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.newsletter.deleteFailed });
     }
   };
 
@@ -82,62 +89,62 @@ const AdminNewsletterPage = () => {
     <div className="admin-page">
       <section className="admin-page-heading">
         <div>
-          <span className="admin-kicker">Lead management</span>
-          <h2>Newsletter subscribers</h2>
-          <p>Review active and inactive subscriptions collected from the public website newsletter form.</p>
+          <span className="admin-kicker">{copy.newsletter.leadManagement}</span>
+          <h2>{copy.newsletter.title}</h2>
+          <p>{copy.newsletter.text}</p>
         </div>
       </section>
 
       <AdminNotice message={message} />
 
       <section className="admin-mini-stats">
-        <div><strong>{data.pagination.total}</strong><span>Total subscribers</span></div>
-        <div><strong>{stats.active}</strong><span>Active on page</span></div>
-        <div><strong>{stats.inactive}</strong><span>Inactive on page</span></div>
+        <div><strong>{data.pagination.total}</strong><span>{copy.newsletter.totalSubscribers}</span></div>
+        <div><strong>{stats.active}</strong><span>{copy.newsletter.activeOnPage}</span></div>
+        <div><strong>{stats.inactive}</strong><span>{copy.newsletter.inactiveOnPage}</span></div>
       </section>
 
       <section className="admin-filters-bar admin-filters-bar--compact">
         <label>
-          Search email
+          {copy.newsletter.searchEmail}
           <input value={filters.search || ''} onChange={(event) => updateFilter('search', event.target.value)} placeholder="name@example.com" />
         </label>
         <label>
-          Status
+          {copy.common.status}
           <select value={filters.status || ''} onChange={(event) => updateFilter('status', event.target.value)}>
-            <option value="">All subscribers</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="">{copy.newsletter.allSubscribers}</option>
+            <option value="active">{copy.common.active}</option>
+            <option value="inactive">{copy.common.inactive}</option>
           </select>
         </label>
-        <button onClick={() => setFilters({ page: 1, limit: 12 })}>Reset</button>
+        <button onClick={() => setFilters({ page: 1, limit: 12 })}>{copy.common.reset}</button>
       </section>
 
-      {loading && <LoadingState text="Loading newsletter subscribers..." />}
+      {loading && <LoadingState text={copy.newsletter.loading} />}
 
       {!loading && data.items.length === 0 && (
-        <EmptyState title="No subscribers found" text="There are no newsletter subscribers matching the selected filters." />
+        <EmptyState title={copy.newsletter.emptyTitle} text={copy.newsletter.emptyText} />
       )}
 
       {!loading && data.items.length > 0 && (
         <section className="admin-table-card">
           <div className="admin-table admin-newsletter-table">
             <div className="admin-table__head">
-              <span>Email</span>
-              <span>Status</span>
-              <span>Source</span>
-              <span>Subscribed</span>
-              <span>Actions</span>
+              <span>{copy.newsletter.email}</span>
+              <span>{copy.common.status}</span>
+              <span>{copy.newsletter.source}</span>
+              <span>{copy.newsletter.subscribed}</span>
+              <span>{copy.common.actions}</span>
             </div>
 
             {data.items.map((subscriber) => (
               <div className="admin-table__row" key={subscriber._id}>
                 <strong>{subscriber.email}</strong>
-                <AdminStatusBadge value={subscriber.isActive ? 'active' : 'inactive'} />
+                <AdminStatusBadge value={subscriber.isActive ? 'active' : 'inactive'} language={language} />
                 <span>{subscriber.source || 'website'}</span>
-                <span>{new Date(subscriber.subscribedAt || subscriber.createdAt).toLocaleDateString('en-GB')}</span>
+                <span>{new Date(subscriber.subscribedAt || subscriber.createdAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}</span>
                 <div className="admin-row-actions">
-                  {subscriber.isActive && <button onClick={() => unsubscribe(subscriber._id)}>Unsubscribe</button>}
-                  <button className="admin-row-actions__danger" onClick={() => remove(subscriber._id, subscriber.email)}>Delete</button>
+                  {subscriber.isActive && <button onClick={() => unsubscribe(subscriber._id)}>{copy.newsletter.unsubscribe}</button>}
+                  <button className="admin-row-actions__danger" onClick={() => remove(subscriber._id, subscriber.email)}>{copy.common.delete}</button>
                 </div>
               </div>
             ))}
@@ -147,9 +154,9 @@ const AdminNewsletterPage = () => {
 
       {!loading && data.pagination.pages > 1 && (
         <div className="admin-pagination">
-          <button disabled={data.pagination.page <= 1} onClick={() => changePage(data.pagination.page - 1)}>Previous</button>
-          <span>Page {data.pagination.page} of {data.pagination.pages}</span>
-          <button disabled={data.pagination.page >= data.pagination.pages} onClick={() => changePage(data.pagination.page + 1)}>Next</button>
+          <button disabled={data.pagination.page <= 1} onClick={() => changePage(data.pagination.page - 1)}>{copy.common.previous}</button>
+          <span>{copy.common.page} {data.pagination.page} {copy.common.of} {data.pagination.pages}</span>
+          <button disabled={data.pagination.page >= data.pagination.pages} onClick={() => changePage(data.pagination.page + 1)}>{copy.common.next}</button>
         </div>
       )}
     </div>

@@ -95,6 +95,15 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const videoUrl = normalizeYoutubeUrl(property.videoUrl);
   const sizeLabel = formatSize(property, copy.details.onRequest);
+  const hasMapCoordinates =
+    typeof property.location.latitude === 'number' &&
+    typeof property.location.longitude === 'number';
+
+  const mapQuery = hasMapCoordinates
+    ? `${property.location.latitude},${property.location.longitude}`
+    : property.location.address || property.location.fullLocation;
+
+  const mapSrc = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
 
   return (
     <main>
@@ -192,6 +201,27 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
                 </div>
               </article>
             )}
+            {mapQuery && (
+              <article className="details-card details-card--map">
+                <span className="eyebrow">{copy.details.map || 'Location'}</span>
+                <h2>{property.location.fullLocation}</h2>
+
+                {property.location.address && (
+                  <p>{property.location.address}</p>
+                )}
+
+                <div className="property-map-frame">
+                  <iframe
+                    title={`${property.title} map`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    src={mapSrc}
+                  />
+                </div>
+              </article>
+            )}
+
+
           </div>
 
           <aside className="details-sidebar">

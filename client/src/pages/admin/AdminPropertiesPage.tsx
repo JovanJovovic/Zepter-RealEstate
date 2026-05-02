@@ -8,7 +8,8 @@ import AdminNotice from '../../components/admin/AdminNotice';
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge';
 import EmptyState from '../../components/EmptyState';
 import LoadingState from '../../components/LoadingState';
-import { categoryLabels, conditionOptions } from '../../data/propertyOptions';
+import { getCopy } from '../../data/localization';
+import { getCategoryLabels, getConditionOptions } from '../../data/propertyOptions';
 import type { AdminMessage, AdminPropertiesQuery, PaginatedPropertiesResponse } from '../../types/admin';
 import type { PropertyStatus, SupportedLanguage } from '../../types/property';
 import { getMainImage } from '../../utils/asset';
@@ -23,18 +24,20 @@ const defaultResponse: PaginatedPropertiesResponse = {
   pagination: { total: 0, page: 1, limit: 10, pages: 0 },
 };
 
-const statusOptions: Array<{ value: '' | PropertyStatus; label: string }> = [
-  { value: '', label: 'All statuses' },
-  { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' },
-  { value: 'archived', label: 'Archived' },
-];
-
 const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) => {
   const [filters, setFilters] = useState<AdminPropertiesQuery>({ page: 1, limit: 10, language });
   const [data, setData] = useState(defaultResponse);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<AdminMessage | null>(null);
+  const copy = getCopy(language).admin;
+  const categoryLabels = getCategoryLabels(language);
+  const conditionOptions = getConditionOptions(language);
+  const statusOptions: Array<{ value: '' | PropertyStatus; label: string }> = [
+    { value: '', label: copy.common.allStatuses },
+    { value: 'published', label: copy.common.published },
+    { value: 'draft', label: copy.common.draft },
+    { value: 'archived', label: copy.common.archived },
+  ];
 
   const loadProperties = () => {
     setLoading(true);
@@ -43,7 +46,7 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
     getAdminProperties({ ...filters, language })
       .then(setData)
       .catch((err) => {
-        setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Nekretnine nisu učitane.' });
+        setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.properties.loadFailed });
         setData(defaultResponse);
       })
       .finally(() => setLoading(false));
@@ -74,33 +77,33 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
   const changeStatus = async (id: string, status: PropertyStatus) => {
     try {
       await updateAdminProperty(id, { status });
-      setMessage({ type: 'success', text: 'Status nekretnine je ažuriran.' });
+      setMessage({ type: 'success', text: copy.properties.statusUpdated });
       loadProperties();
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Status nije promenjen.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.properties.statusFailed });
     }
   };
 
   const toggleFeatured = async (id: string, isFeatured: boolean) => {
     try {
       await updateAdminProperty(id, { isFeatured: !isFeatured });
-      setMessage({ type: 'success', text: 'Featured oznaka je ažurirana.' });
+      setMessage({ type: 'success', text: copy.properties.featuredUpdated });
       loadProperties();
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Featured oznaka nije promenjena.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.properties.featuredFailed });
     }
   };
 
   const removeProperty = async (id: string, title: string) => {
-    const confirmed = window.confirm(`Da li sigurno želiš da obrišeš nekretninu: ${title}?`);
+    const confirmed = window.confirm(`${copy.properties.deleteConfirm} ${title}?`);
     if (!confirmed) return;
 
     try {
       await deleteAdminProperty(id);
-      setMessage({ type: 'success', text: 'Nekretnina je obrisana.' });
+      setMessage({ type: 'success', text: copy.properties.deleted });
       loadProperties();
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Nekretnina nije obrisana.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : copy.properties.deleteFailed });
     }
   };
 
@@ -108,70 +111,70 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
     <div className="admin-page">
       <section className="admin-page-heading">
         <div>
-          <span className="admin-kicker">Content management</span>
-          <h2>Properties</h2>
-          <p>Search, publish, archive and maintain the complete Zepter Real Estate portfolio.</p>
+          <span className="admin-kicker">{copy.properties.contentManagement}</span>
+          <h2>{copy.properties.title}</h2>
+          <p>{copy.properties.text}</p>
         </div>
-        <button className="admin-primary-action" onClick={() => navigate('/admin/properties/new')}>+ New property</button>
+        <button className="admin-primary-action" onClick={() => navigate('/admin/properties/new')}>{copy.common.newProperty}</button>
       </section>
 
       <AdminNotice message={message} />
 
       <section className="admin-mini-stats">
-        <div><strong>{data.pagination.total}</strong><span>Total</span></div>
-        <div><strong>{counts.published}</strong><span>Published on page</span></div>
-        <div><strong>{counts.draft}</strong><span>Drafts on page</span></div>
-        <div><strong>{counts.archived}</strong><span>Archived on page</span></div>
+        <div><strong>{data.pagination.total}</strong><span>{copy.properties.total}</span></div>
+        <div><strong>{counts.published}</strong><span>{copy.properties.publishedOnPage}</span></div>
+        <div><strong>{counts.draft}</strong><span>{copy.properties.draftsOnPage}</span></div>
+        <div><strong>{counts.archived}</strong><span>{copy.properties.archivedOnPage}</span></div>
       </section>
 
       <section className="admin-filters-bar">
         <label>
-          Search
+          {copy.common.search}
           <input
             value={filters.search || ''}
             onChange={(event) => updateFilter('search', event.target.value)}
-            placeholder="Title, description or location"
+            placeholder={copy.properties.searchPlaceholder}
           />
         </label>
         <label>
-          Status
+          {copy.common.status}
           <select value={filters.status || ''} onChange={(event) => updateFilter('status', event.target.value)}>
             {statusOptions.map((option) => <option key={option.value || 'all'} value={option.value}>{option.label}</option>)}
           </select>
         </label>
         <label>
-          Category
+          {copy.common.category}
           <select value={filters.category || ''} onChange={(event) => updateFilter('category', event.target.value)}>
-            <option value="">All categories</option>
+            <option value="">{copy.common.allCategories}</option>
             {Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </label>
         <label>
-          Condition
+          {copy.common.condition}
           <select value={filters.condition || ''} onChange={(event) => updateFilter('condition', event.target.value)}>
-            <option value="">All conditions</option>
+            <option value="">{copy.common.allConditions}</option>
             {conditionOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </label>
-        <button onClick={() => setFilters({ page: 1, limit: 10, language })}>Reset</button>
+        <button onClick={() => setFilters({ page: 1, limit: 10, language })}>{copy.common.reset}</button>
       </section>
 
-      {loading && <LoadingState text="Loading properties..." />}
+      {loading && <LoadingState text={copy.properties.loading} />}
 
       {!loading && data.items.length === 0 && (
-        <EmptyState title="No properties found" text="Try changing filters or create a new property record." actionLabel="Create property" onAction={() => navigate('/admin/properties/new')} />
+        <EmptyState title={copy.properties.emptyTitle} text={copy.properties.emptyText} actionLabel={copy.properties.createProperty} onAction={() => navigate('/admin/properties/new')} />
       )}
 
       {!loading && data.items.length > 0 && (
         <section className="admin-table-card">
           <div className="admin-table admin-properties-table">
             <div className="admin-table__head">
-              <span>Property</span>
-              <span>Category</span>
-              <span>Status</span>
-              <span>Featured</span>
-              <span>Updated</span>
-              <span>Actions</span>
+              <span>{copy.properties.property}</span>
+              <span>{copy.common.category}</span>
+              <span>{copy.common.status}</span>
+              <span>{copy.properties.featured}</span>
+              <span>{copy.common.updated}</span>
+              <span>{copy.common.actions}</span>
             </div>
 
             {data.items.map((property) => (
@@ -187,21 +190,21 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
                 </div>
                 <span>{categoryLabels[property.category]}</span>
                 <div className="admin-status-select-wrap">
-                  <AdminStatusBadge value={property.status} />
+                  <AdminStatusBadge value={property.status} language={language} />
                   <select value={property.status} onChange={(event) => changeStatus(property._id, event.target.value as PropertyStatus)}>
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                    <option value="archived">Archived</option>
+                    <option value="draft">{copy.common.draft}</option>
+                    <option value="published">{copy.common.published}</option>
+                    <option value="archived">{copy.common.archived}</option>
                   </select>
                 </div>
                 <button className={property.isFeatured ? 'admin-feature-toggle admin-feature-toggle--on' : 'admin-feature-toggle'} onClick={() => toggleFeatured(property._id, property.isFeatured)}>
-                  {property.isFeatured ? 'Featured' : 'Standard'}
+                  {property.isFeatured ? copy.common.featured : copy.common.standard}
                 </button>
-                <span>{new Date(property.updatedAt).toLocaleDateString('en-GB')}</span>
+                <span>{new Date(property.updatedAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}</span>
                 <div className="admin-row-actions">
-                  <button onClick={() => navigate(`/properties/${property.publicId}`)}>View</button>
-                  <button onClick={() => navigate(`/admin/properties/${property._id}/edit`)}>Edit</button>
-                  <button className="admin-row-actions__danger" onClick={() => removeProperty(property._id, property.title)}>Delete</button>
+                  <button onClick={() => navigate(`/properties/${property.publicId}`)}>{copy.common.view}</button>
+                  <button onClick={() => navigate(`/admin/properties/${property._id}/edit`)}>{copy.common.edit}</button>
+                  <button className="admin-row-actions__danger" onClick={() => removeProperty(property._id, property.title)}>{copy.common.delete}</button>
                 </div>
               </div>
             ))}
@@ -211,9 +214,9 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
 
       {!loading && data.pagination.pages > 1 && (
         <div className="admin-pagination">
-          <button disabled={data.pagination.page <= 1} onClick={() => changePage(data.pagination.page - 1)}>Previous</button>
-          <span>Page {data.pagination.page} of {data.pagination.pages}</span>
-          <button disabled={data.pagination.page >= data.pagination.pages} onClick={() => changePage(data.pagination.page + 1)}>Next</button>
+          <button disabled={data.pagination.page <= 1} onClick={() => changePage(data.pagination.page - 1)}>{copy.common.previous}</button>
+          <span>{copy.common.page} {data.pagination.page} {copy.common.of} {data.pagination.pages}</span>
+          <button disabled={data.pagination.page >= data.pagination.pages} onClick={() => changePage(data.pagination.page + 1)}>{copy.common.next}</button>
         </div>
       )}
     </div>

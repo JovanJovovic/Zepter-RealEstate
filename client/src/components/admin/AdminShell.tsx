@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { languageOptions } from '../../data/languages';
+import { getCopy } from '../../data/localization';
 import type { AdminUser } from '../../types/admin';
 import type { SupportedLanguage } from '../../types/property';
 
@@ -13,18 +14,28 @@ interface AdminShellProps {
   children: ReactNode;
 }
 
-const navItems = [
-  { label: 'Dashboard', path: '/admin' },
-  { label: 'Properties', path: '/admin/properties' },
-  { label: 'Newsletter', path: '/admin/newsletter' },
-];
-
 const isActive = (currentPath: string, itemPath: string) => {
   if (itemPath === '/admin') return currentPath === '/admin' || currentPath === '/admin/';
   return currentPath.startsWith(itemPath);
 };
 
 const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLanguageChange, children }: AdminShellProps) => {
+  const copy = getCopy(language).admin;
+  const navItems = [
+    { label: copy.common.dashboard, path: '/admin' },
+    { label: copy.common.properties, path: '/admin/properties' },
+    { label: copy.common.newsletter, path: '/admin/newsletter' },
+  ];
+  const localizedLanguageOptions =
+    language === 'sr'
+      ? [
+          { value: 'en' as const, label: 'Engleski' },
+          { value: 'sr' as const, label: 'Srpski' },
+          { value: 'ru' as const, label: 'Ruski' },
+          { value: 'de' as const, label: 'Nemački' },
+        ]
+      : languageOptions;
+
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
@@ -32,11 +43,11 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLangua
           <span>ZRE</span>
           <div>
             <strong>Zepter Real Estate</strong>
-            <small>Admin Console</small>
+            <small>{copy.common.adminConsole}</small>
           </div>
         </button>
 
-        <nav className="admin-nav" aria-label="Admin navigation">
+        <nav className="admin-nav" aria-label={copy.common.adminNavigation}>
           {navItems.map((item) => (
             <button
               key={item.path}
@@ -51,7 +62,7 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLangua
 
         <div className="admin-sidebar__footer">
           <button className="admin-sidebar__public" onClick={() => navigate('/')}>
-            View public website
+            {copy.common.viewPublicWebsite}
           </button>
           <div className="admin-user-card">
             <span>{admin.name.slice(0, 1).toUpperCase()}</span>
@@ -61,7 +72,7 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLangua
             </div>
           </div>
           <button className="admin-logout" onClick={onLogout}>
-            Sign out
+            {copy.common.signOut}
           </button>
         </div>
       </aside>
@@ -69,14 +80,14 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLangua
       <section className="admin-main">
         <header className="admin-topbar">
           <div>
-            <span className="admin-kicker">Portfolio management</span>
+            <span className="admin-kicker">{copy.common.portfolioManagement}</span>
             <h1>Zepter Real Estate CMS</h1>
           </div>
           <div className="admin-topbar__actions">
             <label className="admin-language-select">
-              Translation preview
+              {copy.common.translationPreview}
               <select value={language} onChange={(event) => onLanguageChange(event.target.value as SupportedLanguage)}>
-                {languageOptions.map((option) => (
+                {localizedLanguageOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -84,10 +95,10 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLangua
               </select>
             </label>
             <button className="admin-topbar__public" onClick={() => navigate('/commercial')}>
-              Commercial page
+              {copy.common.commercialPage}
             </button>
             <button className="admin-topbar__new" onClick={() => navigate('/admin/properties/new')}>
-              + New property
+              {copy.common.newProperty}
             </button>
           </div>
         </header>

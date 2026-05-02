@@ -8,12 +8,13 @@ import {
 } from '../../api/admin';
 import AdminNotice from '../../components/admin/AdminNotice';
 import LoadingState from '../../components/LoadingState';
+import { getCopy } from '../../data/localization';
 import {
-  categoryLabels,
-  conditionOptions,
-  propertyTypeOptions,
+  getCategoryLabels,
+  getConditionOptions,
+  getPropertyTypeOptions,
+  getSpecialRequirementOptions,
   roomOptions,
-  specialRequirementOptions,
 } from '../../data/propertyOptions';
 import { languageOptions } from '../../data/languages';
 import type { AdminMessage, AdminPropertyPayload } from '../../types/admin';
@@ -23,6 +24,7 @@ import { resolveMediaUrl } from '../../utils/asset';
 interface AdminPropertyEditorPageProps {
   propertyId?: string;
   navigate: (path: string) => void;
+  language: SupportedLanguage;
 }
 
 type PropertyFormState = {
@@ -251,7 +253,7 @@ const toPayload = (form: PropertyFormState): AdminPropertyPayload => {
   };
 };
 
-const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPageProps) => {
+const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminPropertyEditorPageProps) => {
   const isEditing = Boolean(propertyId);
   const [form, setForm] = useState<PropertyFormState>(defaultForm);
   const [loading, setLoading] = useState(isEditing);
@@ -259,6 +261,21 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<AdminMessage | null>(null);
   const [activeTranslationLanguage, setActiveTranslationLanguage] = useState<SupportedLanguage>('sr');
+  const copy = getCopy(language).admin;
+  const editorCopy = copy.editor;
+  const categoryLabels = getCategoryLabels(language);
+  const conditionOptions = getConditionOptions(language);
+  const propertyTypeOptions = getPropertyTypeOptions(language);
+  const specialRequirementOptions = getSpecialRequirementOptions(language);
+  const localizedLanguageOptions =
+    language === 'sr'
+      ? [
+          { value: 'en' as const, label: 'Engleski' },
+          { value: 'sr' as const, label: 'Srpski' },
+          { value: 'ru' as const, label: 'Ruski' },
+          { value: 'de' as const, label: 'Nemački' },
+        ]
+      : languageOptions;
 
   useEffect(() => {
     if (!propertyId) {
@@ -278,7 +295,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
       })
       .catch((err) => {
         if (!mounted) return;
-        setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Nekretnina nije učitana.' });
+        setMessage({ type: 'error', text: err instanceof Error ? err.message : editorCopy.loadFailed });
       })
       .finally(() => {
         if (mounted) setLoading(false);
@@ -287,7 +304,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
     return () => {
       mounted = false;
     };
-  }, [propertyId]);
+  }, [editorCopy.loadFailed, propertyId]);
 
   const mainImage = useMemo(() => form.images.find((image) => image.isMain) || form.images[0], [form.images]);
 
@@ -373,7 +390,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
         ],
       }));
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Slika nije uploadovana.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : editorCopy.imageFailed });
     } finally {
       setUploading(false);
       event.target.value = '';
@@ -401,7 +418,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
         ],
       }));
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Floor plan nije uploadovan.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : editorCopy.floorPlanFailed });
     } finally {
       setUploading(false);
       event.target.value = '';
@@ -456,12 +473,12 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
     setMessage(null);
 
     if (!form.title.trim()) {
-      setMessage({ type: 'error', text: 'Naziv nekretnine je obavezan.' });
+      setMessage({ type: 'error', text: editorCopy.titleRequired });
       return;
     }
 
     if (!form.fullLocation.trim()) {
-      setMessage({ type: 'error', text: 'Full location je obavezna.' });
+      setMessage({ type: 'error', text: editorCopy.locationRequired });
       return;
     }
 
@@ -473,30 +490,30 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
         ? await updateAdminProperty(propertyId, payload)
         : await createAdminProperty(payload);
 
-      setMessage({ type: 'success', text: isEditing ? 'Nekretnina je uspešno ažurirana.' : 'Nekretnina je uspešno kreirana.' });
+      setMessage({ type: 'success', text: isEditing ? editorCopy.updated : editorCopy.created });
       if (!isEditing) navigate(`/admin/properties/${saved._id}/edit`);
     } catch (err) {
-      setMessage({ type: 'error', text: err instanceof Error ? err.message : 'Čuvanje nije uspelo.' });
+      setMessage({ type: 'error', text: err instanceof Error ? err.message : editorCopy.saveFailed });
     } finally {
       setSaving(false);
     }
   };
 
   if (loading) {
-    return <LoadingState text="Loading property editor..." />;
+    return <LoadingState text={editorCopy.loading} />;
   }
 
   return (
     <div className="admin-page admin-editor-page">
       <section className="admin-page-heading">
         <div>
-          <span className="admin-kicker">{isEditing ? 'Edit property' : 'Create property'}</span>
-          <h2>{isEditing ? form.title || 'Property editor' : 'New property'}</h2>
-          <p>Maintain all public-facing content, technical facts, images and floor plans from one editor.</p>
+          <span className="admin-kicker">{isEditing ? editorCopy.editProperty : editorCopy.createProperty}</span>
+          <h2>{isEditing ? form.title || editorCopy.propertyEditor : editorCopy.newProperty}</h2>
+          <p>{editorCopy.intro}</p>
         </div>
         <div className="admin-heading-actions">
-          <button onClick={() => navigate('/admin/properties')}>Back to list</button>
-          {form.publicId && <button onClick={() => navigate(`/properties/${form.publicId}`)}>View public page</button>}
+          <button onClick={() => navigate('/admin/properties')}>{editorCopy.backToList}</button>
+          {form.publicId && <button onClick={() => navigate(`/properties/${form.publicId}`)}>{editorCopy.viewPublicPage}</button>}
         </div>
       </section>
 
@@ -505,43 +522,43 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
       <form className="admin-editor-grid" onSubmit={submit}>
         <div className="admin-editor-main">
           <section className="admin-form-card">
-            <span className="admin-kicker">Basic information</span>
+            <span className="admin-kicker">{editorCopy.basic}</span>
             <div className="admin-form-grid admin-form-grid--two">
               <label className="admin-field admin-field--wide">
-                Title *
+                {editorCopy.title}
                 <input value={form.title} onChange={(event) => setField('title', event.target.value)} placeholder="Palata Zepter - KRALJA PETRA, BEOGRAD" />
               </label>
               <label className="admin-field">
-                Slug
-                <input value={form.slug} onChange={(event) => setField('slug', event.target.value)} placeholder="Auto generated if empty" />
+                {editorCopy.slug}
+                <input value={form.slug} onChange={(event) => setField('slug', event.target.value)} placeholder={editorCopy.slugPlaceholder} />
               </label>
               <label className="admin-field">
-                Public ID
-                <input value={form.publicId} onChange={(event) => setField('publicId', event.target.value)} placeholder="Auto generated if empty" />
+                {editorCopy.publicId}
+                <input value={form.publicId} onChange={(event) => setField('publicId', event.target.value)} placeholder={editorCopy.publicIdPlaceholder} />
               </label>
               <label className="admin-field">
-                Category
+                {editorCopy.category}
                 <select value={form.category} onChange={(event) => setField('category', event.target.value as PropertyCategory)}>
                   {Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                 </select>
               </label>
               <label className="admin-field">
-                Status
+                {editorCopy.status}
                 <select value={form.status} onChange={(event) => setField('status', event.target.value as PropertyStatus)}>
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="archived">Archived</option>
+                  <option value="draft">{copy.common.draft}</option>
+                  <option value="published">{copy.common.published}</option>
+                  <option value="archived">{copy.common.archived}</option>
                 </select>
               </label>
               <label className="admin-switch-field">
                 <input checked={form.isFeatured} onChange={(event) => setField('isFeatured', event.target.checked)} type="checkbox" />
-                <span>Featured on public pages</span>
+                <span>{editorCopy.featuredPublic}</span>
               </label>
             </div>
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Property types</span>
+            <span className="admin-kicker">{editorCopy.propertyTypes}</span>
             <div className="admin-chip-grid">
               {propertyTypeOptions.map((option) => (
                 <button
@@ -557,104 +574,104 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Location</span>
+            <span className="admin-kicker">{editorCopy.location}</span>
             <div className="admin-form-grid admin-form-grid--two">
               <label className="admin-field">
-                City
+                {editorCopy.city}
                 <input value={form.city} onChange={(event) => setField('city', event.target.value)} />
               </label>
               <label className="admin-field">
-                Municipality
+                {editorCopy.municipality}
                 <input value={form.municipality} onChange={(event) => setField('municipality', event.target.value)} />
               </label>
               <label className="admin-field admin-field--wide">
-                Full location *
+                {editorCopy.fullLocation}
                 <input value={form.fullLocation} onChange={(event) => setField('fullLocation', event.target.value)} placeholder="Beograd Stari Grad" />
               </label>
               <label className="admin-field admin-field--wide">
-                Address
+                {editorCopy.address}
                 <input value={form.address} onChange={(event) => setField('address', event.target.value)} />
               </label>
               <label className="admin-field">
-                Latitude
+                {editorCopy.latitude}
                 <input value={form.latitude} onChange={(event) => setField('latitude', event.target.value)} />
               </label>
               <label className="admin-field">
-                Longitude
+                {editorCopy.longitude}
                 <input value={form.longitude} onChange={(event) => setField('longitude', event.target.value)} />
               </label>
             </div>
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Technical facts</span>
+            <span className="admin-kicker">{editorCopy.facts}</span>
             <div className="admin-form-grid admin-form-grid--three">
               <label className="admin-field">
-                Size sqm
+                {editorCopy.sizeSqm}
                 <input value={form.sizeSqm} onChange={(event) => setField('sizeSqm', event.target.value)} placeholder="3706" />
               </label>
               <label className="admin-field">
-                Size label
+                {editorCopy.sizeLabel}
                 <input value={form.sizeLabel} onChange={(event) => setField('sizeLabel', event.target.value)} placeholder="3,706 m2" />
               </label>
               <label className="admin-field">
-                Condition
+                {editorCopy.condition}
                 <select value={form.condition} onChange={(event) => setField('condition', event.target.value as PropertyCondition)}>
                   {conditionOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                 </select>
               </label>
               <label className="admin-field">
-                Rooms
+                {editorCopy.rooms}
                 <select value={form.rooms} onChange={(event) => setField('rooms', event.target.value)}>
-                  <option value="">Not specified</option>
+                  <option value="">{copy.common.notSpecified}</option>
                   {roomOptions.map((room) => <option key={room} value={room}>{room}</option>)}
                 </select>
               </label>
               <label className="admin-field">
-                Floor label
+                {editorCopy.floorLabel}
                 <input value={form.floorLabel} onChange={(event) => setField('floorLabel', event.target.value)} placeholder="ground floor - seventh Floor" />
               </label>
               <label className="admin-field">
-                Floors
+                {editorCopy.floors}
                 <input value={form.floorsText} onChange={(event) => setField('floorsText', event.target.value)} placeholder="7, 6, 5, 4, Pr" />
               </label>
             </div>
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Descriptions</span>
+            <span className="admin-kicker">{editorCopy.descriptions}</span>
             <div className="admin-form-grid">
               <label className="admin-field">
-                Short description
+                {editorCopy.shortDescription}
                 <textarea value={form.shortDescription} onChange={(event) => setField('shortDescription', event.target.value)} rows={3} />
               </label>
               <label className="admin-field">
-                Full description
+                {editorCopy.fullDescription}
                 <textarea value={form.fullDescription} onChange={(event) => setField('fullDescription', event.target.value)} rows={6} />
               </label>
               <label className="admin-field">
-                About property
+                {editorCopy.aboutProperty}
                 <textarea value={form.aboutProperty} onChange={(event) => setField('aboutProperty', event.target.value)} rows={8} />
               </label>
               <label className="admin-field">
-                Video URL
+                {editorCopy.videoUrl}
                 <input value={form.videoUrl} onChange={(event) => setField('videoUrl', event.target.value)} placeholder="https://www.youtube.com/embed/..." />
               </label>
             </div>
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Translations</span>
+            <span className="admin-kicker">{editorCopy.translations}</span>
             <div className="admin-form-grid admin-form-grid--two">
               <label className="admin-field">
-                Translation language
+                {editorCopy.translationLanguage}
                 <select
                   value={activeTranslationLanguage}
                   onChange={(event) => setActiveTranslationLanguage(event.target.value as SupportedLanguage)}
                 >
-                  {languageOptions.map((option) => (
+                  {localizedLanguageOptions.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}{option.value === 'en' ? ' (base content)' : ''}
+                      {option.label}{option.value === 'en' ? ` (${editorCopy.baseContent})` : ''}
                     </option>
                   ))}
                 </select>
@@ -665,44 +682,44 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
                   disabled={activeTranslationLanguage === 'en' || Boolean(activeTranslation)}
                   onClick={() => addTranslation(activeTranslationLanguage)}
                 >
-                  Add translation
+                  {editorCopy.addTranslation}
                 </button>
                 {activeTranslation && (
                   <button type="button" onClick={() => removeTranslation(activeTranslation.language)}>
-                    Remove translation
+                    {editorCopy.removeTranslation}
                   </button>
                 )}
               </div>
             </div>
 
             {activeTranslationLanguage === 'en' && (
-              <p className="admin-side-note">English is edited in the main fields above. Other languages override only the fields filled here.</p>
+              <p className="admin-side-note">{editorCopy.englishHelp}</p>
             )}
 
             {activeTranslationLanguage !== 'en' && !activeTranslation && (
-              <p className="admin-side-note">Add this language first, then fill only the translated fields you need.</p>
+              <p className="admin-side-note">{editorCopy.addHelp}</p>
             )}
 
             {activeTranslation && (
               <div className="admin-form-grid admin-form-grid--two">
                 <label className="admin-field admin-field--wide">
-                  Translated title
+                  {editorCopy.translatedTitle}
                   <input
                     value={activeTranslation.title}
                     onChange={(event) => updateTranslation(activeTranslation.language, 'title', event.target.value)}
-                    placeholder={form.title || 'Property title'}
+                    placeholder={form.title || editorCopy.title}
                   />
                 </label>
                 <label className="admin-field">
-                  City
+                  {editorCopy.city}
                   <input value={activeTranslation.city} onChange={(event) => updateTranslation(activeTranslation.language, 'city', event.target.value)} />
                 </label>
                 <label className="admin-field">
-                  Municipality
+                  {editorCopy.municipality}
                   <input value={activeTranslation.municipality} onChange={(event) => updateTranslation(activeTranslation.language, 'municipality', event.target.value)} />
                 </label>
                 <label className="admin-field admin-field--wide">
-                  Full location
+                  {editorCopy.fullLocation.replace(' *', '')}
                   <input
                     value={activeTranslation.fullLocation}
                     onChange={(event) => updateTranslation(activeTranslation.language, 'fullLocation', event.target.value)}
@@ -710,19 +727,19 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
                   />
                 </label>
                 <label className="admin-field admin-field--wide">
-                  Address
+                  {editorCopy.address}
                   <input value={activeTranslation.address} onChange={(event) => updateTranslation(activeTranslation.language, 'address', event.target.value)} />
                 </label>
                 <label className="admin-field">
-                  Size label
+                  {editorCopy.sizeLabel}
                   <input value={activeTranslation.sizeLabel} onChange={(event) => updateTranslation(activeTranslation.language, 'sizeLabel', event.target.value)} />
                 </label>
                 <label className="admin-field">
-                  Floor label
+                  {editorCopy.floorLabel}
                   <input value={activeTranslation.floorLabel} onChange={(event) => updateTranslation(activeTranslation.language, 'floorLabel', event.target.value)} />
                 </label>
                 <label className="admin-field admin-field--wide">
-                  Floors
+                  {editorCopy.floors}
                   <input
                     value={activeTranslation.floorsText}
                     onChange={(event) => updateTranslation(activeTranslation.language, 'floorsText', event.target.value)}
@@ -730,15 +747,15 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
                   />
                 </label>
                 <label className="admin-field admin-field--wide">
-                  Short description
+                  {editorCopy.shortDescription}
                   <textarea value={activeTranslation.shortDescription} onChange={(event) => updateTranslation(activeTranslation.language, 'shortDescription', event.target.value)} rows={3} />
                 </label>
                 <label className="admin-field admin-field--wide">
-                  Full description
+                  {editorCopy.fullDescription}
                   <textarea value={activeTranslation.fullDescription} onChange={(event) => updateTranslation(activeTranslation.language, 'fullDescription', event.target.value)} rows={6} />
                 </label>
                 <label className="admin-field admin-field--wide">
-                  About property
+                  {editorCopy.aboutProperty}
                   <textarea value={activeTranslation.aboutProperty} onChange={(event) => updateTranslation(activeTranslation.language, 'aboutProperty', event.target.value)} rows={8} />
                 </label>
               </div>
@@ -746,7 +763,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Special requirements</span>
+            <span className="admin-kicker">{editorCopy.specialRequirements}</span>
             <div className="admin-chip-grid">
               {specialRequirementOptions.map((option) => (
                 <button
@@ -764,36 +781,36 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
 
         <aside className="admin-editor-side">
           <section className="admin-media-preview-card">
-            <span className="admin-kicker">Main image</span>
+            <span className="admin-kicker">{editorCopy.mainImage}</span>
             <div className="admin-media-preview">
               {mainImage ? <img src={resolveMediaUrl(mainImage.url)} alt={mainImage.alt || form.title} /> : <span>ZRE</span>}
             </div>
           </section>
 
           <section className="admin-form-card admin-form-card--sticky-action">
-            <span className="admin-kicker">Save changes</span>
-            <p className="admin-side-note">Drafts remain hidden. Published properties are visible on public pages immediately.</p>
+            <span className="admin-kicker">{editorCopy.saveChanges}</span>
+            <p className="admin-side-note">{editorCopy.draftNote}</p>
             <button className="admin-submit-button" disabled={saving || uploading} type="submit">
-              {saving ? 'Saving...' : isEditing ? 'Save property' : 'Create property'}
+              {saving ? editorCopy.saving : isEditing ? editorCopy.saveProperty : editorCopy.createProperty}
             </button>
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Images</span>
+            <span className="admin-kicker">{editorCopy.images}</span>
             <label className="admin-upload-zone">
               <input type="file" accept="image/*" onChange={uploadImage} />
-              <strong>{uploading ? 'Uploading...' : 'Upload image'}</strong>
-              <small>JPG, PNG or WEBP</small>
+              <strong>{uploading ? editorCopy.uploading : editorCopy.uploadImage}</strong>
+              <small>{editorCopy.imageTypes}</small>
             </label>
 
             <div className="admin-media-list">
               {form.images.map((image, index) => (
                 <div className="admin-media-item" key={`${image.url}-${index}`}>
                   <img src={resolveMediaUrl(image.url)} alt={image.alt || form.title} />
-                  <input value={image.alt || ''} onChange={(event) => updateImageAlt(index, event.target.value)} placeholder="Alt text" />
+                  <input value={image.alt || ''} onChange={(event) => updateImageAlt(index, event.target.value)} placeholder={editorCopy.altText} />
                   <div>
-                    <button type="button" onClick={() => setMainImage(index)}>{image.isMain ? 'Main' : 'Set main'}</button>
-                    <button type="button" onClick={() => removeImage(index)}>Remove</button>
+                    <button type="button" onClick={() => setMainImage(index)}>{image.isMain ? editorCopy.main : editorCopy.setMain}</button>
+                    <button type="button" onClick={() => removeImage(index)}>{copy.common.remove}</button>
                   </div>
                 </div>
               ))}
@@ -801,32 +818,32 @@ const AdminPropertyEditorPage = ({ propertyId, navigate }: AdminPropertyEditorPa
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Floor plans</span>
+            <span className="admin-kicker">{editorCopy.floorPlans}</span>
             <label className="admin-upload-zone">
               <input type="file" accept="application/pdf,image/*" onChange={uploadFloorPlan} />
-              <strong>{uploading ? 'Uploading...' : 'Upload floor plan'}</strong>
-              <small>PDF or image file</small>
+              <strong>{uploading ? editorCopy.uploading : editorCopy.uploadFloorPlan}</strong>
+              <small>{editorCopy.floorPlanTypes}</small>
             </label>
 
             <div className="admin-plan-list">
               {form.floorPlans.map((plan, index) => (
                 <div className="admin-plan-item" key={`${plan.fileUrl}-${index}`}>
-                  <input value={plan.title || ''} onChange={(event) => updateFloorPlanTitle(index, event.target.value)} placeholder="Floor plan title" />
-                  <a href={resolveMediaUrl(plan.fileUrl)} target="_blank" rel="noreferrer">Open</a>
-                  <button type="button" onClick={() => removeFloorPlan(index)}>Remove</button>
+                  <input value={plan.title || ''} onChange={(event) => updateFloorPlanTitle(index, event.target.value)} placeholder={editorCopy.floorPlanTitle} />
+                  <a href={resolveMediaUrl(plan.fileUrl)} target="_blank" rel="noreferrer">{copy.common.open}</a>
+                  <button type="button" onClick={() => removeFloorPlan(index)}>{copy.common.remove}</button>
                 </div>
               ))}
             </div>
           </section>
 
           <section className="admin-form-card">
-            <span className="admin-kicker">Contact</span>
+            <span className="admin-kicker">{editorCopy.contact}</span>
             <label className="admin-field">
-              Phone
+              {editorCopy.phone}
               <input value={form.contactPhone} onChange={(event) => setField('contactPhone', event.target.value)} />
             </label>
             <label className="admin-field">
-              Email
+              {editorCopy.email}
               <input value={form.contactEmail} onChange={(event) => setField('contactEmail', event.target.value)} />
             </label>
           </section>

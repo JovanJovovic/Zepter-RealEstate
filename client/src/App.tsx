@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import LoadingState from './components/LoadingState';
 import { defaultLanguage, normalizeLanguage } from './data/languages';
+import { getCopy } from './data/localization';
 import AboutPage from './pages/AboutPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -30,6 +31,7 @@ function App() {
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [language, setLanguageState] = useState<SupportedLanguage>(() => normalizeLanguage(localStorage.getItem('zre_language')));
   const [adminLanguage, setAdminLanguageState] = useState<SupportedLanguage>(() => normalizeLanguage(localStorage.getItem('zre_admin_language') || defaultLanguage));
+  const adminCopy = getCopy(adminLanguage).admin;
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
@@ -91,35 +93,35 @@ function App() {
     if (checkingAdmin) {
       return (
         <main className="admin-loading-shell">
-          <LoadingState text="Checking admin session..." />
+          <LoadingState text={adminCopy.common.loadingSession} />
         </main>
       );
     }
 
     if (currentPath === '/admin/login') {
-      if (admin) return <AdminShell admin={admin} currentPath="/admin" navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}><AdminDashboardPage navigate={navigate} /></AdminShell>;
-      return <AdminLoginPage onLogin={setAdmin} navigate={navigate} />;
+      if (admin) return <AdminShell admin={admin} currentPath="/admin" navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}><AdminDashboardPage navigate={navigate} language={adminLanguage} /></AdminShell>;
+      return <AdminLoginPage onLogin={setAdmin} navigate={navigate} language={adminLanguage} />;
     }
 
     if (!admin) {
-      return <AdminLoginPage onLogin={setAdmin} navigate={navigate} />;
+      return <AdminLoginPage onLogin={setAdmin} navigate={navigate} language={adminLanguage} />;
     }
 
-    let content = <AdminDashboardPage navigate={navigate} />;
+    let content = <AdminDashboardPage navigate={navigate} language={adminLanguage} />;
 
     if (currentPath === '/admin/properties') {
       content = <AdminPropertiesPage navigate={navigate} language={adminLanguage} />;
     } else if (currentPath === '/admin/properties/new') {
-      content = <AdminPropertyEditorPage navigate={navigate} />;
+      content = <AdminPropertyEditorPage navigate={navigate} language={adminLanguage} />;
     } else if (currentPath.startsWith('/admin/properties/') && currentPath.endsWith('/edit')) {
       const propertyId = decodeURIComponent(currentPath.replace('/admin/properties/', '').replace('/edit', ''));
-      content = <AdminPropertyEditorPage propertyId={propertyId} navigate={navigate} />;
+      content = <AdminPropertyEditorPage propertyId={propertyId} navigate={navigate} language={adminLanguage} />;
     } else if (currentPath === '/admin/newsletter') {
-      content = <AdminNewsletterPage />;
+      content = <AdminNewsletterPage language={adminLanguage} />;
     }
 
     return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}>{content}</AdminShell>;
-  }, [admin, adminLanguage, checkingAdmin, currentPath, isAdminPath]);
+  }, [admin, adminCopy.common.loadingSession, adminLanguage, checkingAdmin, currentPath, isAdminPath]);
 
   const publicPage = useMemo(() => {
     if (currentPath === '/') return <HomePage navigate={navigate} language={language} />;
