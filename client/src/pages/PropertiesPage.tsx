@@ -115,7 +115,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
             <div className="properties-toolbar">
               <div>
                 <span className="eyebrow">{copy.properties.results}</span>
-                <h2>{data.pagination.total} {copy.properties.properties}</h2>
+                <h2>{copy.properties.propertiesCount}: {data.pagination.total}</h2>
               </div>
               <p>
                 {copy.properties.page} {data.pagination.page || 1} {copy.properties.of} {Math.max(data.pagination.pages, 1)}
