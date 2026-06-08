@@ -1,4 +1,8 @@
 import type { IProperty, IPropertyTranslation, SupportedLanguage } from "../models/Property.js";
+import {
+  DEFAULT_OCCUPANCY_PERCENTAGE,
+  calculateAvailableArea,
+} from "./propertyAvailability.js";
 
 export const supportedLanguages: SupportedLanguage[] = ["en", "sr", "ru", "de"];
 
@@ -24,7 +28,19 @@ const firstValue = <T>(translatedValue: T | undefined, fallbackValue: T | undefi
 };
 
 export const localizeProperty = (property: IProperty, language: SupportedLanguage) => {
-  const propertyObject = property.toObject();
+  const rawPropertyObject = property.toObject();
+  const occupancyPercentage =
+    typeof rawPropertyObject.occupancyPercentage === "number"
+      ? rawPropertyObject.occupancyPercentage
+      : DEFAULT_OCCUPANCY_PERCENTAGE;
+  const propertyObject = {
+    ...rawPropertyObject,
+    occupancyPercentage,
+    availableArea:
+      typeof rawPropertyObject.availableArea === "number"
+        ? rawPropertyObject.availableArea
+        : calculateAvailableArea(rawPropertyObject.sizeSqm, occupancyPercentage),
+  };
   const availableLanguages = Array.from(
     new Set([
       defaultLanguage,

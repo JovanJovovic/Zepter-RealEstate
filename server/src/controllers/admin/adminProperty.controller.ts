@@ -4,6 +4,11 @@ import Property from "../../models/Property.js";
 import { slugifyText } from "../../utils/slugifyText.js";
 import { generatePublicId } from "../../utils/generatePublicId.js";
 import { localizeProperty, normalizeLanguage } from "../../utils/propertyTranslations.js";
+import {
+    DEFAULT_OCCUPANCY_PERCENTAGE,
+    OCCUPANCY_PERCENTAGE_ERROR,
+    buildAvailabilityFields,
+} from "../../utils/propertyAvailability.js";
 
 
 const parsePositiveNumber = (value: unknown): number | undefined => {
@@ -16,6 +21,24 @@ const parsePositiveNumber = (value: unknown): number | undefined => {
     }
 
     return parsed;
+};
+
+const buildPropertyAvailabilityData = (
+    data: Record<string, unknown>,
+    existingProperty?: { sizeSqm?: number; occupancyPercentage?: number }
+) => {
+    delete data.availableArea;
+
+    const totalArea = data.sizeSqm ?? existingProperty?.sizeSqm;
+    const occupancyPercentage =
+        data.occupancyPercentage ??
+        existingProperty?.occupancyPercentage ??
+        DEFAULT_OCCUPANCY_PERCENTAGE;
+
+    return {
+        ...data,
+        ...buildAvailabilityFields(totalArea, occupancyPercentage),
+    };
 };
 
 const buildAdminPropertyFilter = (query: Request["query"]) => {
@@ -173,17 +196,28 @@ export const createProperty = async (req: Request, res: Response) => {
         });
     }
 
-    const property = await Property.create({
-        ...req.body,
-        slug,
-        publicId: req.body.publicId || generatePublicId(),
-    });
+    let propertyData;
+
+    try {
+        propertyData = buildPropertyAvailabilityData({
+            ...req.body,
+            slug,
+            publicId: req.body.publicId || generatePublicId(),
+        });
+    } catch (error) {
+        return res.status(400).json({
+            message: error instanceof Error ? error.message : OCCUPANCY_PERCENTAGE_ERROR,
+        });
+    }
+
+    const property = await Property.create(propertyData);
 
     res.status(201).json(property);
 };
 
 export const updateProperty = async (req: Request, res: Response) => {
-    const updateData = { ...req.body };
+    let updateData = { ...req.body };
+    delete updateData.availableArea;
 
     if (req.body.slug) {
         updateData.slug = slugifyText(req.body.slug);
@@ -215,6 +249,22 @@ export const updateProperty = async (req: Request, res: Response) => {
                 message: "Druga nekretnina sa ovim publicId već postoji.",
             });
         }
+    }
+
+    const existingProperty = await Property.findById(req.params.id);
+
+    if (!existingProperty) {
+        return res.status(404).json({
+            message: "Property not found.",
+        });
+    }
+
+    try {
+        updateData = buildPropertyAvailabilityData(updateData, existingProperty);
+    } catch (error) {
+        return res.status(400).json({
+            message: error instanceof Error ? error.message : OCCUPANCY_PERCENTAGE_ERROR,
+        });
     }
 
     const property = await Property.findByIdAndUpdate(req.params.id, updateData, {

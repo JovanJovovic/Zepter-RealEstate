@@ -1,4 +1,8 @@
 import mongoose, { Document, Schema } from "mongoose";
+import {
+  DEFAULT_OCCUPANCY_PERCENTAGE,
+  buildAvailabilityFields,
+} from "../utils/propertyAvailability.js";
 
 export type PropertyCategory = "commercial" | "private" | "project-development";
 
@@ -73,6 +77,8 @@ export interface IProperty extends Document {
   location: IPropertyLocation;
 
   sizeSqm?: number;
+  occupancyPercentage: number;
+  availableArea: number;
   sizeLabel?: string;
 
   condition: PropertyCondition;
@@ -301,6 +307,18 @@ const propertySchema = new Schema<IProperty>(
       type: Number,
       min: 0,
     },
+    occupancyPercentage: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: DEFAULT_OCCUPANCY_PERCENTAGE,
+    },
+    availableArea: {
+      type: Number,
+      min: 0,
+      default: 0,
+      index: true,
+    },
     sizeLabel: {
       type: String,
       trim: true,
@@ -407,6 +425,34 @@ const propertySchema = new Schema<IProperty>(
     timestamps: true,
   }
 );
+
+propertySchema.pre("validate", function () {
+  const availability = buildAvailabilityFields(this.sizeSqm, this.occupancyPercentage);
+
+  this.occupancyPercentage = availability.occupancyPercentage;
+  this.availableArea = availability.availableArea;
+});
+
+propertySchema.pre("findOneAndUpdate", function () {
+  const update = this.getUpdate();
+
+  if (!update || Array.isArray(update)) {
+    return;
+  }
+
+  const mutableUpdate = update as Record<string, unknown>;
+  const target = (mutableUpdate.$set || mutableUpdate) as Record<string, unknown>;
+
+  if (target.sizeSqm !== undefined) {
+    const availability = buildAvailabilityFields(
+      target.sizeSqm,
+      target.occupancyPercentage ?? DEFAULT_OCCUPANCY_PERCENTAGE
+    );
+
+    target.occupancyPercentage = availability.occupancyPercentage;
+    target.availableArea = availability.availableArea;
+  }
+});
 
 propertySchema.index({
   title: "text",

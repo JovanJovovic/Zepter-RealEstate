@@ -68,6 +68,8 @@ export interface Property {
   types: PropertyType[];
   location: PropertyLocation;
   sizeSqm?: number;
+  occupancyPercentage?: number;
+  availableArea?: number;
   sizeLabel?: string;
   condition: PropertyCondition;
   rooms?: string;

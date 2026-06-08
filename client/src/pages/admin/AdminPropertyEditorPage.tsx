@@ -38,6 +38,7 @@ type PropertyFormState = {
   condition: PropertyCondition;
   rooms: string;
   sizeSqm: string;
+  occupancyPercentage: string;
   sizeLabel: string;
   floorLabel: string;
   floorsText: string;
@@ -85,6 +86,7 @@ const defaultForm: PropertyFormState = {
   condition: 'not-specified',
   rooms: '',
   sizeSqm: '',
+  occupancyPercentage: '0',
   sizeLabel: '',
   floorLabel: '',
   floorsText: '',
@@ -149,6 +151,7 @@ const formFromProperty = (property: AdminPropertyPayload & { _id?: string; creat
   condition: property.condition || 'not-specified',
   rooms: property.rooms || '',
   sizeSqm: toStringNumber(property.sizeSqm),
+  occupancyPercentage: toStringNumber(property.occupancyPercentage ?? 0),
   sizeLabel: property.sizeLabel || '',
   floorLabel: property.floorLabel || '',
   floorsText: property.floors?.join(', ') || '',
@@ -177,6 +180,23 @@ const numberOrUndefined = (value: string) => {
   return Number.isNaN(parsed) ? undefined : parsed;
 };
 
+const calculateAvailableAreaPreview = (sizeSqm: string, occupancyPercentage: string) => {
+  const area = numberOrUndefined(sizeSqm);
+  const occupancy = numberOrUndefined(occupancyPercentage) ?? 0;
+
+  if (area === undefined || area < 0 || occupancy < 0 || occupancy > 100) {
+    return undefined;
+  }
+
+  return Math.round(((area * (100 - occupancy)) / 100) * 100) / 100;
+};
+
+const formatAreaValue = (value: number, language: SupportedLanguage) => {
+  return `${value.toLocaleString(language === 'sr' ? 'sr-RS' : 'en-US', {
+    maximumFractionDigits: 2,
+  })} m²`;
+};
+
 const toPayload = (form: PropertyFormState): AdminPropertyPayload => {
   const floors = form.floorsText
     .split(',')
@@ -198,6 +218,7 @@ const toPayload = (form: PropertyFormState): AdminPropertyPayload => {
       longitude: numberOrUndefined(form.longitude),
     },
     sizeSqm: numberOrUndefined(form.sizeSqm),
+    occupancyPercentage: numberOrUndefined(form.occupancyPercentage) ?? 0,
     sizeLabel: form.sizeLabel.trim() || undefined,
     condition: form.condition,
     rooms: form.rooms.trim() || undefined,
@@ -307,6 +328,10 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
   }, [editorCopy.loadFailed, propertyId]);
 
   const mainImage = useMemo(() => form.images.find((image) => image.isMain) || form.images[0], [form.images]);
+  const availableAreaPreview = useMemo(
+    () => calculateAvailableAreaPreview(form.sizeSqm, form.occupancyPercentage),
+    [form.occupancyPercentage, form.sizeSqm]
+  );
 
   const setField = <K extends keyof PropertyFormState>(key: K, value: PropertyFormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -482,6 +507,13 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
       return;
     }
 
+    const occupancyPercentage = numberOrUndefined(form.occupancyPercentage) ?? 0;
+
+    if (occupancyPercentage < 0 || occupancyPercentage > 100) {
+      setMessage({ type: 'error', text: editorCopy.occupancyInvalid });
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -608,12 +640,31 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
             <div className="admin-form-grid admin-form-grid--three">
               <label className="admin-field">
                 {editorCopy.sizeSqm}
-                <input value={form.sizeSqm} onChange={(event) => setField('sizeSqm', event.target.value)} placeholder="3706" />
+                <input type="number" min="0" step="0.01" value={form.sizeSqm} onChange={(event) => setField('sizeSqm', event.target.value)} placeholder="3706" />
               </label>
               <label className="admin-field">
                 {editorCopy.sizeLabel}
                 <input value={form.sizeLabel} onChange={(event) => setField('sizeLabel', event.target.value)} placeholder="3,706 m2" />
               </label>
+              <label className="admin-field">
+                {editorCopy.occupancyPercentage}
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={form.occupancyPercentage}
+                  onChange={(event) => setField('occupancyPercentage', event.target.value)}
+                  placeholder="0"
+                />
+              </label>
+              <div className="admin-field">
+                {editorCopy.availableArea}
+                <output className="admin-calculated-value">
+                  {availableAreaPreview !== undefined ? formatAreaValue(availableAreaPreview, language) : copy.common.notSet}
+                </output>
+                <small className="admin-field-hint">{editorCopy.availableAreaHelp}</small>
+              </div>
               <label className="admin-field">
                 {editorCopy.condition}
                 <select value={form.condition} onChange={(event) => setField('condition', event.target.value as PropertyCondition)}>

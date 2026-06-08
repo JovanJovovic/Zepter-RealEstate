@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import slugify from "slugify";
 import Property from "../models/Property.js";
 import { localizeProperty, normalizeLanguage } from "../utils/propertyTranslations.js";
+import {
+  DEFAULT_OCCUPANCY_PERCENTAGE,
+  OCCUPANCY_PERCENTAGE_ERROR,
+  buildAvailabilityFields,
+} from "../utils/propertyAvailability.js";
 
 const createSlug = (title: string): string => {
   return slugify(title, {
@@ -21,6 +26,24 @@ const parsePositiveNumber = (value: unknown): number | undefined => {
   }
 
   return parsed;
+};
+
+const buildPropertyAvailabilityData = (
+  data: Record<string, unknown>,
+  existingProperty?: { sizeSqm?: number; occupancyPercentage?: number }
+) => {
+  delete data.availableArea;
+
+  const totalArea = data.sizeSqm ?? existingProperty?.sizeSqm;
+  const occupancyPercentage =
+    data.occupancyPercentage ??
+    existingProperty?.occupancyPercentage ??
+    DEFAULT_OCCUPANCY_PERCENTAGE;
+
+  return {
+    ...data,
+    ...buildAvailabilityFields(totalArea, occupancyPercentage),
+  };
 };
 
 const buildPropertyFilter = (query: Request["query"]) => {
@@ -83,15 +106,26 @@ const buildPropertyFilter = (query: Request["query"]) => {
   const parsedMaxSize = parsePositiveNumber(maxSize);
 
   if (parsedMinSize !== undefined || parsedMaxSize !== undefined) {
-    filter.sizeSqm = {};
+    const availableAreaRange: Record<string, number> = {};
 
     if (parsedMinSize !== undefined) {
-      (filter.sizeSqm as Record<string, number>).$gte = parsedMinSize;
+      availableAreaRange.$gte = parsedMinSize;
     }
 
     if (parsedMaxSize !== undefined) {
-      (filter.sizeSqm as Record<string, number>).$lte = parsedMaxSize;
+      availableAreaRange.$lte = parsedMaxSize;
     }
+
+    filter.$and = [
+      ...((filter.$and as Record<string, unknown>[] | undefined) || []),
+      {
+        $or: [
+          { availableArea: availableAreaRange },
+          { availableArea: { $exists: false }, sizeSqm: availableAreaRange },
+          { availableArea: null, sizeSqm: availableAreaRange },
+        ],
+      },
+    ];
   }
 
   if (featured === "true") {
@@ -197,19 +231,46 @@ export const createProperty = async (req: Request, res: Response) => {
     });
   }
 
-  const property = await Property.create({
-    ...req.body,
-    slug,
-  });
+  let propertyData;
+
+  try {
+    propertyData = buildPropertyAvailabilityData({
+      ...req.body,
+      slug,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      message: error instanceof Error ? error.message : OCCUPANCY_PERCENTAGE_ERROR,
+    });
+  }
+
+  const property = await Property.create(propertyData);
 
   res.status(201).json(property);
 };
 
 export const updateProperty = async (req: Request, res: Response) => {
-  const updateData = { ...req.body };
+  let updateData = { ...req.body };
+  delete updateData.availableArea;
 
   if (req.body.title) {
     updateData.slug = createSlug(req.body.title);
+  }
+
+  const existingProperty = await Property.findById(req.params.id);
+
+  if (!existingProperty) {
+    return res.status(404).json({
+      message: "Property not found.",
+    });
+  }
+
+  try {
+    updateData = buildPropertyAvailabilityData(updateData, existingProperty);
+  } catch (error) {
+    return res.status(400).json({
+      message: error instanceof Error ? error.message : OCCUPANCY_PERCENTAGE_ERROR,
+    });
   }
 
   const property = await Property.findByIdAndUpdate(req.params.id, updateData, {

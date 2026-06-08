@@ -6,6 +6,7 @@ import { getCopy } from '../data/localization';
 import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions, getSpecialRequirementOptions } from '../data/propertyOptions';
 import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage, resolveMediaUrl } from '../utils/asset';
+import { getAvailableAreaLabel, getOccupancyPercentage, getTotalAreaLabel } from '../utils/propertyArea';
 
 interface PropertyDetailsPageProps {
   publicId: string;
@@ -25,10 +26,6 @@ const normalizeYoutubeUrl = (url?: string) => {
   if (watchMatch?.[1]) return `https://www.youtube.com/embed/${watchMatch[1]}`;
 
   return url;
-};
-
-const formatSize = (property: Property, fallback: string) => {
-  return property.sizeLabel || (property.sizeSqm ? `${property.sizeSqm.toLocaleString('en-US')} m²` : fallback);
 };
 
 const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPageProps) => {
@@ -94,7 +91,9 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
   const conditionLabel = getLabel(property.condition, conditionOptions);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const videoUrl = normalizeYoutubeUrl(property.videoUrl);
-  const sizeLabel = formatSize(property, copy.details.onRequest);
+  const totalAreaLabel = getTotalAreaLabel(property, copy.details.onRequest, language);
+  const availableAreaLabel = getAvailableAreaLabel(property, copy.details.onRequest, language);
+  const occupancyPercentage = getOccupancyPercentage(property);
   const hasMapCoordinates =
     typeof property.location.latitude === 'number' &&
     typeof property.location.longitude === 'number';
@@ -122,16 +121,20 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
             </p>
             <div className="details-quick-facts">
               <div>
-                <span>{copy.details.size}</span>
-                <strong>{sizeLabel}</strong>
+                <span>{copy.details.totalArea}</span>
+                <strong>{totalAreaLabel}</strong>
+              </div>
+              <div>
+                <span>{copy.details.availableArea}</span>
+                <strong>{availableAreaLabel}</strong>
+              </div>
+              <div>
+                <span>{copy.details.occupancy}</span>
+                <strong>{occupancyPercentage}%</strong>
               </div>
               <div>
                 <span>{copy.details.condition}</span>
                 <strong>{conditionLabel}</strong>
-              </div>
-              <div>
-                <span>{copy.details.type}</span>
-                <strong>{typeLabel || copy.details.onRequest}</strong>
               </div>
             </div>
           </div>
@@ -229,8 +232,16 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
               <h2>{copy.details.facts}</h2>
               <dl className="facts-list">
                 <div>
-                  <dt>{copy.details.size}</dt>
-                  <dd>{sizeLabel}</dd>
+                  <dt>{copy.details.totalArea}</dt>
+                  <dd>{totalAreaLabel}</dd>
+                </div>
+                <div>
+                  <dt>{copy.details.availableArea}</dt>
+                  <dd>{availableAreaLabel}</dd>
+                </div>
+                <div>
+                  <dt>{copy.details.occupancy}</dt>
+                  <dd>{occupancyPercentage}%</dd>
                 </div>
                 <div>
                   <dt>{copy.details.type}</dt>

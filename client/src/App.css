@@ -1091,7 +1091,7 @@
 
 .details-quick-facts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-top: 30px;
 }
@@ -2425,6 +2425,26 @@
   padding: 13px 14px;
   resize: vertical;
   line-height: 1.6;
+}
+
+.admin-calculated-value {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 0 14px;
+  color: var(--blue-950);
+  background: #f5f9fd;
+  font-weight: 950;
+}
+
+.admin-field-hint {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 .admin-filters-bar input:focus,

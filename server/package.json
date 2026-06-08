@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "seed:admin": "tsx src/scripts/seedAdmin.ts",
-    "seed:properties": "tsx src/scripts/seedProperties.ts"
+    "seed:properties": "tsx src/scripts/seedProperties.ts",
+    "backfill:property-availability": "tsx src/scripts/backfillPropertyAvailability.ts"
   },
   "keywords": [],
   "author": "",

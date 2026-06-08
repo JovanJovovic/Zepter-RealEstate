@@ -114,7 +114,7 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
           </div>
 
           <div className="field-group">
-            <label htmlFor="size">{copy.filters.size}</label>
+            <label htmlFor="size">{copy.filters.availableArea}</label>
             <select id="size" value={selectedSize} onChange={(event) => handleSizeChange(event.target.value)}>
               <option value="">{copy.filters.anySize}</option>
               {sizeOptions.map((option) => (

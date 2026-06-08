@@ -2,6 +2,7 @@ import { getCopy } from '../data/localization';
 import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions } from '../data/propertyOptions';
 import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage } from '../utils/asset';
+import { getAvailableArea, getAvailableAreaLabel, getTotalAreaLabel } from '../utils/propertyArea';
 
 interface PropertyCardProps {
   property: Property;
@@ -21,6 +22,12 @@ const PropertyCard = ({ property, navigate, language }: PropertyCardProps) => {
   const copy = getCopy(language);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const conditionLabel = getLabel(property.condition, conditionOptions);
+  const totalAreaLabel = getTotalAreaLabel(property, copy.card.onRequest, language);
+  const availableAreaLabel = getAvailableAreaLabel(property, copy.card.onRequest, language);
+  const shouldShowAvailableArea =
+    property.occupancyPercentage !== undefined &&
+    property.occupancyPercentage > 0 &&
+    getAvailableArea(property) !== property.sizeSqm;
 
   return (
     <article className="property-card">
@@ -49,7 +56,8 @@ const PropertyCard = ({ property, navigate, language }: PropertyCardProps) => {
         </p>
 
         <div className="property-card__facts">
-          <span>{property.sizeLabel || (property.sizeSqm ? `${property.sizeSqm.toLocaleString('en-US')} m²` : copy.card.onRequest)}</span>
+          <span>{copy.card.totalArea}: {totalAreaLabel}</span>
+          {shouldShowAvailableArea && <span>{copy.card.availableArea}: {availableAreaLabel}</span>}
           <span>{conditionLabel}</span>
           {property.rooms && <span>{property.rooms} {copy.card.rooms}</span>}
         </div>
