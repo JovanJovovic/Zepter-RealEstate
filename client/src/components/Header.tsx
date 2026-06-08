@@ -25,8 +25,8 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
   const localizedLanguageOptions =
     language === 'sr'
       ? [
-          { value: 'en' as const, label: 'Engleski' },
           { value: 'sr' as const, label: 'Srpski' },
+          { value: 'en' as const, label: 'Engleski' },
           { value: 'ru' as const, label: 'Ruski' },
           { value: 'de' as const, label: 'Nemački' },
         ]

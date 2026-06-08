@@ -236,16 +236,91 @@ const properties = [
     },
 ];
 
+type SeedTranslationData = {
+    language: string;
+    title?: string;
+    location?: Record<string, unknown>;
+    sizeLabel?: string;
+    floorLabel?: string;
+    floors?: string[];
+    shortDescription?: string;
+    fullDescription?: string;
+    aboutProperty?: string;
+};
+
+type SeedPropertyData = {
+    publicId: string;
+    title: string;
+    location: Record<string, unknown>;
+    sizeLabel?: string;
+    floorLabel?: string;
+    floors?: string[];
+    shortDescription?: string;
+    fullDescription?: string;
+    aboutProperty?: string;
+    translations?: SeedTranslationData[];
+    [key: string]: unknown;
+};
+
+const translationFromBaseProperty = (propertyData: SeedPropertyData) => ({
+    language: "en",
+    title: propertyData.title,
+    location: propertyData.location,
+    sizeLabel: propertyData.sizeLabel,
+    floorLabel: propertyData.floorLabel,
+    floors: propertyData.floors,
+    shortDescription: propertyData.shortDescription,
+    fullDescription: propertyData.fullDescription,
+    aboutProperty: propertyData.aboutProperty,
+});
+
+const normalizeSeedPropertyLanguage = (propertyData: SeedPropertyData) => {
+    const translations = propertyData.translations || [];
+    const serbianTranslation = translations.find(
+        (translation) => translation.language === "sr"
+    );
+
+    if (!serbianTranslation) {
+        return propertyData;
+    }
+
+    const englishTranslation = translations.some(
+        (translation) => translation.language === "en"
+    )
+        ? []
+        : [translationFromBaseProperty(propertyData)];
+
+    return {
+        ...propertyData,
+        title: serbianTranslation.title || propertyData.title,
+        location: {
+            ...propertyData.location,
+            ...(serbianTranslation.location || {}),
+        },
+        sizeLabel: serbianTranslation.sizeLabel || propertyData.sizeLabel,
+        floorLabel: serbianTranslation.floorLabel || propertyData.floorLabel,
+        floors: serbianTranslation.floors || propertyData.floors,
+        shortDescription: serbianTranslation.shortDescription || propertyData.shortDescription,
+        fullDescription: serbianTranslation.fullDescription || propertyData.fullDescription,
+        aboutProperty: serbianTranslation.aboutProperty || propertyData.aboutProperty,
+        translations: [
+            ...englishTranslation,
+            ...translations.filter((translation) => translation.language !== "sr"),
+        ],
+    };
+};
+
 const seedProperties = async () => {
     await connectDB();
 
     for (const propertyData of properties) {
-        const slug = slugifyText(propertyData.title);
+        const normalizedPropertyData = normalizeSeedPropertyLanguage(propertyData);
+        const slug = slugifyText(normalizedPropertyData.title);
 
         await Property.findOneAndUpdate(
-            { publicId: propertyData.publicId },
+            { publicId: normalizedPropertyData.publicId },
             {
-                ...propertyData,
+                ...normalizedPropertyData,
                 slug,
             },
             {
@@ -255,7 +330,7 @@ const seedProperties = async () => {
             }
         );
 
-        console.log(`Seeded property: ${propertyData.title}`);
+        console.log(`Seeded property: ${normalizedPropertyData.title}`);
     }
 
     await mongoose.disconnect();

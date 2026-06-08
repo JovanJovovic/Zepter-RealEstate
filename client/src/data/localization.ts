@@ -430,7 +430,7 @@ const en = {
       addTranslation: "Add translation",
       removeTranslation: "Remove translation",
       englishHelp:
-        "English is edited in the main fields above. Other languages override only the fields filled here.",
+        "Serbian is edited in the main fields above. English and other languages override only the fields filled here.",
       addHelp:
         "Add this language first, then fill only the translated fields you need.",
       translatedTitle: "Translated title",
@@ -896,7 +896,7 @@ const sr: typeof en = {
       addTranslation: "Dodaj prevod",
       removeTranslation: "Ukloni prevod",
       englishHelp:
-        "Engleski se uređuje u glavnim poljima iznad. Ostali jezici menjaju samo popunjena polja.",
+        "Srpski se uredjuje u glavnim poljima iznad. Engleski i ostali jezici menjaju samo popunjena polja.",
       addHelp:
         "Prvo dodajte ovaj jezik, zatim popunite samo polja koja prevodite.",
       translatedTitle: "Preveden naziv",

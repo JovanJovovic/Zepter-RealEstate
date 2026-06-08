@@ -4,9 +4,9 @@ import {
   calculateAvailableArea,
 } from "./propertyAvailability.js";
 
-export const supportedLanguages: SupportedLanguage[] = ["en", "sr", "ru", "de"];
+export const supportedLanguages: SupportedLanguage[] = ["sr", "en", "ru", "de"];
 
-export const defaultLanguage: SupportedLanguage = "en";
+export const defaultLanguage: SupportedLanguage = "sr";
 
 export const normalizeLanguage = (value: unknown): SupportedLanguage => {
   const language = Array.isArray(value) ? value[0] : value;
@@ -47,6 +47,30 @@ export const localizeProperty = (property: IProperty, language: SupportedLanguag
       ...(propertyObject.translations || []).map((translation: IPropertyTranslation) => translation.language),
     ])
   );
+  const translation = propertyObject.translations?.find(
+    (item: IPropertyTranslation) => item.language === language
+  );
+
+  const applyTranslation = (item: IPropertyTranslation, resolvedLanguage: SupportedLanguage) => ({
+    ...propertyObject,
+    title: firstValue(item.title, propertyObject.title),
+    location: {
+      ...propertyObject.location,
+      ...(item.location || {}),
+    },
+    sizeLabel: firstValue(item.sizeLabel, propertyObject.sizeLabel),
+    floorLabel: firstValue(item.floorLabel, propertyObject.floorLabel),
+    floors: firstValue(item.floors, propertyObject.floors),
+    shortDescription: firstValue(item.shortDescription, propertyObject.shortDescription),
+    fullDescription: firstValue(item.fullDescription, propertyObject.fullDescription),
+    aboutProperty: firstValue(item.aboutProperty, propertyObject.aboutProperty),
+    language: resolvedLanguage,
+    availableLanguages,
+  });
+
+  if (translation) {
+    return applyTranslation(translation, language);
+  }
 
   if (language === defaultLanguage) {
     return {
@@ -56,33 +80,21 @@ export const localizeProperty = (property: IProperty, language: SupportedLanguag
     };
   }
 
-  const translation = propertyObject.translations?.find(
-    (item: IPropertyTranslation) => item.language === language
+  const defaultTranslation = propertyObject.translations?.find(
+    (item: IPropertyTranslation) => item.language === defaultLanguage
   );
 
-  if (!translation) {
+  if (defaultTranslation) {
     return {
-      ...propertyObject,
-      language: defaultLanguage,
+      ...applyTranslation(defaultTranslation, defaultLanguage),
       requestedLanguage: language,
-      availableLanguages,
     };
   }
 
   return {
     ...propertyObject,
-    title: firstValue(translation.title, propertyObject.title),
-    location: {
-      ...propertyObject.location,
-      ...(translation.location || {}),
-    },
-    sizeLabel: firstValue(translation.sizeLabel, propertyObject.sizeLabel),
-    floorLabel: firstValue(translation.floorLabel, propertyObject.floorLabel),
-    floors: firstValue(translation.floors, propertyObject.floors),
-    shortDescription: firstValue(translation.shortDescription, propertyObject.shortDescription),
-    fullDescription: firstValue(translation.fullDescription, propertyObject.fullDescription),
-    aboutProperty: firstValue(translation.aboutProperty, propertyObject.aboutProperty),
-    language,
+    language: defaultLanguage,
+    requestedLanguage: language,
     availableLanguages,
   };
 };

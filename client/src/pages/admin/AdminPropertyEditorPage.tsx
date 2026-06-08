@@ -138,40 +138,70 @@ const formTranslationFromProperty = (translation: PropertyTranslation): Translat
   aboutProperty: translation.aboutProperty || '',
 });
 
-const toStringNumber = (value?: number) => (value === undefined || value === null ? '' : String(value));
-
-const formFromProperty = (property: AdminPropertyPayload & { _id?: string; createdAt?: string; updatedAt?: string }): PropertyFormState => ({
+const formTranslationFromBaseProperty = (
+  property: AdminPropertyPayload & { _id?: string; createdAt?: string; updatedAt?: string },
+  language: SupportedLanguage
+): TranslationFormState => ({
+  language,
   title: property.title || '',
-  slug: property.slug || '',
-  publicId: property.publicId || '',
-  category: property.category || 'commercial',
-  status: property.status || 'draft',
-  isFeatured: Boolean(property.isFeatured),
-  types: property.types || [],
-  condition: property.condition || 'not-specified',
-  rooms: property.rooms || '',
-  sizeSqm: toStringNumber(property.sizeSqm),
-  occupancyPercentage: toStringNumber(property.occupancyPercentage ?? 0),
-  sizeLabel: property.sizeLabel || '',
-  floorLabel: property.floorLabel || '',
-  floorsText: property.floors?.join(', ') || '',
   city: property.location?.city || '',
   municipality: property.location?.municipality || '',
   fullLocation: property.location?.fullLocation || '',
   address: property.location?.address || '',
-  latitude: toStringNumber(property.location?.latitude),
-  longitude: toStringNumber(property.location?.longitude),
+  sizeLabel: property.sizeLabel || '',
+  floorLabel: property.floorLabel || '',
+  floorsText: property.floors?.join(', ') || '',
   shortDescription: property.shortDescription || '',
   fullDescription: property.fullDescription || '',
   aboutProperty: property.aboutProperty || '',
-  specialRequirements: property.specialRequirements || [],
-  images: property.images || [],
-  floorPlans: property.floorPlans || [],
-  videoUrl: property.videoUrl || '',
-  contactPhone: property.contactPhone || '+381 11 20 19 170',
-  contactEmail: property.contactEmail || 'realestate@zepter.rs',
-  translations: property.translations?.map(formTranslationFromProperty) || [],
 });
+
+const toStringNumber = (value?: number) => (value === undefined || value === null ? '' : String(value));
+
+const formFromProperty = (property: AdminPropertyPayload & { _id?: string; createdAt?: string; updatedAt?: string }): PropertyFormState => {
+  const translations = property.translations || [];
+  const serbianTranslation = translations.find((translation) => translation.language === 'sr');
+  const translationForms = translations
+    .filter((translation) => translation.language !== 'sr')
+    .map(formTranslationFromProperty);
+
+  if (serbianTranslation && !translations.some((translation) => translation.language === 'en')) {
+    translationForms.unshift(formTranslationFromBaseProperty(property, 'en'));
+  }
+
+  return {
+    title: serbianTranslation?.title || property.title || '',
+    slug: property.slug || '',
+    publicId: property.publicId || '',
+    category: property.category || 'commercial',
+    status: property.status || 'draft',
+    isFeatured: Boolean(property.isFeatured),
+    types: property.types || [],
+    condition: property.condition || 'not-specified',
+    rooms: property.rooms || '',
+    sizeSqm: toStringNumber(property.sizeSqm),
+    occupancyPercentage: toStringNumber(property.occupancyPercentage ?? 0),
+    sizeLabel: serbianTranslation?.sizeLabel || property.sizeLabel || '',
+    floorLabel: serbianTranslation?.floorLabel || property.floorLabel || '',
+    floorsText: (serbianTranslation?.floors?.length ? serbianTranslation.floors : property.floors)?.join(', ') || '',
+    city: serbianTranslation?.location?.city || property.location?.city || '',
+    municipality: serbianTranslation?.location?.municipality || property.location?.municipality || '',
+    fullLocation: serbianTranslation?.location?.fullLocation || property.location?.fullLocation || '',
+    address: serbianTranslation?.location?.address || property.location?.address || '',
+    latitude: toStringNumber(property.location?.latitude),
+    longitude: toStringNumber(property.location?.longitude),
+    shortDescription: serbianTranslation?.shortDescription || property.shortDescription || '',
+    fullDescription: serbianTranslation?.fullDescription || property.fullDescription || '',
+    aboutProperty: serbianTranslation?.aboutProperty || property.aboutProperty || '',
+    specialRequirements: property.specialRequirements || [],
+    images: property.images || [],
+    floorPlans: property.floorPlans || [],
+    videoUrl: property.videoUrl || '',
+    contactPhone: property.contactPhone || '+381 11 20 19 170',
+    contactEmail: property.contactEmail || 'realestate@zepter.rs',
+    translations: translationForms,
+  };
+};
 
 const numberOrUndefined = (value: string) => {
   const trimmed = value.trim();
@@ -237,7 +267,7 @@ const toPayload = (form: PropertyFormState): AdminPropertyPayload => {
     status: form.status,
     translations: form.translations
       .filter((translation) => {
-        if (translation.language === 'en') return false;
+        if (translation.language === 'sr') return false;
         return [
           translation.title,
           translation.city,
@@ -281,7 +311,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState<AdminMessage | null>(null);
-  const [activeTranslationLanguage, setActiveTranslationLanguage] = useState<SupportedLanguage>('sr');
+  const [activeTranslationLanguage, setActiveTranslationLanguage] = useState<SupportedLanguage>('en');
   const copy = getCopy(language).admin;
   const editorCopy = copy.editor;
   const categoryLabels = getCategoryLabels(language);
@@ -291,8 +321,8 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
   const localizedLanguageOptions =
     language === 'sr'
       ? [
-          { value: 'en' as const, label: 'Engleski' },
           { value: 'sr' as const, label: 'Srpski' },
+          { value: 'en' as const, label: 'Engleski' },
           { value: 'ru' as const, label: 'Ruski' },
           { value: 'de' as const, label: 'Nemački' },
         ]
@@ -362,7 +392,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
   const activeTranslation = form.translations.find((translation) => translation.language === activeTranslationLanguage);
 
   const addTranslation = (language: SupportedLanguage) => {
-    if (language === 'en') return;
+    if (language === 'sr') return;
 
     setForm((current) => {
       if (current.translations.some((translation) => translation.language === language)) return current;
@@ -722,7 +752,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
                 >
                   {localizedLanguageOptions.map((option) => (
                     <option key={option.value} value={option.value}>
-                      {option.label}{option.value === 'en' ? ` (${editorCopy.baseContent})` : ''}
+                      {option.label}{option.value === 'sr' ? ` (${editorCopy.baseContent})` : ''}
                     </option>
                   ))}
                 </select>
@@ -730,7 +760,7 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
               <div className="admin-translation-actions">
                 <button
                   type="button"
-                  disabled={activeTranslationLanguage === 'en' || Boolean(activeTranslation)}
+                  disabled={activeTranslationLanguage === 'sr' || Boolean(activeTranslation)}
                   onClick={() => addTranslation(activeTranslationLanguage)}
                 >
                   {editorCopy.addTranslation}
@@ -743,11 +773,11 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
               </div>
             </div>
 
-            {activeTranslationLanguage === 'en' && (
+            {activeTranslationLanguage === 'sr' && (
               <p className="admin-side-note">{editorCopy.englishHelp}</p>
             )}
 
-            {activeTranslationLanguage !== 'en' && !activeTranslation && (
+            {activeTranslationLanguage !== 'sr' && !activeTranslation && (
               <p className="admin-side-note">{editorCopy.addHelp}</p>
             )}
 

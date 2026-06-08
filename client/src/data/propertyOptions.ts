@@ -111,31 +111,31 @@ export const categoryLabels = {
   'project-development': 'Project in Development',
 };
 
-export const getPropertyTypeOptions = (language: SupportedLanguage = 'en') => {
+export const getPropertyTypeOptions = (language: SupportedLanguage = 'sr') => {
   const labels = propertyTypeLabels[language] || propertyTypeLabels.en;
   return propertyTypeOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
 };
 
-export const getConditionOptions = (language: SupportedLanguage = 'en') => {
+export const getConditionOptions = (language: SupportedLanguage = 'sr') => {
   const labels = conditionLabels[language] || conditionLabels.en;
   return conditionOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
 };
 
-export const getSpecialRequirementOptions = (language: SupportedLanguage = 'en') => {
+export const getSpecialRequirementOptions = (language: SupportedLanguage = 'sr') => {
   const labels = specialRequirementLabels[language] || specialRequirementLabels.en;
   return specialRequirementOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
 };
 
-export const getPublicSpecialRequirementOptions = (language: SupportedLanguage = 'en') => {
+export const getPublicSpecialRequirementOptions = (language: SupportedLanguage = 'sr') => {
   return getSpecialRequirementOptions(language).filter((option) => publicSpecialRequirementValues.includes(option.value));
 };
 
-export const getSizeOptions = (language: SupportedLanguage = 'en') => {
+export const getSizeOptions = (language: SupportedLanguage = 'sr') => {
   if (language !== 'sr') return sizeOptions;
   return sizeOptions.map((option, index) => ({ ...option, label: sizeLabelsSr[index] || option.label }));
 };
 
-export const getCategoryLabels = (language: SupportedLanguage = 'en') => {
+export const getCategoryLabels = (language: SupportedLanguage = 'sr') => {
   if (language === 'sr') {
     return {
       commercial: 'Komercijalne nekretnine',

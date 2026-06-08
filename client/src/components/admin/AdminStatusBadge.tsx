@@ -37,7 +37,7 @@ const labelFromValue = (value: string | boolean | undefined, language: Supported
   return String(value).replace(/-/g, ' ');
 };
 
-const AdminStatusBadge = ({ value, tone, language = 'en' }: AdminStatusBadgeProps) => {
+const AdminStatusBadge = ({ value, tone, language = 'sr' }: AdminStatusBadgeProps) => {
   const badgeTone = tone || toneFromValue(value);
 
   return <span className={`admin-status admin-status--${badgeTone}`}>{labelFromValue(value, language)}</span>;
