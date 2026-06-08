@@ -12,7 +12,7 @@ interface HomePageProps {
   language: SupportedLanguage;
 }
 
-const HERO_ROTATION_MS = 5000;
+const HERO_ROTATION_MS = 10000;
 
 type HeroSlide = {
   image: string;
@@ -116,7 +116,7 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
     }, HERO_ROTATION_MS);
 
     return () => window.clearInterval(timer);
-  }, [isHeroPaused, slides.length]);
+  }, [activeSlideIndex, isHeroPaused, slides.length]);
 
   useEffect(() => {
     setActiveSlideIndex(0);
@@ -155,7 +155,6 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
                   key={slide.title}
                   aria-hidden={index !== activeSlideIndex}
                 >
-                  <span className="eyebrow eyebrow--light">{slide.eyebrow}</span>
                   <h1>{slide.title}</h1>
                   <p>{slide.text}</p>
                 </div>
