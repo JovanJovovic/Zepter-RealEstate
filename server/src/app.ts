@@ -11,6 +11,8 @@ import adminUploadRoutes from "./routes/admin/adminUpload.routes.js";
 import adminPropertyRoutes from "./routes/admin/adminProperty.routes.js";
 import newsletterRoutes from "./routes/newsletter.routes.js";
 import adminNewsletterRoutes from "./routes/admin/adminNewsletter.routes.js";
+import assistantInquiryRoutes from "./routes/assistantInquiry.routes.js";
+import adminAssistantInquiryRoutes from "./routes/admin/adminAssistantInquiry.routes.js";
 
 
 
@@ -45,6 +47,8 @@ app.use("/api/admin/upload", adminUploadRoutes);
 app.use("/api/admin/properties", adminPropertyRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/admin/newsletter", adminNewsletterRoutes);
+app.use("/api/assistant-inquiries", assistantInquiryRoutes);
+app.use("/api/admin/assistant-inquiries", adminAssistantInquiryRoutes);
 
 app.use(errorHandler);
 

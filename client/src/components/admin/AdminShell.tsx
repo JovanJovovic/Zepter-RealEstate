@@ -24,6 +24,7 @@ const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLangua
   const navItems = [
     { label: copy.common.dashboard, path: '/admin' },
     { label: copy.common.properties, path: '/admin/properties' },
+    { label: copy.common.inquiries, path: '/admin/inquiries' },
     { label: copy.common.newsletter, path: '/admin/newsletter' },
   ];
   const localizedLanguageOptions =

@@ -1,10 +1,13 @@
 import type {
+  AssistantInquiryFiltersState,
+  AssistantInquiryStatus,
   AdminPropertiesQuery,
   AdminPropertyPayload,
   CurrentAdminResponse,
   LoginResponse,
   NewsletterFiltersState,
   PaginatedNewsletterResponse,
+  PaginatedAssistantInquiriesResponse,
   PaginatedPropertiesResponse,
   UploadFileResponse,
 } from '../types/admin';
@@ -130,6 +133,17 @@ export const uploadAdminFile = (file: File) => {
 
 export const getNewsletterSubscribers = (params: NewsletterFiltersState = {}) => {
   return adminRequest<PaginatedNewsletterResponse>(`${API_URL}/admin/newsletter${buildQuery(params)}`);
+};
+
+export const getAssistantInquiries = (params: AssistantInquiryFiltersState = {}) => {
+  return adminRequest<PaginatedAssistantInquiriesResponse>(`${API_URL}/admin/assistant-inquiries${buildQuery(params)}`);
+};
+
+export const updateAssistantInquiryStatus = (id: string, status: AssistantInquiryStatus) => {
+  return adminRequest<{ message: string }>(`${API_URL}/admin/assistant-inquiries/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
 };
 
 export const unsubscribeNewsletterSubscriber = (id: string) => {

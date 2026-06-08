@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import './App.css';
 import { getCurrentAdmin, logoutAdmin } from './api/admin';
 import AdminShell from './components/admin/AdminShell';
+import AssistantWidget from './components/AssistantWidget';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import LoadingState from './components/LoadingState';
@@ -9,6 +10,7 @@ import { defaultLanguage, normalizeLanguage } from './data/languages';
 import { getCopy } from './data/localization';
 import AboutPage from './pages/AboutPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminAssistantInquiriesPage from './pages/admin/AdminAssistantInquiriesPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminNewsletterPage from './pages/admin/AdminNewsletterPage';
 import AdminPropertiesPage from './pages/admin/AdminPropertiesPage';
@@ -118,6 +120,8 @@ function App() {
       content = <AdminPropertyEditorPage propertyId={propertyId} navigate={navigate} language={adminLanguage} />;
     } else if (currentPath === '/admin/newsletter') {
       content = <AdminNewsletterPage language={adminLanguage} />;
+    } else if (currentPath === '/admin/inquiries') {
+      content = <AdminAssistantInquiriesPage language={adminLanguage} />;
     }
 
     return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}>{content}</AdminShell>;
@@ -147,6 +151,7 @@ function App() {
       <Header currentPath={currentPath} navigate={navigate} language={language} onLanguageChange={setLanguage} />
       {publicPage}
       <Footer navigate={navigate} language={language} />
+      <AssistantWidget currentPath={currentPath} language={language} />
     </div>
   );
 }

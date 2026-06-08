@@ -15,11 +15,14 @@ const toneFromValue = (value?: string | boolean): AdminStatusBadgeProps['tone'] 
   if (value === 'archived') return 'archived';
   if (value === 'active') return 'active';
   if (value === 'inactive') return 'inactive';
+  if (value === 'answered') return 'active';
+  if (value === 'new' || value === 'in-progress') return 'neutral';
   return 'neutral';
 };
 
 const labelFromValue = (value: string | boolean | undefined, language: SupportedLanguage) => {
-  const copy = getCopy(language).admin.common;
+  const adminCopy = getCopy(language).admin;
+  const copy = adminCopy.common;
   if (value === true) return copy.featured;
   if (value === false) return copy.standard;
   if (!value) return copy.notSet;
@@ -28,6 +31,9 @@ const labelFromValue = (value: string | boolean | undefined, language: Supported
   if (value === 'archived') return copy.archived;
   if (value === 'active') return copy.active;
   if (value === 'inactive') return copy.inactive;
+  if (value === 'new') return adminCopy.assistantInquiries.statusNew;
+  if (value === 'in-progress') return adminCopy.assistantInquiries.statusInProgress;
+  if (value === 'answered') return adminCopy.assistantInquiries.statusAnswered;
   return String(value).replace(/-/g, ' ');
 };
 

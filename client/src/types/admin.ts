@@ -39,8 +39,34 @@ export interface NewsletterSubscriber {
   updatedAt: string;
 }
 
+export type AssistantInquiryStatus = 'new' | 'in-progress' | 'answered' | 'archived';
+
+export interface AssistantInquiry {
+  _id: string;
+  question: string;
+  email?: string | null;
+  phone?: string | null;
+  sourcePage?: string | null;
+  pageTitle?: string | null;
+  propertyId?: string | null;
+  propertyName?: string | null;
+  status: AssistantInquiryStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaginatedNewsletterResponse {
   items: NewsletterSubscriber[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface PaginatedAssistantInquiriesResponse {
+  items: AssistantInquiry[];
   pagination: {
     total: number;
     page: number;
@@ -52,6 +78,13 @@ export interface PaginatedNewsletterResponse {
 export interface NewsletterFiltersState {
   search?: string;
   status?: '' | 'active' | 'inactive';
+  page?: number;
+  limit?: number;
+}
+
+export interface AssistantInquiryFiltersState {
+  search?: string;
+  status?: '' | AssistantInquiryStatus;
   page?: number;
   limit?: number;
 }
