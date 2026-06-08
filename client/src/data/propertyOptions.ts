@@ -87,6 +87,8 @@ export const specialRequirementOptions = [
   { value: 'water', label: 'Water' },
 ];
 
+const publicSpecialRequirementValues = ['parking', 'invalid-access', 'video-surveillance', 'security'];
+
 const specialRequirementLabels: Record<SupportedLanguage, Record<string, string>> = {
   en: Object.fromEntries(specialRequirementOptions.map((option) => [option.value, option.label])),
   sr: {
@@ -122,6 +124,10 @@ export const getConditionOptions = (language: SupportedLanguage = 'en') => {
 export const getSpecialRequirementOptions = (language: SupportedLanguage = 'en') => {
   const labels = specialRequirementLabels[language] || specialRequirementLabels.en;
   return specialRequirementOptions.map((option) => ({ ...option, label: labels[option.value] || option.label }));
+};
+
+export const getPublicSpecialRequirementOptions = (language: SupportedLanguage = 'en') => {
+  return getSpecialRequirementOptions(language).filter((option) => publicSpecialRequirementValues.includes(option.value));
 };
 
 export const getSizeOptions = (language: SupportedLanguage = 'en') => {

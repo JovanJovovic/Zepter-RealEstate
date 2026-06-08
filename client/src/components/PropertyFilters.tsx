@@ -3,9 +3,8 @@ import type { FormEvent } from 'react';
 import type { PropertyFiltersState } from '../types/property';
 import {
   getConditionOptions,
+  getPublicSpecialRequirementOptions,
   getPropertyTypeOptions,
-  getSizeOptions,
-  getSpecialRequirementOptions,
   roomOptions,
 } from '../data/propertyOptions';
 import type { SupportedLanguage } from '../types/property';
@@ -13,28 +12,55 @@ import { getCopy } from '../data/localization';
 
 interface PropertyFiltersProps {
   initialFilters: PropertyFiltersState;
-  locations: string[];
+  locations: LocationFilterOption[];
   onApply: (filters: PropertyFiltersState) => void;
   onReset: () => void;
   mode?: 'commercial' | 'projects';
   language: SupportedLanguage;
 }
 
+export interface LocationFilterOption {
+  key: string;
+  label: string;
+  city: string;
+  municipality: string;
+}
+
 const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = 'commercial', language }: PropertyFiltersProps) => {
   const [filters, setFilters] = useState<PropertyFiltersState>(initialFilters);
   const propertyTypeOptions = getPropertyTypeOptions(language);
   const conditionOptions = getConditionOptions(language);
-  const specialRequirementOptions = getSpecialRequirementOptions(language);
-  const sizeOptions = getSizeOptions(language);
+  const specialRequirementOptions = getPublicSpecialRequirementOptions(language);
   const copy = getCopy(language);
 
   const locationOptions = useMemo(() => {
-    const unique = Array.from(new Set(locations.filter(Boolean)));
-    return unique.sort((a, b) => a.localeCompare(b));
+    return [...locations].sort((a, b) => a.label.localeCompare(b.label));
   }, [locations]);
+
+  const selectedLocationKey =
+    filters.city && filters.municipality
+      ? `${filters.city.trim().toLowerCase()}|${filters.municipality.trim().toLowerCase()}`
+      : '';
 
   const setValue = (key: keyof PropertyFiltersState, value: string) => {
     setFilters((current) => ({ ...current, [key]: value, page: 1 }));
+  };
+
+  const setLocation = (locationKey: string) => {
+    const selectedLocation = locationOptions.find((option) => option.key === locationKey);
+
+    setFilters((current) => ({
+      ...current,
+      city: selectedLocation?.city || undefined,
+      municipality: selectedLocation?.municipality || undefined,
+      location: undefined,
+      page: 1,
+    }));
+  };
+
+  const setPositiveNumberValue = (key: 'minAvailableArea' | 'maxAvailableArea', value: string) => {
+    if (value && !/^\d*\.?\d*$/.test(value)) return;
+    setValue(key, value);
   };
 
   const toggleRequirement = (value: string) => {
@@ -48,23 +74,10 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
     });
   };
 
-  const handleSizeChange = (value: string) => {
-    const option = sizeOptions.find((item) => item.label === value);
-
-    setFilters((current) => ({
-      ...current,
-      minSize: option?.min || '',
-      maxSize: option?.max || '',
-      page: 1,
-    }));
-  };
-
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     onApply(filters);
   };
-
-  const selectedSize = sizeOptions.find((item) => item.min === filters.minSize && item.max === filters.maxSize)?.label || '';
 
   return (
     <aside className="filters-panel">
@@ -103,26 +116,50 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
         <div className="field-grid">
           <div className="field-group">
             <label htmlFor="location">{copy.filters.location}</label>
-            <select id="location" value={filters.location || ''} onChange={(event) => setValue('location', event.target.value)}>
+            <select id="location" value={selectedLocationKey} onChange={(event) => setLocation(event.target.value)}>
               <option value="">{copy.filters.allLocations}</option>
               {locationOptions.map((location) => (
-                <option key={location} value={location}>
-                  {location}
+                <option key={location.key} value={location.key}>
+                  {location.label}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="field-group">
-            <label htmlFor="size">{copy.filters.availableArea}</label>
-            <select id="size" value={selectedSize} onChange={(event) => handleSizeChange(event.target.value)}>
-              <option value="">{copy.filters.anySize}</option>
-              {sizeOptions.map((option) => (
-                <option key={option.label} value={option.label}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <label>{copy.filters.availableArea}</label>
+            <div className="area-range-fields">
+              <label>
+                <span>{copy.filters.from}</span>
+                <div className="area-range-input">
+                  <input
+                    aria-label={`${copy.filters.availableArea} ${copy.filters.from}`}
+                    inputMode="decimal"
+                    min="0"
+                    type="number"
+                    value={filters.minAvailableArea || ''}
+                    placeholder={copy.filters.from}
+                    onChange={(event) => setPositiveNumberValue('minAvailableArea', event.target.value)}
+                  />
+                  <small>{copy.filters.sqm}</small>
+                </div>
+              </label>
+              <label>
+                <span>{copy.filters.to}</span>
+                <div className="area-range-input">
+                  <input
+                    aria-label={`${copy.filters.availableArea} ${copy.filters.to}`}
+                    inputMode="decimal"
+                    min="0"
+                    type="number"
+                    value={filters.maxAvailableArea || ''}
+                    placeholder={copy.filters.to}
+                    onChange={(event) => setPositiveNumberValue('maxAvailableArea', event.target.value)}
+                  />
+                  <small>{copy.filters.sqm}</small>
+                </div>
+              </label>
+            </div>
           </div>
 
           <div className="field-group">

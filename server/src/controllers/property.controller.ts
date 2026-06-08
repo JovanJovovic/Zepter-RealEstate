@@ -28,6 +28,26 @@ const parsePositiveNumber = (value: unknown): number | undefined => {
   return parsed;
 };
 
+const escapeRegex = (value: string) => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
+const parseLegacyLocation = (value: unknown) => {
+  if (!value || Array.isArray(value)) return {};
+
+  const parts = String(value)
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length < 2) return {};
+
+  return {
+    city: parts[0],
+    municipality: parts[1],
+  };
+};
+
 const buildPropertyAvailabilityData = (
   data: Record<string, unknown>,
   existingProperty?: { sizeSqm?: number; occupancyPercentage?: number }
@@ -50,10 +70,14 @@ const buildPropertyFilter = (query: Request["query"]) => {
   const {
     category,
     type,
+    city,
+    municipality,
     location,
     condition,
     rooms,
     specialRequirement,
+    minAvailableArea,
+    maxAvailableArea,
     minSize,
     maxSize,
     status = "published",
@@ -77,9 +101,20 @@ const buildPropertyFilter = (query: Request["query"]) => {
     filter.types = { $in: types };
   }
 
-  if (location) {
-    filter["location.fullLocation"] = {
-      $regex: String(location),
+  const legacyLocation = parseLegacyLocation(location);
+  const selectedCity = city || legacyLocation.city;
+  const selectedMunicipality = municipality || legacyLocation.municipality;
+
+  if (selectedCity) {
+    filter["location.city"] = {
+      $regex: `^\\s*${escapeRegex(String(selectedCity).trim())}\\s*$`,
+      $options: "i",
+    };
+  }
+
+  if (selectedMunicipality) {
+    filter["location.municipality"] = {
+      $regex: `^\\s*${escapeRegex(String(selectedMunicipality).trim())}\\s*$`,
       $options: "i",
     };
   }
@@ -102,18 +137,20 @@ const buildPropertyFilter = (query: Request["query"]) => {
     };
   }
 
-  const parsedMinSize = parsePositiveNumber(minSize);
-  const parsedMaxSize = parsePositiveNumber(maxSize);
+  const parsedMinAvailableArea = parsePositiveNumber(minAvailableArea ?? minSize);
+  const parsedMaxAvailableArea = parsePositiveNumber(maxAvailableArea ?? maxSize);
 
-  if (parsedMinSize !== undefined || parsedMaxSize !== undefined) {
+  if (parsedMinAvailableArea !== undefined || parsedMaxAvailableArea !== undefined) {
     const availableAreaRange: Record<string, number> = {};
 
-    if (parsedMinSize !== undefined) {
-      availableAreaRange.$gte = parsedMinSize;
+    if (parsedMinAvailableArea !== undefined) {
+      availableAreaRange.$gte = parsedMinAvailableArea;
+    } else if (parsedMaxAvailableArea !== undefined) {
+      availableAreaRange.$gte = 0;
     }
 
-    if (parsedMaxSize !== undefined) {
-      availableAreaRange.$lte = parsedMaxSize;
+    if (parsedMaxAvailableArea !== undefined) {
+      availableAreaRange.$lte = parsedMaxAvailableArea;
     }
 
     filter.$and = [

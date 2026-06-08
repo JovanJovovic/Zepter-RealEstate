@@ -5,6 +5,7 @@ import LoadingState from '../components/LoadingState';
 import PageHero from '../components/PageHero';
 import PropertyCard from '../components/PropertyCard';
 import PropertyFilters from '../components/PropertyFilters';
+import type { LocationFilterOption } from '../components/PropertyFilters';
 import { getCopy } from '../data/localization';
 import type { PaginatedPropertiesResponse, Property, PropertyFiltersState, SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
@@ -25,6 +26,36 @@ const defaultResponse: PaginatedPropertiesResponse = {
   },
 };
 
+const normalizeLocationPart = (value?: string) => value?.trim().replace(/\s+/g, ' ') || '';
+
+const getLocationKey = (city: string, municipality: string) => {
+  return `${city.trim().toLowerCase()}|${municipality.trim().toLowerCase()}`;
+};
+
+const buildLocationOptions = (properties: Property[]): LocationFilterOption[] => {
+  const options = new Map<string, LocationFilterOption>();
+
+  properties.forEach((property) => {
+    const city = normalizeLocationPart(property.location.city);
+    const municipality = normalizeLocationPart(property.location.municipality);
+
+    if (!city || !municipality) return;
+
+    const key = getLocationKey(city, municipality);
+
+    if (!options.has(key)) {
+      options.set(key, {
+        key,
+        label: `${city}, ${municipality}`,
+        city,
+        municipality,
+      });
+    }
+  });
+
+  return Array.from(options.values()).sort((a, b) => a.label.localeCompare(b.label));
+};
+
 const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesPageProps) => {
   const initialFilters: PropertyFiltersState = useMemo(
     () => ({
@@ -38,7 +69,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
 
   const [filters, setFilters] = useState<PropertyFiltersState>(initialFilters);
   const [data, setData] = useState<PaginatedPropertiesResponse>(defaultResponse);
-  const [allLocations, setAllLocations] = useState<string[]>([]);
+  const [allLocations, setAllLocations] = useState<LocationFilterOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const copy = getCopy(language);
@@ -74,7 +105,7 @@ const PropertiesPage = ({ navigate, mode = 'commercial', language }: PropertiesP
   useEffect(() => {
     getProperties({ category: mode === 'projects' ? 'project-development' : 'commercial', language, limit: 100 })
       .then((response) => {
-        setAllLocations(response.items.map((item: Property) => item.location.fullLocation));
+        setAllLocations(buildLocationOptions(response.items));
       })
       .catch(() => setAllLocations([]));
   }, [mode, language]);

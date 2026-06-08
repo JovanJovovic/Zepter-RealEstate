@@ -109,9 +109,13 @@ export interface PaginatedPropertiesResponse {
 export interface PropertyFiltersState {
   category?: PropertyCategory;
   type?: string;
+  city?: string;
+  municipality?: string;
   location?: string;
   condition?: string;
   rooms?: string;
+  minAvailableArea?: string;
+  maxAvailableArea?: string;
   minSize?: string;
   maxSize?: string;
   specialRequirement?: string[];
