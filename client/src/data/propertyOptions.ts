@@ -1,7 +1,6 @@
 import type { PropertyCondition, PropertyType, SupportedLanguage } from '../types/property';
 
 export const propertyTypeOptions: Array<{ value: PropertyType; label: string }> = [
-  { value: 'houses', label: 'Houses' },
   { value: 'retails', label: 'Retails' },
   { value: 'offices', label: 'Offices' },
   { value: 'warehouses', label: 'Warehouses' },

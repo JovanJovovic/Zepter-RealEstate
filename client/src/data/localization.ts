@@ -483,14 +483,14 @@ const sr: typeof en = {
   home: {
     eyebrow: "Dobrodošli u Zepter Real Estate",
     title: "Regionalni portfolio nekretnina sa premium poslovnim standardom.",
-    text: "Težimo tome da kroz efikasne i pouzdane transakcije ostvarimo korist za obe strane i izgradimo dugoročnu saradnju sa klijentima.",
+    text: "Kroz efikasne i pouzdane transakcije ostvarujemo zajedničku korist i gradimo dugoročnu saradnju sa našim klijentima.",
     explore: "Istraži nekretnine",
     about: "O ZRE",
     statPortfolio: "m² portfolija",
     statSince: "Od 2008.",
     statSinceText: "vlasništvo, upravljanje i razvoj",
     introEyebrow: "Real estate · Real deal",
-    introTitle: "Jedan od najvećih portfolija nekretnina u Srbiji.",
+    introTitle: "Jedan od lidera u upravljanju i razvoju reprezentativnih nekretnina u Srbiji.",
     introText:
       "Zepter Real Estate poseduje, upravlja i razvija stambene, maloprodajne, komercijalne, kancelarijske, industrijske i mešovite nekretnine. Naš rad je usmeren na aktiviranje potencijala nekretnina kroz zakup, prodaju i dugoročnu vrednost portfolija.",
     featuredEyebrow: "Izdvojeni portfolio",
@@ -504,10 +504,10 @@ const sr: typeof en = {
       "Naš tim pruža profesionalnu, informativnu, lojalnu i posvećenu uslugu na tržištu, uz dugoročan pogled na odnose sa klijentima i razvoj portfolija.",
     commercialSpaces: "Komercijalni prostori",
     commercialSpacesText:
-      "Kancelarije, lokali, magacini, industrijske nekretnine i mešovite lokacije.",
+      "Strateški pozicionirani prostori za najviši nivo poslovanja (kancelarije, lokali, magacini, industrijske nekretnine i mešovite lokacje) .",
     portfolioManagement: "Upravljanje portfolijom",
     portfolioManagementText:
-      "Procena potencijala nekretnina, aktiviranje kroz zakup i prodaju i dugoročna briga o imovini.",
+      "Maksimizacija vrednosti i dugoročna stabilnost vašeg portfolija (procene, prodaja, briga o imovini…).",
     clientRelationships: "Odnosi sa klijentima",
     clientRelationshipsText:
       "Efikasne transakcije, zadovoljstvo klijenata i pouzdana saradnja od početka do kraja.",
@@ -517,19 +517,19 @@ const sr: typeof en = {
   },
   about: {
     eyebrow: "O Zepter Real Estate",
-    title: "Sveobuhvatna regionalna kompanija za nekretnine.",
+    title: "Regionalna kompanija koja postavlja standarde u svetu nekretnina.",
     text: "Spajamo obim portfolija, profesionalnu uslugu i dugoročan pristup vrednosti nekretnina.",
     blocks: [
       {
         eyebrow: "Ko smo mi",
         title:
           "Kompanija sa jednim od najvećih portfolija nekretnina u Srbiji.",
-        text: "Gradimo dugoročne odnose sa klijentima pružajući najbolja moguća rešenja za njihove potrebe. Zepter Real Estate je deo Zepter Grupe u Srbiji.",
+        text: "Pružamo najbolja moguća rešenja za potrebe klijenata, gradeći odnose zasnovane na poverenju i stabilnosti.",
       },
       {
         eyebrow: "Šta radimo",
         title: "Vlasništvo, upravljanje i razvoj nekretnina visoke vrednosti.",
-        text: "Osnovan 2008. godine, Zepter Real Estate poseduje, upravlja i razvija jedan od najvećih stambenih, maloprodajnih, komercijalnih, kancelarijskih, industrijskih i mešovitih portfolija u Srbiji. Kompanija nastavlja da kupuje i razvija kvalitetne nekretnine zasnovane na realnim vrednostima.",
+        text: "Od 2008. godine, Zepter Real Estate razvija i upravlja jednim od najznačajnijih portfolija nekretnina u Srbiji.",
       },
       {
         eyebrow: "Portfolio",
@@ -571,7 +571,7 @@ const sr: typeof en = {
     next: "Sledeća",
   },
   filters: {
-    refine: "Preciziraj pretragu",
+    refine: "Napredna pretraga",
     projectFilters: "Filteri za projekte",
     commercialFilters: "Filteri za komercijalne nekretnine",
     search: "Pretraga",
@@ -632,8 +632,8 @@ const sr: typeof en = {
   },
   contact: {
     eyebrow: "Kontakt",
-    title: "Real estate · Real deal",
-    text: "Kontaktirajte Zepter Real Estate za informacije o portfoliju, komercijalnim prostorima i razvojnim mogućnostima.",
+    title: "Real estate · Real Value",
+    text: "Pronađite idealan prostor za vaše poslovanje ili razvojne mogućnosti u našem portfoliju.",
     getInTouch: "Kontaktirajte nas",
     hours: "Pon - Pet / 09:00 - 17:00",
     located: "Nalazimo se na adresi:",

@@ -12,7 +12,7 @@ interface HomePageProps {
   language: SupportedLanguage;
 }
 
-const HERO_ROTATION_MS = 10000;
+const HERO_ROTATION_MS = 6000;
 
 type HeroSlide = {
   image: string;
@@ -103,20 +103,17 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [isHeroPaused, setIsHeroPaused] = useState(false);
   const copy = getCopy(language);
   const slides = language === 'sr' ? heroSlides.sr : heroSlides.en;
   const activeSlide = slides[activeSlideIndex];
 
   useEffect(() => {
-    if (isHeroPaused) return undefined;
-
     const timer = window.setInterval(() => {
       setActiveSlideIndex((current) => (current + 1) % slides.length);
     }, HERO_ROTATION_MS);
 
     return () => window.clearInterval(timer);
-  }, [activeSlideIndex, isHeroPaused, slides.length]);
+  }, [slides.length]);
 
   useEffect(() => {
     setActiveSlideIndex(0);
@@ -144,7 +141,7 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
 
   return (
     <main>
-      <section className="home-hero" onMouseEnter={() => setIsHeroPaused(true)} onMouseLeave={() => setIsHeroPaused(false)}>
+      <section className="home-hero">
         <div className="home-hero__bg" />
         <div className="container home-hero__grid">
           <div className="home-hero__content reveal-on-load">
