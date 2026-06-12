@@ -25,6 +25,418 @@
   overflow-x: hidden;
 }
 
+.app-shell:not(.app-shell--admin) {
+  --blue-950: #1f1b17;
+  --blue-900: #2a2622;
+  --blue-800: #332d27;
+  --blue-700: #b8913f;
+  --blue-600: #9a742b;
+  --blue-500: #c29b42;
+  --blue-100: #fff9ee;
+  --gold: #b8913f;
+  --gold-soft: #f7f1e6;
+  --ink: #1f1b17;
+  --muted: #6b6258;
+  --line: #e8decc;
+  --shadow: 0 24px 70px rgba(31, 27, 23, 0.12);
+  --shadow-soft: 0 16px 42px rgba(31, 27, 23, 0.08);
+  color: #1f1b17;
+  background:
+    radial-gradient(circle at top left, rgba(194, 155, 66, 0.15), transparent 30rem),
+    linear-gradient(180deg, #fff9ee 0%, #ffffff 42%, #f5efe3 100%);
+}
+
+.app-shell:not(.app-shell--admin) .btn--primary {
+  background: #b8913f;
+  box-shadow: 0 14px 30px rgba(184, 145, 63, 0.32);
+}
+
+.app-shell:not(.app-shell--admin) .btn--primary:hover {
+  background: #9a742b;
+  box-shadow: 0 18px 36px rgba(154, 116, 43, 0.34);
+}
+
+.app-shell:not(.app-shell--admin) .btn--ghost {
+  color: #1f1b17;
+  background: #fff9ee;
+  border-color: rgba(184, 145, 63, 0.34);
+}
+
+.app-shell:not(.app-shell--admin) .btn--ghost:hover {
+  color: #fff;
+  background: #b8913f;
+  border-color: #b8913f;
+  box-shadow: 0 14px 28px rgba(184, 145, 63, 0.24);
+}
+
+.app-shell:not(.app-shell--admin) .btn--light:hover {
+  background: rgba(255, 249, 238, 0.72);
+  border-color: rgba(184, 145, 63, 0.34);
+}
+
+.app-shell:not(.app-shell--admin) .site-header--scrolled {
+  background: rgba(255, 249, 238, 0.94);
+  box-shadow: 0 18px 44px rgba(31, 27, 23, 0.1);
+}
+
+.app-shell:not(.app-shell--admin) .header-inner {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(232, 222, 204, 0.95);
+  box-shadow: 0 16px 44px rgba(31, 27, 23, 0.1);
+}
+
+.app-shell:not(.app-shell--admin) .nav-link,
+.app-shell:not(.app-shell--admin) .language-select {
+  color: #332d27;
+}
+
+.app-shell:not(.app-shell--admin) .nav-link:hover,
+.app-shell:not(.app-shell--admin) .nav-link--active {
+  color: #b8913f;
+  background: rgba(184, 145, 63, 0.14);
+}
+
+.app-shell:not(.app-shell--admin) .language-select select {
+  color: #1f1b17;
+  border-color: #e8decc;
+}
+
+.app-shell:not(.app-shell--admin) .menu-toggle span {
+  background: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .home-hero {
+  color: #1f1b17;
+  background:
+    radial-gradient(circle at 74% 18%, rgba(201, 74, 63, 0.12), transparent 22rem),
+    radial-gradient(circle at 85% 72%, rgba(194, 155, 66, 0.26), transparent 26rem),
+    linear-gradient(135deg, #fff9ee 0%, #f7f1e6 46%, #efe5d4 100%);
+}
+
+.app-shell:not(.app-shell--admin) .home-hero__bg {
+  background:
+    radial-gradient(circle at 15% 22%, rgba(255, 255, 255, 0.54), transparent 24rem),
+    radial-gradient(circle at 84% 18%, rgba(184, 145, 63, 0.28), transparent 22rem),
+    radial-gradient(circle at 82% 72%, rgba(184, 58, 50, 0.1), transparent 18rem),
+    linear-gradient(120deg, rgba(184, 145, 63, 0.09) 0 1px, transparent 1px 80px);
+}
+
+.app-shell:not(.app-shell--admin) .home-hero::after {
+  background: #fff9ee;
+}
+
+.app-shell:not(.app-shell--admin) .home-hero__content p {
+  color: #6b6258;
+}
+
+.app-shell:not(.app-shell--admin) .home-hero .btn--light {
+  color: #1f1b17;
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(184, 145, 63, 0.3);
+}
+
+.app-shell:not(.app-shell--admin) .home-hero .btn--light:hover {
+  color: #fff;
+  background: #b8913f;
+  border-color: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .hero-stat {
+  background: rgba(251, 247, 239, 0.96);
+  border: 1px solid #e6d7b8;
+  box-shadow: 0 18px 44px rgba(31, 27, 23, 0.14);
+}
+
+.app-shell:not(.app-shell--admin) .hero-stat strong {
+  color: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .hero-stat span {
+  color: #5f564d;
+}
+
+.app-shell:not(.app-shell--admin) .hero-slider-dot:hover,
+.app-shell:not(.app-shell--admin) .hero-slider-dot--active {
+  background: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .hero-slider-dot {
+  background: rgba(184, 145, 63, 0.26);
+}
+
+.app-shell:not(.app-shell--admin) .featured-section {
+  background: linear-gradient(180deg, rgba(247, 241, 230, 0.86), rgba(255, 255, 255, 0));
+}
+
+.app-shell:not(.app-shell--admin) .property-card,
+.app-shell:not(.app-shell--admin) .filters-panel,
+.app-shell:not(.app-shell--admin) .properties-toolbar,
+.app-shell:not(.app-shell--admin) .loading-state,
+.app-shell:not(.app-shell--admin) .empty-state,
+.app-shell:not(.app-shell--admin) .details-card,
+.app-shell:not(.app-shell--admin) .details-sidebar__card,
+.app-shell:not(.app-shell--admin) .contact-card,
+.app-shell:not(.app-shell--admin) .map-card,
+.app-shell:not(.app-shell--admin) .assistant-panel {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: #e8decc;
+  box-shadow: var(--shadow-soft);
+}
+
+.app-shell:not(.app-shell--admin) .property-card:hover {
+  border-color: rgba(184, 145, 63, 0.55);
+  box-shadow: var(--shadow);
+}
+
+.app-shell:not(.app-shell--admin) .property-card__meta span,
+.app-shell:not(.app-shell--admin) .details-tags span,
+.app-shell:not(.app-shell--admin) .filter-chip,
+.app-shell:not(.app-shell--admin) .requirement-toggle {
+  color: #9a742b;
+  background: #f7f1e6;
+  border-color: rgba(184, 145, 63, 0.28);
+}
+
+.app-shell:not(.app-shell--admin) .property-card__facts span,
+.app-shell:not(.app-shell--admin) .area-range-fields span,
+.app-shell:not(.app-shell--admin) .assistant-message {
+  color: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .loading-state span {
+  border-color: rgba(184, 145, 63, 0.18);
+  border-top-color: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .service-card {
+  background: #fbf7ef;
+  border-color: #e6d7b8;
+}
+
+.app-shell:not(.app-shell--admin) .service-card h3 {
+  color: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .service-card p {
+  color: #5f564d;
+}
+
+.app-shell:not(.app-shell--admin) .service-card--large,
+.app-shell:not(.app-shell--admin) .newsletter-card,
+.app-shell:not(.app-shell--admin) .values-band,
+.app-shell:not(.app-shell--admin) .details-sidebar__card--accent,
+.app-shell:not(.app-shell--admin) .contact-card--main,
+.app-shell:not(.app-shell--admin) .assistant-panel__header {
+  color: #1f1b17;
+  background:
+    radial-gradient(circle at 92% 12%, rgba(201, 74, 63, 0.12), transparent 20rem),
+    linear-gradient(135deg, #fff9ee 0%, #f7f1e6 44%, #c29b42 150%);
+}
+
+.app-shell:not(.app-shell--admin) .service-card--large h2,
+.app-shell:not(.app-shell--admin) .newsletter-card h2,
+.app-shell:not(.app-shell--admin) .contact-card--main h2,
+.app-shell:not(.app-shell--admin) .details-sidebar__card--accent h2 {
+  color: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .service-card--large p,
+.app-shell:not(.app-shell--admin) .newsletter-card p,
+.app-shell:not(.app-shell--admin) .newsletter-form label,
+.app-shell:not(.app-shell--admin) .contact-hours,
+.app-shell:not(.app-shell--admin) .details-sidebar__card--accent p {
+  color: #6b6258;
+}
+
+.app-shell:not(.app-shell--admin) .newsletter-input-row {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(184, 145, 63, 0.28);
+}
+
+.app-shell:not(.app-shell--admin) .newsletter-input-row input {
+  color: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .newsletter-input-row input::placeholder {
+  color: #756b60;
+}
+
+.app-shell:not(.app-shell--admin) .contact-list a,
+.app-shell:not(.app-shell--admin) .address-box {
+  color: #1f1b17;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.app-shell:not(.app-shell--admin) .address-box span {
+  color: #756b60;
+}
+
+.app-shell:not(.app-shell--admin) .details-sidebar__card--accent a {
+  color: #9a742b;
+}
+
+.app-shell:not(.app-shell--admin) .assistant-panel__header button {
+  color: #9a742b;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.app-shell:not(.app-shell--admin) .page-hero {
+  background: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .page-hero__overlay {
+  background:
+    linear-gradient(90deg, rgba(31, 27, 23, 0.72), rgba(31, 27, 23, 0.34)),
+    linear-gradient(180deg, rgba(31, 27, 23, 0.16), rgba(31, 27, 23, 0.78));
+}
+
+.app-shell:not(.app-shell--admin) .properties-layout-section,
+.app-shell:not(.app-shell--admin) .property-details-section {
+  background: linear-gradient(180deg, #fff9ee 0%, #f5efe3 100%);
+}
+
+.app-shell:not(.app-shell--admin) .field-group input:focus,
+.app-shell:not(.app-shell--admin) .field-group select:focus,
+.app-shell:not(.app-shell--admin) .area-range-input:focus-within,
+.app-shell:not(.app-shell--admin) .assistant-form textarea:focus,
+.app-shell:not(.app-shell--admin) .assistant-form input:focus {
+  border-color: #b8913f;
+  box-shadow: 0 0 0 4px rgba(184, 145, 63, 0.16);
+}
+
+.app-shell:not(.app-shell--admin) .filter-chip--active,
+.app-shell:not(.app-shell--admin) .requirement-toggle--active,
+.app-shell:not(.app-shell--admin) .pagination__number--active {
+  color: #fff;
+  border-color: #b8913f;
+  background: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .values-grid div,
+.app-shell:not(.app-shell--admin) .details-quick-facts div {
+  background: rgba(251, 247, 239, 0.96);
+  border-color: #e6d7b8;
+  box-shadow: 0 14px 34px rgba(31, 27, 23, 0.1);
+}
+
+.app-shell:not(.app-shell--admin) .values-grid strong,
+.app-shell:not(.app-shell--admin) .details-quick-facts strong {
+  color: #1f1b17;
+}
+
+.app-shell:not(.app-shell--admin) .values-grid span,
+.app-shell:not(.app-shell--admin) .details-quick-facts span {
+  color: #5f564d;
+}
+
+.app-shell:not(.app-shell--admin) .property-details-intro {
+  background:
+    radial-gradient(circle at 8% 18%, rgba(194, 155, 66, 0.18), transparent 24rem),
+    radial-gradient(circle at 90% 16%, rgba(184, 58, 50, 0.08), transparent 18rem),
+    linear-gradient(180deg, #fff9ee 0%, #f7f1e6 100%);
+}
+
+.app-shell:not(.app-shell--admin) .property-details-intro__pattern {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(194, 155, 66, 0.16), transparent 22rem),
+    linear-gradient(120deg, rgba(184, 145, 63, 0.08) 0 1px, transparent 1px 76px);
+}
+
+.app-shell:not(.app-shell--admin) .property-details-intro__content p {
+  color: #6b6258;
+}
+
+.app-shell:not(.app-shell--admin) .property-gallery-card__image,
+.app-shell:not(.app-shell--admin) .floor-plan-list a,
+.app-shell:not(.app-shell--admin) .assistant-message {
+  background: #fff9ee;
+}
+
+.app-shell:not(.app-shell--admin) .floor-plan-list strong {
+  color: #b83a32;
+}
+
+.app-shell:not(.app-shell--admin) .thumbnail--active,
+.app-shell:not(.app-shell--admin) .thumbnail:hover {
+  border-color: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .back-link--dark {
+  border-color: rgba(184, 145, 63, 0.34);
+  color: #9a742b;
+  box-shadow: 0 12px 28px rgba(31, 27, 23, 0.08);
+}
+
+.app-shell:not(.app-shell--admin) .back-link--dark:hover {
+  color: #fff;
+  background: #9a742b;
+  box-shadow: 0 16px 34px rgba(154, 116, 43, 0.24);
+}
+
+.app-shell:not(.app-shell--admin) .site-footer {
+  color: #fff9ee;
+  background:
+    radial-gradient(circle at 82% 12%, rgba(194, 155, 66, 0.22), transparent 22rem),
+    linear-gradient(135deg, #3a2d22 0%, #443326 58%, #4e3a28 100%);
+}
+
+.app-shell:not(.app-shell--admin) .footer-pattern {
+  opacity: 0.12;
+  background:
+    radial-gradient(circle at 82% 12%, #5b442c, transparent 18rem),
+    linear-gradient(120deg, rgba(255, 249, 238, 0.12) 0 1px, transparent 1px 70px);
+}
+
+.app-shell:not(.app-shell--admin) .footer-brand p,
+.app-shell:not(.app-shell--admin) .footer-column button,
+.app-shell:not(.app-shell--admin) .footer-column a,
+.app-shell:not(.app-shell--admin) .footer-column span {
+  color: #d8ccbc;
+}
+
+.app-shell:not(.app-shell--admin) .footer-column h3 {
+  color: #fff9ee;
+}
+
+.app-shell:not(.app-shell--admin) .footer-bottom {
+  border-top-color: rgba(247, 241, 230, 0.18);
+  color: #cfc2b0;
+}
+
+.app-shell:not(.app-shell--admin) .footer-column button:hover,
+.app-shell:not(.app-shell--admin) .footer-column a:hover {
+  color: #fff9ee;
+}
+
+.app-shell:not(.app-shell--admin) .assistant-avatar-button {
+  background: #f7f1e6;
+  box-shadow: 0 18px 44px rgba(31, 27, 23, 0.18);
+}
+
+.app-shell:not(.app-shell--admin) .assistant-avatar-button:hover {
+  box-shadow: 0 24px 58px rgba(31, 27, 23, 0.22);
+}
+
+.app-shell:not(.app-shell--admin) .assistant-bubble {
+  border-color: #e8decc;
+}
+
+.app-shell:not(.app-shell--admin) .assistant-bubble button,
+.app-shell:not(.app-shell--admin) .assistant-form__actions button:first-child {
+  color: #9a742b;
+  background: #f7f1e6;
+}
+
+.app-shell:not(.app-shell--admin) .assistant-form button,
+.app-shell:not(.app-shell--admin) .assistant-success button {
+  background: #b8913f;
+}
+
+.app-shell:not(.app-shell--admin) .assistant-form button:hover,
+.app-shell:not(.app-shell--admin) .assistant-success button:hover {
+  background: #9a742b;
+}
+
 .container {
   width: min(var(--container), calc(100% - 40px));
   margin: 0 auto;
@@ -1449,21 +1861,21 @@
   font-weight: 900;
 }
 
-.details-sidebar__card--blue {
+.details-sidebar__card--accent {
   color: #fff;
   background: linear-gradient(135deg, var(--blue-950), var(--blue-700));
 }
 
-.details-sidebar__card--blue h2 {
+.details-sidebar__card--accent h2 {
   color: #fff;
 }
 
-.details-sidebar__card--blue p {
+.details-sidebar__card--accent p {
   color: rgba(255, 255, 255, 0.76);
   line-height: 1.7;
 }
 
-.details-sidebar__card--blue a {
+.details-sidebar__card--accent a {
   display: block;
   margin-top: 10px;
   color: #fff;

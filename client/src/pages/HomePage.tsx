@@ -29,7 +29,7 @@ type HeroSlide = {
 const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
   en: [
     {
-      image: publicImage('who we are Zepter-Real Estate.jpg'),
+      image: publicImage('what we do Zepter Real Estate.jpg'),
       alt: 'Zepter Real Estate business portfolio presentation',
       eyebrow: 'WELCOME TO ZEPTER REAL ESTATE',
       title: 'Regional real estate portfolio with a premium business standard.',
@@ -40,7 +40,7 @@ const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
       secondaryText: 'ownership, management and development',
     },
     {
-      image: publicImage('what we do Zepter Real Estate.jpg'),
+      image: publicImage('portfolio Zepter Real Estate.jpg'),
       alt: 'Zepter Real Estate professional property management',
       eyebrow: 'WHAT WE DO',
       title: 'Professional management, development and presentation of Zepter properties.',
@@ -51,7 +51,7 @@ const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
       secondaryText: 'viewing, contact and team support',
     },
     {
-      image: publicImage('portfolio Zepter Real Estate.jpg'),
+      image: publicImage('who we are Zepter-Real Estate.jpg'),
       alt: 'Zepter Real Estate selected premium locations',
       eyebrow: 'ZEPTER PORTFOLIO',
       title: 'Carefully selected properties in attractive business locations.',
@@ -64,7 +64,7 @@ const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
   ],
   sr: [
     {
-      image: publicImage('who we are Zepter-Real Estate.jpg'),
+      image: publicImage('what we do Zepter Real Estate.jpg'),
       alt: 'Zepter Real Estate poslovni portfolio nekretnina',
       eyebrow: 'WELCOME TO ZEPTER REAL ESTATE',
       title: 'Regionalni portfolio nekretnina sa premium poslovnim standardom.',
@@ -75,7 +75,7 @@ const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
       secondaryText: 'vlasništvo, upravljanje i razvoj',
     },
     {
-      image: publicImage('what we do Zepter Real Estate.jpg'),
+      image: publicImage('portfolio Zepter Real Estate.jpg'),
       alt: 'Zepter Real Estate profesionalno upravljanje nekretninama',
       eyebrow: 'WHAT WE DO',
       title: 'Profesionalno upravljanje, razvoj i prezentacija Zepter nekretnina.',
@@ -86,7 +86,7 @@ const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
       secondaryText: 'pregled, kontakt i podrška tima',
     },
     {
-      image: publicImage('portfolio Zepter Real Estate.jpg'),
+      image: publicImage('who we are Zepter-Real Estate.jpg'),
       alt: 'Zepter Real Estate odabrane premium lokacije',
       eyebrow: 'ZEPTER PORTFOLIO',
       title: 'Pažljivo odabrane nekretnine na atraktivnim poslovnim lokacijama.',

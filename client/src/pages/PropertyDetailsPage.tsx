@@ -266,7 +266,7 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
               </dl>
             </div>
 
-            <div className="details-sidebar__card details-sidebar__card--blue">
+            <div className="details-sidebar__card details-sidebar__card--accent">
               <h2>{copy.details.contact}</h2>
               <p>{copy.details.contactText}</p>
               <a href={`tel:${property.contactPhone || '+381112019170'}`}>{property.contactPhone || '+381 11 20 19 170'}</a>
