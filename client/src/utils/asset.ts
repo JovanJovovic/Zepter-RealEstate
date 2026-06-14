@@ -5,13 +5,15 @@ export const publicImage = (fileName: string) => {
   return `/Zepter Real Estate images/${fileName}`;
 };
 
-export const resolveMediaUrl = (url?: string) => {
+export const mediaUrl = (url?: string | null) => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   return `${API_ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
 };
 
+export const resolveMediaUrl = mediaUrl;
+
 export const getMainImage = <T extends { images?: Array<{ url: string; isMain?: boolean }> }>(item: T) => {
   const image = item.images?.find((img) => img.isMain) || item.images?.[0];
-  return resolveMediaUrl(image?.url);
+  return mediaUrl(image?.url);
 };
