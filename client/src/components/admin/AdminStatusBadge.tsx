@@ -17,6 +17,10 @@ const toneFromValue = (value?: string | boolean): AdminStatusBadgeProps['tone'] 
   if (value === 'inactive') return 'inactive';
   if (value === 'answered') return 'active';
   if (value === 'new' || value === 'in-progress') return 'neutral';
+  if (value === 'accepted') return 'active';
+  if (value === 'rejected') return 'archived';
+  if (value === 'contacted') return 'draft';
+  if (value === 'reviewed') return 'neutral';
   return 'neutral';
 };
 
@@ -34,6 +38,10 @@ const labelFromValue = (value: string | boolean | undefined, language: Supported
   if (value === 'new') return adminCopy.assistantInquiries.statusNew;
   if (value === 'in-progress') return adminCopy.assistantInquiries.statusInProgress;
   if (value === 'answered') return adminCopy.assistantInquiries.statusAnswered;
+  if (value === 'reviewed') return adminCopy.propertyOffers.statusReviewed;
+  if (value === 'contacted') return adminCopy.propertyOffers.statusContacted;
+  if (value === 'accepted') return adminCopy.propertyOffers.statusAccepted;
+  if (value === 'rejected') return adminCopy.propertyOffers.statusRejected;
   return String(value).replace(/-/g, ' ');
 };
 

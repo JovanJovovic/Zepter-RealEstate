@@ -9,6 +9,10 @@ import type {
   PaginatedNewsletterResponse,
   PaginatedAssistantInquiriesResponse,
   PaginatedPropertiesResponse,
+  PaginatedPropertyOffersResponse,
+  PropertyOffer,
+  PropertyOfferFiltersState,
+  PropertyOfferStatus,
   UploadFileResponse,
 } from '../types/admin';
 import type { Property } from '../types/property';
@@ -143,6 +147,28 @@ export const updateAssistantInquiryStatus = (id: string, status: AssistantInquir
   return adminRequest<{ message: string }>(`${API_URL}/admin/assistant-inquiries/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
+  });
+};
+
+export const getPropertyOffers = (params: PropertyOfferFiltersState = {}) => {
+  return adminRequest<PaginatedPropertyOffersResponse>(`${API_URL}/admin/property-offers${buildQuery(params)}`);
+};
+
+export const getPropertyOfferById = (id: string) => {
+  return adminRequest<PropertyOffer>(`${API_URL}/admin/property-offers/${id}`);
+};
+
+export const updatePropertyOfferStatus = (id: string, status: PropertyOfferStatus) => {
+  return adminRequest<{ message: string }>(`${API_URL}/admin/property-offers/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+};
+
+export const updatePropertyOfferInternalNote = (id: string, internalNote: string) => {
+  return adminRequest<{ message: string }>(`${API_URL}/admin/property-offers/${id}/internal-note`, {
+    method: 'PATCH',
+    body: JSON.stringify({ internalNote }),
   });
 };
 

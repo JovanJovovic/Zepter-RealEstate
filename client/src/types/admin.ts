@@ -40,6 +40,40 @@ export interface NewsletterSubscriber {
 }
 
 export type AssistantInquiryStatus = 'new' | 'in-progress' | 'answered' | 'archived';
+export type PropertyOfferStatus = 'new' | 'reviewed' | 'contacted' | 'accepted' | 'rejected';
+
+export interface PropertyOfferFile {
+  originalName: string;
+  filename: string;
+  url: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+}
+
+export interface PropertyOffer {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email?: string | null;
+  phone?: string | null;
+  propertyType: string;
+  city: string;
+  municipality?: string | null;
+  address?: string | null;
+  fullLocation?: string | null;
+  area?: number | null;
+  proposedPrice?: number | null;
+  currency: string;
+  description?: string | null;
+  images: PropertyOfferFile[];
+  floorPlans: PropertyOfferFile[];
+  documents: PropertyOfferFile[];
+  status: PropertyOfferStatus;
+  internalNote?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface AssistantInquiry {
   _id: string;
@@ -75,6 +109,16 @@ export interface PaginatedAssistantInquiriesResponse {
   };
 }
 
+export interface PaginatedPropertyOffersResponse {
+  items: PropertyOffer[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
 export interface NewsletterFiltersState {
   search?: string;
   status?: '' | 'active' | 'inactive';
@@ -85,6 +129,13 @@ export interface NewsletterFiltersState {
 export interface AssistantInquiryFiltersState {
   search?: string;
   status?: '' | AssistantInquiryStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface PropertyOfferFiltersState {
+  search?: string;
+  status?: '' | PropertyOfferStatus;
   page?: number;
   limit?: number;
 }

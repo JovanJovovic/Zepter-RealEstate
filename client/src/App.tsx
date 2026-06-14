@@ -14,9 +14,11 @@ import AdminAssistantInquiriesPage from './pages/admin/AdminAssistantInquiriesPa
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminNewsletterPage from './pages/admin/AdminNewsletterPage';
 import AdminPropertiesPage from './pages/admin/AdminPropertiesPage';
+import AdminPropertyOffersPage from './pages/admin/AdminPropertyOffersPage';
 import AdminPropertyEditorPage from './pages/admin/AdminPropertyEditorPage';
 import ContactPage from './pages/ContactPage';
 import HomePage from './pages/HomePage';
+import OfferPropertyPage from './pages/OfferPropertyPage';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import type { AdminUser } from './types/admin';
@@ -122,6 +124,8 @@ function App() {
       content = <AdminNewsletterPage language={adminLanguage} />;
     } else if (currentPath === '/admin/inquiries') {
       content = <AdminAssistantInquiriesPage language={adminLanguage} />;
+    } else if (currentPath === '/admin/property-offers') {
+      content = <AdminPropertyOffersPage language={adminLanguage} />;
     }
 
     return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}>{content}</AdminShell>;
@@ -132,6 +136,7 @@ function App() {
     if (currentPath === '/about') return <AboutPage language={language} />;
     if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" language={language} />;
     if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" language={language} />;
+    if (currentPath === '/offer-property') return <OfferPropertyPage language={language} />;
     if (currentPath === '/contact') return <ContactPage language={language} />;
 
     if (currentPath.startsWith('/properties/')) {

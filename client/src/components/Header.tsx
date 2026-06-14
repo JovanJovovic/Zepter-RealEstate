@@ -20,6 +20,7 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
     { label: copy.nav.about, path: '/about' },
     { label: copy.nav.commercial, path: '/commercial' },
     { label: copy.nav.projects, path: '/projects-in-development' },
+    { label: copy.nav.offerProperty, path: '/offer-property' },
     { label: copy.nav.contact, path: '/contact' },
   ];
   const localizedLanguageOptions =

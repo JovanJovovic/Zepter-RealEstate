@@ -25,6 +25,7 @@ const Footer = ({ navigate, language }: FooterProps) => {
           <button onClick={() => navigate('/about')}>{copy.nav.about}</button>
           <button onClick={() => navigate('/commercial')}>{copy.nav.commercial}</button>
           <button onClick={() => navigate('/projects-in-development')}>{copy.nav.projects}</button>
+          <button onClick={() => navigate('/offer-property')}>{copy.nav.offerProperty}</button>
           <button onClick={() => navigate('/contact')}>{copy.nav.contact}</button>
         </div>
 
