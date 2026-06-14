@@ -28,7 +28,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+const uploadDirectories = [
+  path.join(process.cwd(), "uploads"),
+  path.join(process.cwd(), "server", "uploads"),
+];
+
+uploadDirectories.forEach((uploadDirectory) => {
+  app.use("/uploads", express.static(uploadDirectory));
+});
 
 app.get("/api/health", (_req, res) => {
   res.json({
