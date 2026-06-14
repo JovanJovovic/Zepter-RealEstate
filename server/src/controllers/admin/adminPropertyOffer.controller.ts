@@ -79,7 +79,7 @@ export const updatePropertyOfferStatus = async (req: Request, res: Response) => 
   const offer = await PropertyOffer.findByIdAndUpdate(
     req.params.id,
     { status },
-    { new: true, runValidators: true }
+    { returnDocument: "after", runValidators: true }
   );
 
   if (!offer) {
@@ -100,7 +100,7 @@ export const updatePropertyOfferInternalNote = async (req: Request, res: Respons
   const offer = await PropertyOffer.findByIdAndUpdate(
     req.params.id,
     { internalNote: internalNote || null },
-    { new: true, runValidators: true }
+    { returnDocument: "after", runValidators: true }
   );
 
   if (!offer) {

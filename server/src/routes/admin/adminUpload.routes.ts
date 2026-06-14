@@ -1,4 +1,5 @@
 import { Router } from "express";
+import type { Request, Response } from "express";
 
 import { protectAdmin } from "../../middlewares/auth.middleware.js";
 import { upload } from "../../middlewares/upload.middleware.js";
@@ -9,7 +10,7 @@ router.post(
   "/single",
   protectAdmin,
   upload.single("file"),
-  (req, res) => {
+  (req: Request, res: Response) => {
     if (!req.file) {
       return res.status(400).json({
         message: "Fajl nije poslat.",
@@ -32,7 +33,7 @@ router.post(
   "/multiple",
   protectAdmin,
   upload.array("files", 20),
-  (req, res) => {
+  (req: Request, res: Response) => {
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (!files || files.length === 0) {

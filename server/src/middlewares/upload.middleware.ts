@@ -1,4 +1,6 @@
 import multer from "multer";
+import type { Request } from "express";
+import type { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
 
@@ -18,10 +20,18 @@ const allowedMimeTypes = [
 ];
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
+  destination: (
+    _req: Request,
+    _file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void
+  ) => {
     cb(null, uploadsDir);
   },
-  filename: (_req, file, cb) => {
+  filename: (
+    _req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, filename: string) => void
+  ) => {
     const timestamp = Date.now();
     const random = Math.round(Math.random() * 1e9);
     const extension = path.extname(file.originalname);
@@ -35,7 +45,11 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
+const fileFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: FileFilterCallback
+) => {
   if (!allowedMimeTypes.includes(file.mimetype)) {
     cb(new Error("Dozvoljeni su samo image fajlovi i PDF dokumenti."));
     return;

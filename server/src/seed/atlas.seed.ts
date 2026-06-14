@@ -68,7 +68,7 @@ const seedAdmin = async () => {
     },
     {
       upsert: true,
-      new: true,
+      returnDocument: "after",
       runValidators: true,
     }
   );
@@ -94,7 +94,7 @@ const seedNewsletterSubscribers = async () => {
       subscriber,
       {
         upsert: true,
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );
@@ -129,7 +129,7 @@ const seedAssistantInquiries = async () => {
       inquiry,
       {
         upsert: true,
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );
@@ -202,7 +202,7 @@ const seedPropertyOffers = async () => {
       offer,
       {
         upsert: true,
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );
@@ -223,7 +223,7 @@ const seedProperties = async () => {
       property,
       {
         upsert: true,
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       }
     );

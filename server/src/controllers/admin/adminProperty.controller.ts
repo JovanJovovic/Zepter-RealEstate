@@ -268,7 +268,7 @@ export const updateProperty = async (req: Request, res: Response) => {
     }
 
     const property = await Property.findByIdAndUpdate(req.params.id, updateData, {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
     });
 

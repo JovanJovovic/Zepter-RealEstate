@@ -63,7 +63,7 @@ export const updateAssistantInquiryStatus = async (req: Request, res: Response) 
   const inquiry = await AssistantInquiry.findByIdAndUpdate(
     req.params.id,
     { status },
-    { new: true, runValidators: true }
+    { returnDocument: "after", runValidators: true }
   );
 
   if (!inquiry) {
