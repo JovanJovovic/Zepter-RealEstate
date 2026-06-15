@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   getAssistantInquiries,
   updateAssistantInquiryStatus,
@@ -10,6 +11,7 @@ import LoadingState from '../../components/LoadingState';
 import { getCopy } from '../../data/localization';
 import type {
   AdminMessage,
+  AssistantInquiry,
   AssistantInquiryFiltersState,
   AssistantInquiryStatus,
   PaginatedAssistantInquiriesResponse,
@@ -30,6 +32,7 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
   const [data, setData] = useState(defaultResponse);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<AdminMessage | null>(null);
+  const [selectedInquiry, setSelectedInquiry] = useState<AssistantInquiry | null>(null);
   const copy = getCopy(language).admin;
   const inquiryCopy = copy.assistantInquiries;
   const statusOptions: Array<{ value: '' | AssistantInquiryStatus; label: string }> = [
@@ -73,6 +76,7 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
   const changeStatus = async (id: string, status: AssistantInquiryStatus) => {
     try {
       await updateAssistantInquiryStatus(id, status);
+      setSelectedInquiry((current) => (current?._id === id ? { ...current, status } : current));
       setMessage({ type: 'success', text: inquiryCopy.statusUpdated });
       loadInquiries();
     } catch (err) {
@@ -84,6 +88,51 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
     setFilters((current) => ({ ...current, page }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const formatDateTime = (value: string) => {
+    return new Date(value).toLocaleString(language === 'sr' ? 'sr-RS' : 'en-GB');
+  };
+
+  const detailLabels = language === 'sr'
+    ? {
+        details: 'Detalji upita',
+        close: 'Zatvori',
+        viewDetails: 'Detalji',
+        fullQuestion: 'Puno pitanje',
+        email: 'Email',
+        phone: 'Telefon',
+        sourcePage: 'Izvorna strana',
+        pageTitle: 'Naslov strane',
+        propertyContext: 'Kontekst nekretnine',
+        propertyName: 'Naziv nekretnine',
+        propertyId: 'ID nekretnine',
+        receivedAt: 'Primljeno',
+        updatedAt: 'Ažurirano',
+        inquiryId: 'ID upita',
+      }
+    : {
+        details: 'Inquiry details',
+        close: 'Close',
+        viewDetails: 'Details',
+        fullQuestion: 'Full question',
+        email: 'Email',
+        phone: 'Phone',
+        sourcePage: 'Source page',
+        pageTitle: 'Page title',
+        propertyContext: 'Property context',
+        propertyName: 'Property name',
+        propertyId: 'Property ID',
+        receivedAt: 'Received',
+        updatedAt: 'Updated',
+        inquiryId: 'Inquiry ID',
+      };
+
+  const DetailField = ({ label, children }: { label: string; children: ReactNode }) => (
+    <div className="admin-detail-field">
+      <span>{label}</span>
+      <strong>{children || copy.common.notSet}</strong>
+    </div>
+  );
 
   return (
     <div className="admin-page">
@@ -141,12 +190,15 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
               <span>{inquiryCopy.context}</span>
               <span>{copy.common.status}</span>
               <span>{inquiryCopy.received}</span>
+              <span>{copy.common.actions}</span>
             </div>
 
             {data.items.map((inquiry) => (
               <div className="admin-table__row" key={inquiry._id}>
                 <div className="admin-inquiry-question">
-                  <strong>{inquiry.question}</strong>
+                  <button onClick={() => setSelectedInquiry(inquiry)}>
+                    <strong>{inquiry.question}</strong>
+                  </button>
                   {inquiry.sourcePage && (
                     <a href={inquiry.sourcePage} target="_blank" rel="noreferrer">
                       {inquiryCopy.openSource}
@@ -172,6 +224,9 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
                   </select>
                 </div>
                 <span>{new Date(inquiry.createdAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}</span>
+                <button className="admin-row-detail-button" onClick={() => setSelectedInquiry(inquiry)}>
+                  {detailLabels.viewDetails}
+                </button>
               </div>
             ))}
           </div>
@@ -183,6 +238,66 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
           <button disabled={data.pagination.page <= 1} onClick={() => changePage(data.pagination.page - 1)}>{copy.common.previous}</button>
           <span>{copy.common.page} {data.pagination.page} {copy.common.of} {data.pagination.pages}</span>
           <button disabled={data.pagination.page >= data.pagination.pages} onClick={() => changePage(data.pagination.page + 1)}>{copy.common.next}</button>
+        </div>
+      )}
+
+      {selectedInquiry && (
+        <div className="admin-detail-modal" role="dialog" aria-modal="true" aria-labelledby="admin-inquiry-detail-title">
+          <button className="admin-detail-modal__backdrop" onClick={() => setSelectedInquiry(null)} aria-label={detailLabels.close} />
+          <section className="admin-detail-modal__card admin-inquiry-detail">
+            <div className="admin-detail-modal__header">
+              <div>
+                <span className="admin-kicker">{inquiryCopy.leadManagement}</span>
+                <h3 id="admin-inquiry-detail-title">{detailLabels.details}</h3>
+              </div>
+              <button className="admin-row-detail-button" onClick={() => setSelectedInquiry(null)}>
+                {detailLabels.close}
+              </button>
+            </div>
+
+            <div className="admin-inquiry-detail__question">
+              <span>{detailLabels.fullQuestion}</span>
+              <p>{selectedInquiry.question}</p>
+            </div>
+
+            <div className="admin-detail-grid">
+              <DetailField label={detailLabels.email}>
+                {selectedInquiry.email ? <a href={`mailto:${selectedInquiry.email}`}>{selectedInquiry.email}</a> : copy.common.notSet}
+              </DetailField>
+              <DetailField label={detailLabels.phone}>
+                {selectedInquiry.phone ? <a href={`tel:${selectedInquiry.phone}`}>{selectedInquiry.phone}</a> : copy.common.notSet}
+              </DetailField>
+              <div className="admin-detail-field">
+                <span>{copy.common.status}</span>
+                <div className="admin-status-select-wrap">
+                  <AdminStatusBadge value={selectedInquiry.status} language={language} />
+                  <select
+                    value={selectedInquiry.status}
+                    onChange={(event) => changeStatus(selectedInquiry._id, event.target.value as AssistantInquiryStatus)}
+                  >
+                    {statusOptions.slice(1).map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <DetailField label={detailLabels.sourcePage}>
+                {selectedInquiry.sourcePage ? (
+                  <a href={selectedInquiry.sourcePage} target="_blank" rel="noreferrer">
+                    {selectedInquiry.sourcePage}
+                  </a>
+                ) : copy.common.notSet}
+              </DetailField>
+              <DetailField label={detailLabels.pageTitle}>{selectedInquiry.pageTitle || copy.common.notSet}</DetailField>
+              <DetailField label={detailLabels.propertyName}>{selectedInquiry.propertyName || copy.common.notSet}</DetailField>
+              <DetailField label={detailLabels.propertyId}>{selectedInquiry.propertyId || copy.common.notSet}</DetailField>
+              <DetailField label={detailLabels.receivedAt}>{formatDateTime(selectedInquiry.createdAt)}</DetailField>
+              <DetailField label={detailLabels.updatedAt}>{formatDateTime(selectedInquiry.updatedAt)}</DetailField>
+              <DetailField label={detailLabels.inquiryId}>{selectedInquiry._id}</DetailField>
+            </div>
+          </section>
         </div>
       )}
     </div>

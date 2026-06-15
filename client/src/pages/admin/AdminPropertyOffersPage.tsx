@@ -1,8 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  getPropertyOfferById,
   getPropertyOffers,
-  updatePropertyOfferInternalNote,
   updatePropertyOfferStatus,
 } from '../../api/admin';
 import AdminNotice from '../../components/admin/AdminNotice';
@@ -15,15 +13,14 @@ import type {
   AdminMessage,
   PaginatedPropertyOffersResponse,
   PropertyOffer,
-  PropertyOfferFile,
   PropertyOfferFiltersState,
   PropertyOfferStatus,
 } from '../../types/admin';
 import type { SupportedLanguage } from '../../types/property';
-import { resolveMediaUrl } from '../../utils/asset';
 
 interface AdminPropertyOffersPageProps {
   language: SupportedLanguage;
+  navigate: (path: string) => void;
 }
 
 const defaultResponse: PaginatedPropertyOffersResponse = {
@@ -41,37 +38,10 @@ const formatPrice = (offer: PropertyOffer, language: SupportedLanguage, fallback
   return `${offer.proposedPrice.toLocaleString(language === 'sr' ? 'sr-RS' : 'en-US')} ${offer.currency || 'EUR'}`;
 };
 
-const FileLinks = ({
-  files,
-  emptyText,
-  openLabel,
-}: {
-  files: PropertyOfferFile[];
-  emptyText: string;
-  openLabel: string;
-}) => {
-  if (!files.length) return <p className="admin-offer-empty-files">{emptyText}</p>;
-
-  return (
-    <div className="admin-offer-file-list">
-      {files.map((file) => (
-        <a href={resolveMediaUrl(file.url)} target="_blank" rel="noreferrer" key={`${file.filename}-${file.uploadedAt}`}>
-          {file.mimeType.startsWith('image/') && <img src={resolveMediaUrl(file.url)} alt={file.originalName} />}
-          <span>{file.originalName}</span>
-          <small>{openLabel}</small>
-        </a>
-      ))}
-    </div>
-  );
-};
-
-const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => {
+const AdminPropertyOffersPage = ({ language, navigate }: AdminPropertyOffersPageProps) => {
   const [filters, setFilters] = useState<PropertyOfferFiltersState>({ page: 1, limit: 12 });
   const [data, setData] = useState(defaultResponse);
-  const [selectedOffer, setSelectedOffer] = useState<PropertyOffer | null>(null);
   const [loading, setLoading] = useState(true);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [noteDraft, setNoteDraft] = useState('');
   const [message, setMessage] = useState<AdminMessage | null>(null);
   const copy = getCopy(language).admin;
   const offerCopy = copy.propertyOffers;
@@ -96,9 +66,6 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
     getPropertyOffers(filters)
       .then((response) => {
         setData(response);
-        if (selectedOffer && !response.items.some((item) => item._id === selectedOffer._id)) {
-          setSelectedOffer(null);
-        }
       })
       .catch((error) => {
         setMessage({ type: 'error', text: error instanceof Error ? error.message : offerCopy.loadFailed });
@@ -124,43 +91,13 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
     setFilters((current) => ({ ...current, [key]: value || undefined, page: 1 }));
   };
 
-  const openOffer = async (id: string) => {
-    setDetailLoading(true);
-    setMessage(null);
-
-    try {
-      const offer = await getPropertyOfferById(id);
-      setSelectedOffer(offer);
-      setNoteDraft(offer.internalNote || '');
-    } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : offerCopy.loadFailed });
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
   const changeStatus = async (id: string, status: PropertyOfferStatus) => {
     try {
       await updatePropertyOfferStatus(id, status);
       setMessage({ type: 'success', text: offerCopy.statusUpdated });
-      if (selectedOffer?._id === id) {
-        setSelectedOffer((current) => (current ? { ...current, status } : current));
-      }
       loadOffers();
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : offerCopy.statusFailed });
-    }
-  };
-
-  const saveNote = async () => {
-    if (!selectedOffer) return;
-
-    try {
-      await updatePropertyOfferInternalNote(selectedOffer._id, noteDraft);
-      setMessage({ type: 'success', text: offerCopy.noteUpdated });
-      setSelectedOffer((current) => (current ? { ...current, internalNote: noteDraft } : current));
-    } catch (error) {
-      setMessage({ type: 'error', text: error instanceof Error ? error.message : offerCopy.noteFailed });
     }
   };
 
@@ -169,9 +106,11 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const selectedLocation = selectedOffer
-    ? [selectedOffer.city, selectedOffer.municipality, selectedOffer.address || selectedOffer.fullLocation].filter(Boolean).join(', ')
-    : '';
+  const viewDetailsLabel = language === 'sr' ? 'Detalji' : 'Details';
+
+  const openOffer = (id: string) => {
+    navigate(`/admin/property-offers/${encodeURIComponent(id)}`);
+  };
 
   return (
     <div className="admin-page">
@@ -230,11 +169,21 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
               <span>{copy.common.status}</span>
               <span>{offerCopy.files}</span>
               <span>{offerCopy.submitted}</span>
+              <span>{copy.common.actions}</span>
             </div>
 
             {data.items.map((offer) => (
-              <div className="admin-table__row" key={offer._id}>
-                <button className="admin-offer-link" onClick={() => openOffer(offer._id)}>
+              <div
+                className="admin-table__row admin-table__row--clickable"
+                key={offer._id}
+                role="button"
+                tabIndex={0}
+                onClick={() => openOffer(offer._id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') openOffer(offer._id);
+                }}
+              >
+                <button className="admin-offer-link" onClick={(event) => { event.stopPropagation(); openOffer(offer._id); }}>
                   <strong>{offer.firstName} {offer.lastName}</strong>
                   <span>{offer.email || offer.phone || copy.common.notSet}</span>
                 </button>
@@ -244,7 +193,7 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
                   <small>{formatArea(offer.area, language, copy.common.notSet)}</small>
                 </div>
                 <span>{formatPrice(offer, language, copy.common.notSet)}</span>
-                <div className="admin-status-select-wrap">
+                <div className="admin-status-select-wrap" onClick={(event) => event.stopPropagation()}>
                   <AdminStatusBadge value={offer.status} language={language} />
                   <select value={offer.status} onChange={(event) => changeStatus(offer._id, event.target.value as PropertyOfferStatus)}>
                     {statusOptions.slice(1).map((option) => (
@@ -256,6 +205,9 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
                 </div>
                 <span>{offer.images.length + offer.floorPlans.length + offer.documents.length}</span>
                 <span>{new Date(offer.createdAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}</span>
+                <button className="admin-row-detail-button" onClick={(event) => { event.stopPropagation(); openOffer(offer._id); }}>
+                  {viewDetailsLabel}
+                </button>
               </div>
             ))}
           </div>
@@ -268,66 +220,6 @@ const AdminPropertyOffersPage = ({ language }: AdminPropertyOffersPageProps) => 
           <span>{copy.common.page} {data.pagination.page} {copy.common.of} {data.pagination.pages}</span>
           <button disabled={data.pagination.page >= data.pagination.pages} onClick={() => changePage(data.pagination.page + 1)}>{copy.common.next}</button>
         </div>
-      )}
-
-      {detailLoading && <LoadingState text={offerCopy.loading} />}
-
-      {selectedOffer && !detailLoading && (
-        <section className="admin-offer-detail">
-          <div className="admin-offer-detail__header">
-            <div>
-              <span className="admin-kicker">{offerCopy.details}</span>
-              <h3>{selectedOffer.firstName} {selectedOffer.lastName}</h3>
-              <p>{selectedLocation || copy.common.notSet}</p>
-            </div>
-            <div className="admin-status-select-wrap">
-              <AdminStatusBadge value={selectedOffer.status} language={language} />
-              <select value={selectedOffer.status} onChange={(event) => changeStatus(selectedOffer._id, event.target.value as PropertyOfferStatus)}>
-                {statusOptions.slice(1).map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="admin-offer-detail__grid">
-            <section>
-              <h4>{offerCopy.contactInformation}</h4>
-              <a href={selectedOffer.email ? `mailto:${selectedOffer.email}` : undefined}>{selectedOffer.email || copy.common.notSet}</a>
-              <a href={selectedOffer.phone ? `tel:${selectedOffer.phone}` : undefined}>{selectedOffer.phone || copy.common.notSet}</a>
-            </section>
-            <section>
-              <h4>{offerCopy.propertyInformation}</h4>
-              <p>{propertyTypeLabels[selectedOffer.propertyType] || selectedOffer.propertyType}</p>
-              <p>{selectedLocation || copy.common.notSet}</p>
-              <p>{formatArea(selectedOffer.area, language, copy.common.notSet)}</p>
-            </section>
-            <section className="admin-offer-detail__wide">
-              <h4>{offerCopy.priceAndDescription}</h4>
-              <strong>{formatPrice(selectedOffer, language, copy.common.notSet)}</strong>
-              <p>{selectedOffer.description || copy.common.notSet}</p>
-            </section>
-            <section className="admin-offer-detail__wide">
-              <h4>{offerCopy.images}</h4>
-              <FileLinks files={selectedOffer.images} emptyText={offerCopy.noFiles} openLabel={offerCopy.openFile} />
-            </section>
-            <section>
-              <h4>{offerCopy.floorPlans}</h4>
-              <FileLinks files={selectedOffer.floorPlans} emptyText={offerCopy.noFiles} openLabel={offerCopy.openFile} />
-            </section>
-            <section>
-              <h4>{offerCopy.documents}</h4>
-              <FileLinks files={selectedOffer.documents} emptyText={offerCopy.noFiles} openLabel={offerCopy.openFile} />
-            </section>
-            <section className="admin-offer-detail__wide">
-              <h4>{offerCopy.internalNote}</h4>
-              <textarea value={noteDraft} onChange={(event) => setNoteDraft(event.target.value)} rows={5} />
-              <button className="admin-primary-action" onClick={saveNote}>{offerCopy.saveNote}</button>
-            </section>
-          </div>
-        </section>
       )}
     </div>
   );

@@ -14,6 +14,7 @@ import AdminAssistantInquiriesPage from './pages/admin/AdminAssistantInquiriesPa
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import AdminNewsletterPage from './pages/admin/AdminNewsletterPage';
 import AdminPropertiesPage from './pages/admin/AdminPropertiesPage';
+import AdminPropertyOfferDetailsPage from './pages/admin/AdminPropertyOfferDetailsPage';
 import AdminPropertyOffersPage from './pages/admin/AdminPropertyOffersPage';
 import AdminPropertyEditorPage from './pages/admin/AdminPropertyEditorPage';
 import ContactPage from './pages/ContactPage';
@@ -125,7 +126,10 @@ function App() {
     } else if (currentPath === '/admin/inquiries') {
       content = <AdminAssistantInquiriesPage language={adminLanguage} />;
     } else if (currentPath === '/admin/property-offers') {
-      content = <AdminPropertyOffersPage language={adminLanguage} />;
+      content = <AdminPropertyOffersPage navigate={navigate} language={adminLanguage} />;
+    } else if (currentPath.startsWith('/admin/property-offers/')) {
+      const offerId = decodeURIComponent(currentPath.replace('/admin/property-offers/', ''));
+      content = <AdminPropertyOfferDetailsPage offerId={offerId} navigate={navigate} language={adminLanguage} />;
     }
 
     return <AdminShell admin={admin} currentPath={currentPath} navigate={navigate} onLogout={handleLogout} language={adminLanguage} onLanguageChange={setAdminLanguage}>{content}</AdminShell>;

@@ -45,6 +45,8 @@ const defaultForm: OfferFormState = {
 
 const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+
+
 const isValidPhone = (phone: string) => {
   const normalized = phone.replace(/[\s().-]/g, '');
   return /^\+?\d{6,20}$/.test(normalized);
@@ -64,7 +66,7 @@ const fileSummary = (files: File[], fallback: string) => {
 const OfferPropertyPage = ({ language }: OfferPropertyPageProps) => {
   const copy = getCopy(language);
   const offerCopy = copy.propertyOffer;
-  const propertyTypeOptions = useMemo(() => getPropertyTypeOptions(language), [language]);
+  //const propertyTypeOptions = useMemo(() => getPropertyTypeOptions(language), [language]);
   const [form, setForm] = useState(defaultForm);
   const [images, setImages] = useState<File[]>([]);
   const [floorPlans, setFloorPlans] = useState<File[]>([]);
@@ -73,6 +75,22 @@ const OfferPropertyPage = ({ language }: OfferPropertyPageProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const propertyTypeOptions = useMemo(() => getPropertyTypeOptions(language), [language]);
+
+
+  const successModalTitle =
+    language === 'sr' ? 'Uspešno ste poslali ponudu' : 'Your offer has been sent successfully';
+
+  const successModalText =
+    language === 'sr'
+      ? 'Hvala Vam. Vaša ponuda je uspešno poslata našem timu. Naši zaposleni će pregledati dostavljene podatke i javiti Vam se u vezi sa daljim koracima.'
+      : 'Thank you. Your property offer has been sent to our team. Our staff will review the submitted information and contact you regarding the next steps.';
+
+  const handleSuccessOk = () => {
+    setSuccess(false);
+    window.location.href = '/';
+  };
+
 
   const setField = <K extends keyof OfferFormState>(key: K, value: OfferFormState[K]) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -125,7 +143,6 @@ const OfferPropertyPage = ({ language }: OfferPropertyPageProps) => {
       setFloorPlans([]);
       setDocuments([]);
       setErrors({});
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : offerCopy.submitFailed);
     } finally {
@@ -152,7 +169,6 @@ const OfferPropertyPage = ({ language }: OfferPropertyPageProps) => {
           </aside>
 
           <form className="property-offer-form" onSubmit={submit}>
-            {success && <div className="form-message form-message--success">{offerCopy.success}</div>}
             {submitError && <div className="form-message form-message--error">{submitError}</div>}
 
             <section className="property-offer-card">
@@ -253,8 +269,8 @@ const OfferPropertyPage = ({ language }: OfferPropertyPageProps) => {
                 <label>
                   {offerCopy.images}
                   <input type="file" multiple accept="image/*" onChange={(event) => setImages(Array.from(event.target.files || []))} />
-                  <span>{fileSummary(images, offerCopy.images)}</span>
-                </label>
+                  <span>{fileSummary(images, offerCopy.additionalImages)}</span>
+                </label> 
                 <label>
                   {offerCopy.floorPlans}
                   <input type="file" multiple accept="image/*,.pdf,application/pdf" onChange={(event) => setFloorPlans(Array.from(event.target.files || []))} />
@@ -274,6 +290,26 @@ const OfferPropertyPage = ({ language }: OfferPropertyPageProps) => {
           </form>
         </div>
       </section>
+      {success && (
+        <div className="property-offer-success-modal" role="dialog" aria-modal="true" aria-labelledby="property-offer-success-title">
+          <div className="property-offer-success-modal__card">
+            <img
+              className="property-offer-success-modal__logo"
+              src={publicImage('ZepterRealEstateLogo.png')}
+              alt="Zepter Real Estate"
+            />
+
+            <h2 id="property-offer-success-title">{successModalTitle}</h2>
+
+            <p>{successModalText}</p>
+
+            <button type="button" className="property-offer-success-modal__button" onClick={handleSuccessOk}>
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 };
