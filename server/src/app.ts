@@ -14,6 +14,8 @@ import assistantInquiryRoutes from "./routes/assistantInquiry.routes.js";
 import adminAssistantInquiryRoutes from "./routes/admin/adminAssistantInquiry.routes.js";
 import propertyOfferRoutes from "./routes/propertyOffer.routes.js";
 import adminPropertyOfferRoutes from "./routes/admin/adminPropertyOffer.routes.js";
+import articleRoutes from "./routes/article.routes.js";
+import adminArticleRoutes from "./routes/admin/adminArticle.routes.js";
 
 const app = express();
 
@@ -54,6 +56,8 @@ app.use("/api/assistant-inquiries", assistantInquiryRoutes);
 app.use("/api/admin/assistant-inquiries", adminAssistantInquiryRoutes);
 app.use("/api/property-offers", propertyOfferRoutes);
 app.use("/api/admin/property-offers", adminPropertyOfferRoutes);
+app.use("/api", articleRoutes);
+app.use("/api/admin/articles", adminArticleRoutes);
 
 app.use(errorHandler);
 

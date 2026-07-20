@@ -3,6 +3,7 @@ import { languageOptions } from '../../data/languages';
 import { getCopy } from '../../data/localization';
 import type { AdminUser } from '../../types/admin';
 import type { SupportedLanguage } from '../../types/property';
+import { getArticleCopy } from '../../data/articleCopy';
 
 interface AdminShellProps {
   admin: AdminUser;
@@ -21,11 +22,13 @@ const isActive = (currentPath: string, itemPath: string) => {
 
 const AdminShell = ({ admin, currentPath, navigate, onLogout, language, onLanguageChange, children }: AdminShellProps) => {
   const copy = getCopy(language).admin;
+  const articleCopy = getArticleCopy(language).admin;
   const navItems = [
     { label: copy.common.dashboard, path: '/admin' },
     { label: copy.common.properties, path: '/admin/properties' },
     { label: copy.common.propertyOffers, path: '/admin/property-offers' },
     { label: copy.common.inquiries, path: '/admin/inquiries' },
+    { label: articleCopy.navLabel, path: '/admin/articles' },
     { label: copy.common.newsletter, path: '/admin/newsletter' },
   ];
   const localizedLanguageOptions =

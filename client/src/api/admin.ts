@@ -16,6 +16,13 @@ import type {
   UploadFileResponse,
 } from '../types/admin';
 import type { Property } from '../types/property';
+import type {
+  AdminArticle,
+  AdminArticleFilters,
+  AdminArticlesResponse,
+  ArticlePayload,
+  ArticleStatus,
+} from '../types/article';
 import { API_URL } from '../utils/asset';
 
 const ADMIN_TOKEN_KEY = 'zre_admin_token';
@@ -132,6 +139,41 @@ export const uploadAdminFile = (file: File) => {
   return adminRequest<UploadFileResponse>(`${API_URL}/admin/upload/single`, {
     method: 'POST',
     body: formData,
+  });
+};
+
+export const getAdminArticles = (params: AdminArticleFilters = {}) => {
+  return adminRequest<AdminArticlesResponse>(`${API_URL}/admin/articles${buildQuery(params)}`);
+};
+
+export const getAdminArticleById = (id: string) => {
+  return adminRequest<AdminArticle>(`${API_URL}/admin/articles/${id}`);
+};
+
+export const createAdminArticle = (payload: ArticlePayload) => {
+  return adminRequest<AdminArticle>(`${API_URL}/admin/articles`, {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+};
+
+export const updateAdminArticle = (id: string, payload: ArticlePayload) => {
+  return adminRequest<AdminArticle>(`${API_URL}/admin/articles/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  });
+};
+
+export const updateAdminArticleStatus = (id: string, status: ArticleStatus) => {
+  return adminRequest<AdminArticle>(`${API_URL}/admin/articles/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+};
+
+export const deleteAdminArticle = (id: string) => {
+  return adminRequest<{ message: string }>(`${API_URL}/admin/articles/${id}`, {
+    method: 'DELETE',
   });
 };
 

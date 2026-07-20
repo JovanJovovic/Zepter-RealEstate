@@ -13,6 +13,8 @@ import AboutPage from './pages/AboutPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminAssistantInquiriesPage from './pages/admin/AdminAssistantInquiriesPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
+import AdminArticleEditorPage from './pages/admin/AdminArticleEditorPage';
+import AdminArticlesPage from './pages/admin/AdminArticlesPage';
 import AdminNewsletterPage from './pages/admin/AdminNewsletterPage';
 import AdminPropertiesPage from './pages/admin/AdminPropertiesPage';
 import AdminPropertyOfferDetailsPage from './pages/admin/AdminPropertyOfferDetailsPage';
@@ -25,6 +27,8 @@ import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
 import ServiceDetailPage from './pages/ServiceDetailPage';
 import ServicesPage from './pages/ServicesPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
+import ArticleListingPage from './pages/ArticleListingPage';
 import type { AdminUser } from './types/admin';
 import type { SupportedLanguage } from './types/property';
 
@@ -119,6 +123,13 @@ function App() {
 
     if (currentPath === '/admin/properties') {
       content = <AdminPropertiesPage navigate={navigate} language={adminLanguage} />;
+    } else if (currentPath === '/admin/articles') {
+      content = <AdminArticlesPage navigate={navigate} language={adminLanguage} />;
+    } else if (currentPath === '/admin/articles/new') {
+      content = <AdminArticleEditorPage navigate={navigate} language={adminLanguage} />;
+    } else if (currentPath.startsWith('/admin/articles/') && currentPath.endsWith('/edit')) {
+      const articleId = decodeURIComponent(currentPath.replace('/admin/articles/', '').replace('/edit', ''));
+      content = <AdminArticleEditorPage articleId={articleId} navigate={navigate} language={adminLanguage} />;
     } else if (currentPath === '/admin/properties/new') {
       content = <AdminPropertyEditorPage navigate={navigate} language={adminLanguage} />;
     } else if (currentPath.startsWith('/admin/properties/') && currentPath.endsWith('/edit')) {
@@ -145,6 +156,16 @@ function App() {
     if (currentPath.startsWith('/services/')) {
       const serviceSlug = decodeURIComponent(currentPath.replace('/services/', ''));
       return <ServiceDetailPage slug={serviceSlug} navigate={navigate} language={language} />;
+    }
+    if (currentPath === '/blog') return <ArticleListingPage type="blog" navigate={navigate} language={language} />;
+    if (currentPath.startsWith('/blog/')) {
+      const articleSlug = decodeURIComponent(currentPath.replace('/blog/', ''));
+      return <ArticleDetailPage type="blog" slug={articleSlug} navigate={navigate} language={language} />;
+    }
+    if (currentPath === '/news') return <ArticleListingPage type="news" navigate={navigate} language={language} />;
+    if (currentPath.startsWith('/news/')) {
+      const articleSlug = decodeURIComponent(currentPath.replace('/news/', ''));
+      return <ArticleDetailPage type="news" slug={articleSlug} navigate={navigate} language={language} />;
     }
     if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" language={language} />;
     if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" language={language} />;

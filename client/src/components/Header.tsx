@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { languageOptions } from '../data/languages';
 import { getCopy } from '../data/localization';
+import { getArticleCopy } from '../data/articleCopy';
 import type { SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
@@ -19,15 +20,16 @@ interface HeaderProps {
 
 const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMediaOpen, setIsMediaOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const copy = getCopy(language);
+  const articleCopy = getArticleCopy(language);
   const navItems: HeaderNavItem[] = [
     { label: copy.nav.home, path: '/' },
     { label: copy.nav.about, path: '/about' },
     { label: copy.nav.services, path: '/services' },
     { label: copy.nav.properties, path: '/commercial' },
     { label: copy.nav.offerProperty, path: '/offer-property' },
-    { label: copy.nav.contact, path: '/contact' },
   ];
   const localizedLanguageOptions =
     language === 'sr'
@@ -49,6 +51,7 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
   const handleNavigate = (path: string) => {
     navigate(path);
     setIsOpen(false);
+    setIsMediaOpen(false);
   };
 
   const handleNavItem = (item: HeaderNavItem) => {
@@ -86,14 +89,36 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
         </button>
 
         <nav className={`main-nav ${isOpen ? 'main-nav--open' : ''}`}>
-          {navItems.map((item) => (
-            <button
-              key={item.path ?? item.anchor ?? item.label}
-              className={isNavItemActive(item) ? 'nav-link nav-link--active' : 'nav-link'}
-              onClick={() => handleNavItem(item)}
-            >
-              {item.label}
-            </button>
+          {navItems.map((item, index) => (
+            <div className="main-nav__slot" key={item.path ?? item.anchor ?? item.label}>
+              <button
+                className={isNavItemActive(item) ? 'nav-link nav-link--active' : 'nav-link'}
+                onClick={() => handleNavItem(item)}
+              >
+                {item.label}
+              </button>
+              {index === 3 && (
+                <div className={`nav-dropdown ${isMediaOpen ? 'nav-dropdown--open' : ''}`}>
+                  <button
+                    className={currentPath.startsWith('/blog') || currentPath.startsWith('/news') ? 'nav-link nav-link--active nav-dropdown__trigger' : 'nav-link nav-dropdown__trigger'}
+                    onClick={() => setIsMediaOpen((value) => !value)}
+                    aria-haspopup="true"
+                    aria-expanded={isMediaOpen}
+                  >
+                    {articleCopy.navGroup}
+                    <span aria-hidden="true">⌄</span>
+                  </button>
+                  <div className="nav-dropdown__menu">
+                    <button className={currentPath.startsWith('/blog') ? 'nav-dropdown__item nav-dropdown__item--active' : 'nav-dropdown__item'} onClick={() => handleNavigate('/blog')}>
+                      Blog
+                    </button>
+                    <button className={currentPath.startsWith('/news') ? 'nav-dropdown__item nav-dropdown__item--active' : 'nav-dropdown__item'} onClick={() => handleNavigate('/news')}>
+                      {articleCopy.news.title}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </nav>
 
