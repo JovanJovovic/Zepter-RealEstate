@@ -1,8 +1,9 @@
 import { getCopy } from '../data/localization';
-import { getConditionOptions, getPropertyTypeOptions } from '../data/propertyOptions';
+import { getPropertyTypeOptions } from '../data/propertyOptions';
 import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage } from '../utils/asset';
 import { getAvailableAreaLabel, getTotalAreaLabel } from '../utils/propertyArea';
+import { getPropertyListingType } from '../utils/propertyListingType';
 
 interface ListingPropertyCardProps {
   property: Property;
@@ -30,9 +31,14 @@ const ListingPropertyCard = ({
   const copy = getCopy(language);
   const mainImage = getMainImage(property);
   const propertyTypeOptions = getPropertyTypeOptions(language);
-  const conditionOptions = getConditionOptions(language);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
-  const conditionLabel = getLabel(property.condition, conditionOptions);
+  const listingType = getPropertyListingType(property);
+  const listingLabel =
+    listingType === 'rent'
+      ? copy.card.rent
+      : listingType === 'sale'
+        ? copy.card.sale
+        : copy.card.availableListing;
   const availableAreaLabel = getAvailableAreaLabel(property, copy.card.onRequest, language);
   const totalAreaLabel = getTotalAreaLabel(property, copy.card.onRequest, language);
   const description =
@@ -65,7 +71,7 @@ const ListingPropertyCard = ({
         ) : (
           <div className="image-fallback">ZRE</div>
         )}
-        <span className="listing-property-card__badge">{conditionLabel}</span>
+        <span className="listing-property-card__badge">{listingLabel}</span>
         {property.images.length > 0 && (
           <span className="listing-property-card__image-count">
             {property.images.length} {copy.card.images}

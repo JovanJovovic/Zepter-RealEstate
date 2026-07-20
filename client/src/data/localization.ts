@@ -177,6 +177,9 @@ const en = {
     availableArea: "Available",
     rooms: "rooms",
     images: "photos",
+    rent: "Rent",
+    sale: "Sale",
+    availableListing: "Available",
   },
   details: {
     loading: "Loading property details...",
@@ -778,6 +781,9 @@ const sr: typeof en = {
     availableArea: "Dostupno",
     rooms: "prostorija",
     images: "fotografija",
+    rent: "Izdavanje",
+    sale: "Prodaja",
+    availableListing: "Dostupno",
   },
   details: {
     loading: "Učitavanje detalja nekretnine...",

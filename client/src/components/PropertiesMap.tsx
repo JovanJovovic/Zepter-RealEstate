@@ -41,22 +41,54 @@ const MapViewport = ({ properties }: { properties: Property[] }) => {
       .filter(hasValidCoordinates)
       .map((property) => [property.location.latitude!, property.location.longitude!] as [number, number]);
 
-    if (positions.length === 0) {
-      map.setView(DEFAULT_CENTER, 7, { animate: true });
-      return;
-    }
+    const updateViewport = () => {
+      map.invalidateSize({ pan: false });
 
-    if (positions.length === 1) {
-      map.setView(positions[0], 14, { animate: true });
-      return;
-    }
+      if (positions.length === 0) {
+        map.setView(DEFAULT_CENTER, 7, { animate: false });
+        return;
+      }
 
-    map.fitBounds(L.latLngBounds(positions), {
-      animate: true,
-      maxZoom: 14,
-      padding: [48, 48],
-    });
+      if (positions.length === 1) {
+        map.setView(positions[0], 14, { animate: false });
+        return;
+      }
+
+      map.fitBounds(L.latLngBounds(positions), {
+        animate: false,
+        maxZoom: 14,
+        padding: [48, 48],
+      });
+    };
+
+    const frame = window.requestAnimationFrame(updateViewport);
+    const timeout = window.setTimeout(updateViewport, 120);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timeout);
+    };
   }, [map, properties]);
+
+  return null;
+};
+
+const MapResizeSync = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    const invalidate = () => map.invalidateSize({ pan: false });
+    const frame = window.requestAnimationFrame(invalidate);
+    const observer = new ResizeObserver(invalidate);
+
+    observer.observe(container);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [map]);
 
   return null;
 };
@@ -122,6 +154,7 @@ const PropertiesMap = (props: PropertiesMapProps) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <MapResizeSync />
         <MapViewport properties={props.properties} />
         {mappedProperties.map((property) => (
           <PropertyMarker key={property._id} property={property} {...props} />

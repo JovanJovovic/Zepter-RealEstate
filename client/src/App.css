@@ -5181,6 +5181,10 @@
 }
 
 /* Public property search */
+.app-shell:not(.app-shell--admin) {
+  overflow-x: clip;
+}
+
 .app-shell:not(.app-shell--admin) .properties-search-page {
   min-height: 100vh;
   padding-top: 126px;
@@ -5413,12 +5417,16 @@
   position: sticky;
   top: 104px;
   min-width: 0;
+  height: calc(100vh - 116px);
+  height: calc(100dvh - 116px);
+  min-height: 620px;
 }
 
 .properties-map {
   position: relative;
-  height: min(850px, calc(100vh - 122px));
-  min-height: 620px;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
   border: 1px solid #d9dee5;
   border-radius: 6px;
@@ -5426,10 +5434,11 @@
   box-shadow: 0 14px 38px rgba(21, 34, 53, 0.09);
 }
 
-.properties-map__canvas {
+.properties-map__canvas,
+.properties-map .leaflet-container {
   z-index: 1;
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  height: 100% !important;
   background: #e8ebef;
 }
 
@@ -5754,6 +5763,8 @@
 
   .properties-map-column {
     position: static;
+    height: auto;
+    min-height: 0;
   }
 
   .properties-map {
@@ -5807,5 +5818,71 @@
 
   .listing-property-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* One shared light header for every public route. */
+.app-shell:not(.app-shell--admin) .site-header--home,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled {
+  padding: 0;
+  border-top: 2px solid #1f2d4d;
+  background: rgba(255, 249, 238, 0.97);
+  box-shadow: 0 8px 28px rgba(31, 45, 77, 0.09);
+  backdrop-filter: blur(18px);
+}
+
+.app-shell:not(.app-shell--admin) .site-header--home .header-inner,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .header-inner {
+  min-height: 102px;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.app-shell:not(.app-shell--admin) .site-header--home:not(.site-header--scrolled) .nav-link,
+.app-shell:not(.app-shell--admin) .site-header--home:not(.site-header--scrolled) .language-select,
+.app-shell:not(.app-shell--admin) .site-header--home:not(.site-header--scrolled) .header-email,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .nav-link,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .language-select,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .header-email {
+  color: #1f2d4d;
+  text-shadow: none;
+}
+
+.app-shell:not(.app-shell--admin) .site-header--home:not(.site-header--scrolled) .nav-link:hover,
+.app-shell:not(.app-shell--admin) .site-header--home:not(.site-header--scrolled) .nav-link--active,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .nav-link:hover,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .nav-link--active {
+  color: #1f2d4d;
+  background: #efe5d4;
+}
+
+.app-shell:not(.app-shell--admin) .site-header--home:not(.site-header--scrolled) .language-select select,
+.app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .language-select select {
+  color: #1f2d4d;
+  border-color: #e2d8c7;
+  background: #fff;
+}
+
+@media (max-width: 860px) {
+  .app-shell:not(.app-shell--admin) .site-header--home,
+  .app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled {
+    padding: 10px 0;
+    border-top-width: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .app-shell:not(.app-shell--admin) .site-header--home .header-inner,
+  .app-shell:not(.app-shell--admin) .site-header--home.site-header--scrolled .header-inner {
+    display: flex;
+    width: min(100% - 28px, var(--container));
+    min-height: 68px;
+    border-radius: 28px;
+    padding: 10px 12px 10px 16px;
+    background: rgba(255, 249, 238, 0.97);
+    border-color: rgba(232, 222, 204, 0.95);
+    box-shadow: 0 12px 34px rgba(31, 27, 23, 0.1);
   }
 }

@@ -21,8 +21,7 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const copy = getCopy(language);
-  const isHome = currentPath === '/';
-  const homeNavItems: HeaderNavItem[] = [
+  const navItems: HeaderNavItem[] = [
     { label: copy.nav.home, path: '/' },
     { label: copy.nav.about, path: '/about' },
     { label: copy.nav.services, anchor: 'home-services' },
@@ -30,15 +29,6 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
     { label: copy.nav.offerProperty, path: '/offer-property' },
     { label: copy.nav.contact, path: '/contact' },
   ];
-  const defaultNavItems: HeaderNavItem[] = [
-    { label: copy.nav.home, path: '/' },
-    { label: copy.nav.about, path: '/about' },
-    { label: copy.nav.commercial, path: '/commercial' },
-    { label: copy.nav.projects, path: '/projects-in-development' },
-    { label: copy.nav.offerProperty, path: '/offer-property' },
-    { label: copy.nav.contact, path: '/contact' },
-  ];
-  const navItems = isHome ? homeNavItems : defaultNavItems;
   const localizedLanguageOptions =
     language === 'sr'
       ? [
@@ -77,8 +67,16 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
     if (item.path) handleNavigate(item.path);
   };
 
+  const isNavItemActive = (item: HeaderNavItem) => {
+    if (!item.path) return false;
+    if (item.path === '/commercial') {
+      return currentPath === '/commercial' || currentPath === '/projects-in-development' || currentPath.startsWith('/properties/');
+    }
+    return currentPath === item.path;
+  };
+
   return (
-    <header className={`site-header ${isHome ? 'site-header--home' : ''} ${isScrolled ? 'site-header--scrolled' : ''}`}>
+    <header className={`site-header site-header--home ${isScrolled ? 'site-header--scrolled' : ''}`}>
       <div className="container header-inner">
         <button className="brand" onClick={() => handleNavigate('/')} aria-label={copy.nav.homeAria}>
           <img src={publicImage('ZepterRealEstateLogo.png')} alt="Zepter Real Estate" />
@@ -88,7 +86,7 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
           {navItems.map((item) => (
             <button
               key={item.path ?? item.anchor ?? item.label}
-              className={item.path && currentPath === item.path ? 'nav-link nav-link--active' : 'nav-link'}
+              className={isNavItemActive(item) ? 'nav-link nav-link--active' : 'nav-link'}
               onClick={() => handleNavItem(item)}
             >
               {item.label}
@@ -108,8 +106,8 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
               ))}
             </select>
           </label>
-          <button className="btn btn--small btn--primary" onClick={() => handleNavigate(isHome ? '/contact' : '/commercial')}>
-            {isHome ? copy.nav.contactCta : copy.nav.viewProperties}
+          <button className="btn btn--small btn--primary" onClick={() => handleNavigate('/contact')}>
+            {copy.nav.contactCta}
           </button>
           <button
             className={`menu-toggle ${isOpen ? 'menu-toggle--active' : ''}`}

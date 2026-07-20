@@ -66,6 +66,10 @@ export interface Property {
   slug: string;
   publicId: string;
   category: PropertyCategory;
+  listingType?: string;
+  transactionType?: string;
+  offerType?: string;
+  purpose?: string;
   types: PropertyType[];
   location: PropertyLocation;
   sizeSqm?: number;
