@@ -9,6 +9,7 @@ import {
     OCCUPANCY_PERCENTAGE_ERROR,
     buildAvailabilityFields,
 } from "../../utils/propertyAvailability.js";
+import { normalizePropertyTransactionType } from "../../utils/propertyTransactionType.js";
 
 
 const parsePositiveNumber = (value: unknown): number | undefined => {
@@ -203,6 +204,7 @@ export const createProperty = async (req: Request, res: Response) => {
             ...req.body,
             slug,
             publicId: req.body.publicId || generatePublicId(),
+            transactionType: normalizePropertyTransactionType(req.body.transactionType),
         });
     } catch (error) {
         return res.status(400).json({
@@ -260,6 +262,10 @@ export const updateProperty = async (req: Request, res: Response) => {
     }
 
     try {
+        updateData.transactionType = normalizePropertyTransactionType(
+            req.body.transactionType,
+            existingProperty.transactionType || "rent"
+        );
         updateData = buildPropertyAvailabilityData(updateData, existingProperty);
     } catch (error) {
         return res.status(400).json({

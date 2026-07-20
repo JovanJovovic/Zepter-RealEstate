@@ -10,6 +10,7 @@
     "seed:admin": "tsx src/scripts/seedAdmin.ts",
     "seed:properties": "tsx src/scripts/seedProperties.ts",
     "backfill:property-availability": "tsx src/scripts/backfillPropertyAvailability.ts",
+    "migrate:transaction-type": "tsx src/scripts/migrateTransactionType.ts",
     "seed:atlas": "tsx src/seed/atlas.seed.ts"
   },
   "keywords": [],

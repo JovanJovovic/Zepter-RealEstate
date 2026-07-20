@@ -3,6 +3,7 @@ import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions } from '
 import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage } from '../utils/asset';
 import { getAvailableArea, getAvailableAreaLabel, getTotalAreaLabel } from '../utils/propertyArea';
+import { getPropertyListingType } from '../utils/propertyListingType';
 
 interface PropertyCardProps {
   property: Property;
@@ -22,6 +23,8 @@ const PropertyCard = ({ property, navigate, language }: PropertyCardProps) => {
   const copy = getCopy(language);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const conditionLabel = getLabel(property.condition, conditionOptions);
+  const transactionType = getPropertyListingType(property);
+  const transactionLabel = transactionType === 'sale' ? copy.card.sale : copy.card.rent;
   const totalAreaLabel = getTotalAreaLabel(property, copy.card.onRequest, language);
   const availableAreaLabel = getAvailableAreaLabel(property, copy.card.onRequest, language);
   const shouldShowAvailableArea =
@@ -33,7 +36,7 @@ const PropertyCard = ({ property, navigate, language }: PropertyCardProps) => {
     <article className="property-card">
       <button className="property-card__media" onClick={() => navigate(`/properties/${property.publicId}`)}>
         {mainImage ? <img src={mainImage} alt={property.images?.[0]?.alt || property.title} /> : <div className="image-fallback">ZRE</div>}
-        {property.isFeatured && <span className="property-badge">{copy.card.featured}</span>}
+        <span className="property-badge">{transactionLabel}</span>
       </button>
 
       <div className="property-card__body">

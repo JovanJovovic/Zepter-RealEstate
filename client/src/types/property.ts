@@ -21,6 +21,8 @@ export type PropertyCondition =
 
 export type PropertyStatus = 'draft' | 'published' | 'archived';
 
+export type PropertyTransactionType = 'rent' | 'sale';
+
 export type SupportedLanguage = 'en' | 'sr' | 'ru' | 'de';
 
 export interface PropertyImage {
@@ -66,10 +68,7 @@ export interface Property {
   slug: string;
   publicId: string;
   category: PropertyCategory;
-  listingType?: string;
-  transactionType?: string;
-  offerType?: string;
-  purpose?: string;
+  transactionType?: PropertyTransactionType;
   types: PropertyType[];
   location: PropertyLocation;
   sizeSqm?: number;

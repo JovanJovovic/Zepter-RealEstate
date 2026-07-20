@@ -24,10 +24,13 @@ export const getAssistantInquiries = async (req: Request, res: Response) => {
 
     filter.$or = [
       { question: searchRegex },
+      { name: searchRegex },
       { email: searchRegex },
       { phone: searchRegex },
       { sourcePage: searchRegex },
       { propertyId: searchRegex },
+      { propertyPublicId: searchRegex },
+      { propertySlug: searchRegex },
       { propertyName: searchRegex },
     ];
   }

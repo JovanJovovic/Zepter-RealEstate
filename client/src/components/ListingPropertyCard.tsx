@@ -33,12 +33,7 @@ const ListingPropertyCard = ({
   const propertyTypeOptions = getPropertyTypeOptions(language);
   const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
   const listingType = getPropertyListingType(property);
-  const listingLabel =
-    listingType === 'rent'
-      ? copy.card.rent
-      : listingType === 'sale'
-        ? copy.card.sale
-        : copy.card.availableListing;
+  const listingLabel = listingType === 'sale' ? copy.card.sale : copy.card.rent;
   const availableAreaLabel = getAvailableAreaLabel(property, copy.card.onRequest, language);
   const totalAreaLabel = getTotalAreaLabel(property, copy.card.onRequest, language);
   const description =

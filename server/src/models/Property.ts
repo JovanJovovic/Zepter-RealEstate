@@ -27,6 +27,8 @@ export type PropertyCondition =
 
 export type PropertyStatus = "draft" | "published" | "archived";
 
+export type PropertyTransactionType = "rent" | "sale";
+
 export type SupportedLanguage = "en" | "sr" | "ru" | "de";
 
 export interface IPropertyImage {
@@ -72,6 +74,7 @@ export interface IProperty extends Document {
   publicId: string;
 
   category: PropertyCategory;
+  transactionType: PropertyTransactionType;
   types: PropertyType[];
 
   location: IPropertyLocation;
@@ -278,6 +281,14 @@ const propertySchema = new Schema<IProperty>(
       type: String,
       enum: ["commercial", "private", "project-development"],
       default: "commercial",
+      index: true,
+    },
+
+    transactionType: {
+      type: String,
+      enum: ["rent", "sale"],
+      default: "rent",
+      required: true,
       index: true,
     },
 

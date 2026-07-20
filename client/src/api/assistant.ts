@@ -2,11 +2,15 @@ import { API_URL } from '../utils/asset';
 
 export interface AssistantInquiryPayload {
   question: string;
+  name?: string;
   email?: string;
   phone?: string;
+  inquiryType?: 'assistant-widget' | 'property-contact-form';
   sourcePage?: string;
   pageTitle?: string;
   propertyId?: string;
+  propertyPublicId?: string;
+  propertySlug?: string;
   propertyName?: string;
 }
 

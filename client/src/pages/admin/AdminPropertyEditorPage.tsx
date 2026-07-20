@@ -18,7 +18,7 @@ import {
 } from '../../data/propertyOptions';
 import { languageOptions } from '../../data/languages';
 import type { AdminMessage, AdminPropertyPayload } from '../../types/admin';
-import type { FloorPlan, PropertyCategory, PropertyCondition, PropertyImage, PropertyStatus, PropertyTranslation, PropertyType, SupportedLanguage } from '../../types/property';
+import type { FloorPlan, PropertyCategory, PropertyCondition, PropertyImage, PropertyStatus, PropertyTransactionType, PropertyTranslation, PropertyType, SupportedLanguage } from '../../types/property';
 import { resolveMediaUrl } from '../../utils/asset';
 
 interface AdminPropertyEditorPageProps {
@@ -32,6 +32,7 @@ type PropertyFormState = {
   slug: string;
   publicId: string;
   category: PropertyCategory;
+  transactionType: PropertyTransactionType;
   status: PropertyStatus;
   isFeatured: boolean;
   types: PropertyType[];
@@ -80,6 +81,7 @@ const defaultForm: PropertyFormState = {
   slug: '',
   publicId: '',
   category: 'commercial',
+  transactionType: 'rent',
   status: 'draft',
   isFeatured: false,
   types: ['offices'],
@@ -174,6 +176,7 @@ const formFromProperty = (property: AdminPropertyPayload & { _id?: string; creat
     slug: property.slug || '',
     publicId: property.publicId || '',
     category: property.category || 'commercial',
+    transactionType: property.transactionType || 'rent',
     status: property.status || 'draft',
     isFeatured: Boolean(property.isFeatured),
     types: property.types || [],
@@ -238,6 +241,7 @@ const toPayload = (form: PropertyFormState): AdminPropertyPayload => {
     slug: form.slug.trim(),
     publicId: form.publicId.trim(),
     category: form.category,
+    transactionType: form.transactionType,
     types: form.types,
     location: {
       city: form.city.trim() || undefined,
@@ -602,6 +606,13 @@ const AdminPropertyEditorPage = ({ propertyId, navigate, language }: AdminProper
                 {editorCopy.category}
                 <select value={form.category} onChange={(event) => setField('category', event.target.value as PropertyCategory)}>
                   {Object.entries(categoryLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </label>
+              <label className="admin-field">
+                {editorCopy.transactionType}
+                <select value={form.transactionType} onChange={(event) => setField('transactionType', event.target.value as PropertyTransactionType)}>
+                  <option value="rent">{editorCopy.transactionRent}</option>
+                  <option value="sale">{editorCopy.transactionSale}</option>
                 </select>
               </label>
               <label className="admin-field">

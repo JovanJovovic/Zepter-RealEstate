@@ -27,6 +27,13 @@ const defaultResponse: PaginatedAssistantInquiriesResponse = {
   pagination: { total: 0, page: 1, limit: 12, pages: 0 },
 };
 
+const DetailField = ({ label, children }: { label: string; children: ReactNode }) => (
+  <div className="admin-detail-field">
+    <span>{label}</span>
+    <strong>{children}</strong>
+  </div>
+);
+
 const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPageProps) => {
   const [filters, setFilters] = useState<AssistantInquiryFiltersState>({ page: 1, limit: 12 });
   const [data, setData] = useState(defaultResponse);
@@ -44,9 +51,6 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
   ];
 
   const loadInquiries = () => {
-    setLoading(true);
-    setMessage(null);
-
     getAssistantInquiries(filters)
       .then(setData)
       .catch((err) => {
@@ -70,6 +74,8 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
   }, [data.items]);
 
   const updateFilter = (key: keyof AssistantInquiryFiltersState, value: string) => {
+    setLoading(true);
+    setMessage(null);
     setFilters((current) => ({ ...current, [key]: value || undefined, page: 1 }));
   };
 
@@ -85,8 +91,16 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
   };
 
   const changePage = (page: number) => {
+    setLoading(true);
+    setMessage(null);
     setFilters((current) => ({ ...current, page }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const resetFilters = () => {
+    setLoading(true);
+    setMessage(null);
+    setFilters({ page: 1, limit: 12 });
   };
 
   const formatDateTime = (value: string) => {
@@ -99,6 +113,10 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
         close: 'Zatvori',
         viewDetails: 'Detalji',
         fullQuestion: 'Puno pitanje',
+        name: 'Ime i prezime',
+        inquiryType: 'Izvor upita',
+        assistantWidget: 'Plutajući asistent',
+        propertyForm: 'Forma za nekretninu',
         email: 'Email',
         phone: 'Telefon',
         sourcePage: 'Izvorna strana',
@@ -106,6 +124,8 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
         propertyContext: 'Kontekst nekretnine',
         propertyName: 'Naziv nekretnine',
         propertyId: 'ID nekretnine',
+        propertyPublicId: 'Public ID nekretnine',
+        propertySlug: 'Slug nekretnine',
         receivedAt: 'Primljeno',
         updatedAt: 'Ažurirano',
         inquiryId: 'ID upita',
@@ -115,6 +135,10 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
         close: 'Close',
         viewDetails: 'Details',
         fullQuestion: 'Full question',
+        name: 'Full name',
+        inquiryType: 'Inquiry source',
+        assistantWidget: 'Floating assistant',
+        propertyForm: 'Property contact form',
         email: 'Email',
         phone: 'Phone',
         sourcePage: 'Source page',
@@ -122,17 +146,12 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
         propertyContext: 'Property context',
         propertyName: 'Property name',
         propertyId: 'Property ID',
+        propertyPublicId: 'Property public ID',
+        propertySlug: 'Property slug',
         receivedAt: 'Received',
         updatedAt: 'Updated',
         inquiryId: 'Inquiry ID',
       };
-
-  const DetailField = ({ label, children }: { label: string; children: ReactNode }) => (
-    <div className="admin-detail-field">
-      <span>{label}</span>
-      <strong>{children || copy.common.notSet}</strong>
-    </div>
-  );
 
   return (
     <div className="admin-page">
@@ -172,7 +191,7 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
             ))}
           </select>
         </label>
-        <button onClick={() => setFilters({ page: 1, limit: 12 })}>{copy.common.reset}</button>
+        <button onClick={resetFilters}>{copy.common.reset}</button>
       </section>
 
       {loading && <LoadingState text={inquiryCopy.loading} />}
@@ -206,12 +225,15 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
                   )}
                 </div>
                 <div className="admin-inquiry-contact">
+                  {inquiry.name && <strong>{inquiry.name}</strong>}
                   {inquiry.email && <a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>}
                   {inquiry.phone && <a href={`tel:${inquiry.phone}`}>{inquiry.phone}</a>}
                 </div>
                 <div className="admin-inquiry-context">
                   <span>{inquiry.propertyName || inquiry.pageTitle || copy.common.notSet}</span>
-                  {inquiry.propertyId && <small>{inquiry.propertyId}</small>}
+                  {(inquiry.propertyPublicId || inquiry.propertyId) && (
+                    <small>{inquiry.propertyPublicId || inquiry.propertyId}</small>
+                  )}
                 </div>
                 <div className="admin-status-select-wrap">
                   <AdminStatusBadge value={inquiry.status} language={language} />
@@ -261,6 +283,12 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
             </div>
 
             <div className="admin-detail-grid">
+              <DetailField label={detailLabels.name}>{selectedInquiry.name || copy.common.notSet}</DetailField>
+              <DetailField label={detailLabels.inquiryType}>
+                {selectedInquiry.inquiryType === 'property-contact-form'
+                  ? detailLabels.propertyForm
+                  : detailLabels.assistantWidget}
+              </DetailField>
               <DetailField label={detailLabels.email}>
                 {selectedInquiry.email ? <a href={`mailto:${selectedInquiry.email}`}>{selectedInquiry.email}</a> : copy.common.notSet}
               </DetailField>
@@ -293,6 +321,8 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
               <DetailField label={detailLabels.pageTitle}>{selectedInquiry.pageTitle || copy.common.notSet}</DetailField>
               <DetailField label={detailLabels.propertyName}>{selectedInquiry.propertyName || copy.common.notSet}</DetailField>
               <DetailField label={detailLabels.propertyId}>{selectedInquiry.propertyId || copy.common.notSet}</DetailField>
+              <DetailField label={detailLabels.propertyPublicId}>{selectedInquiry.propertyPublicId || copy.common.notSet}</DetailField>
+              <DetailField label={detailLabels.propertySlug}>{selectedInquiry.propertySlug || copy.common.notSet}</DetailField>
               <DetailField label={detailLabels.receivedAt}>{formatDateTime(selectedInquiry.createdAt)}</DetailField>
               <DetailField label={detailLabels.updatedAt}>{formatDateTime(selectedInquiry.updatedAt)}</DetailField>
               <DetailField label={detailLabels.inquiryId}>{selectedInquiry._id}</DetailField>

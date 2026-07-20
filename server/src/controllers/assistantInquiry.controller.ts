@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 
-import AssistantInquiry from "../models/AssistantInquiry.js";
+import AssistantInquiry, { AssistantInquiryType } from "../models/AssistantInquiry.js";
+import Property from "../models/Property.js";
 
 const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -17,14 +19,30 @@ const normalizeNullableString = (value: unknown) => {
   return trimmed || null;
 };
 
+const inquiryTypes: AssistantInquiryType[] = ["assistant-widget", "property-contact-form"];
+
 export const createAssistantInquiry = async (req: Request, res: Response) => {
   const question = normalizeNullableString(req.body.question);
+  const name = normalizeNullableString(req.body.name);
   const email = normalizeNullableString(req.body.email)?.toLowerCase() || null;
   const phone = normalizeNullableString(req.body.phone);
+  const inquiryType = normalizeNullableString(req.body.inquiryType) || "assistant-widget";
 
   if (!question) {
     return res.status(400).json({
       message: "Question is required.",
+    });
+  }
+
+  if (!inquiryTypes.includes(inquiryType as AssistantInquiryType)) {
+    return res.status(400).json({
+      message: "Inquiry type is not valid.",
+    });
+  }
+
+  if (inquiryType === "property-contact-form" && !name) {
+    return res.status(400).json({
+      message: "Name is required.",
     });
   }
 
@@ -46,14 +64,57 @@ export const createAssistantInquiry = async (req: Request, res: Response) => {
     });
   }
 
+  let propertyContext = {
+    propertyId: normalizeNullableString(req.body.propertyId),
+    propertyPublicId: normalizeNullableString(req.body.propertyPublicId),
+    propertySlug: normalizeNullableString(req.body.propertySlug),
+    propertyName: normalizeNullableString(req.body.propertyName),
+  };
+
+  if (inquiryType === "property-contact-form") {
+    const propertyFilters: Record<string, unknown>[] = [];
+
+    if (propertyContext.propertyId && mongoose.isValidObjectId(propertyContext.propertyId)) {
+      propertyFilters.push({ _id: propertyContext.propertyId });
+    }
+
+    if (propertyContext.propertyPublicId) {
+      propertyFilters.push({ publicId: propertyContext.propertyPublicId });
+    }
+
+    if (propertyContext.propertySlug) {
+      propertyFilters.push({ slug: propertyContext.propertySlug });
+    }
+
+    const property = propertyFilters.length
+      ? await Property.findOne({ status: "published", $or: propertyFilters }).select(
+          "_id publicId slug title"
+        )
+      : null;
+
+    if (!property) {
+      return res.status(400).json({
+        message: "Property context is not valid.",
+      });
+    }
+
+    propertyContext = {
+      propertyId: String(property._id),
+      propertyPublicId: property.publicId,
+      propertySlug: property.slug,
+      propertyName: property.title,
+    };
+  }
+
   const inquiry = await AssistantInquiry.create({
     question,
+    name,
     email,
     phone,
+    inquiryType,
     sourcePage: normalizeNullableString(req.body.sourcePage),
     pageTitle: normalizeNullableString(req.body.pageTitle),
-    propertyId: normalizeNullableString(req.body.propertyId),
-    propertyName: normalizeNullableString(req.body.propertyName),
+    ...propertyContext,
   });
 
   res.status(201).json({

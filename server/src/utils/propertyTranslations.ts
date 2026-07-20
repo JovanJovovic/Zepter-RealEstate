@@ -35,6 +35,7 @@ export const localizeProperty = (property: IProperty, language: SupportedLanguag
       : DEFAULT_OCCUPANCY_PERCENTAGE;
   const propertyObject = {
     ...rawPropertyObject,
+    transactionType: rawPropertyObject.transactionType === "sale" ? "sale" : "rent",
     occupancyPercentage,
     availableArea:
       typeof rawPropertyObject.availableArea === "number"

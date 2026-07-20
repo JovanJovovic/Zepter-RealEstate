@@ -1,14 +1,19 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export type AssistantInquiryStatus = "new" | "in-progress" | "answered" | "archived";
+export type AssistantInquiryType = "assistant-widget" | "property-contact-form";
 
 export interface IAssistantInquiry extends Document {
   question: string;
+  name?: string | null;
   email?: string | null;
   phone?: string | null;
+  inquiryType: AssistantInquiryType;
   sourcePage?: string | null;
   pageTitle?: string | null;
   propertyId?: string | null;
+  propertyPublicId?: string | null;
+  propertySlug?: string | null;
   propertyName?: string | null;
   status: AssistantInquiryStatus;
   createdAt: Date;
@@ -23,6 +28,12 @@ const assistantInquirySchema = new Schema<IAssistantInquiry>(
       trim: true,
       maxlength: 4000,
     },
+    name: {
+      type: String,
+      trim: true,
+      maxlength: 160,
+      default: null,
+    },
     email: {
       type: String,
       lowercase: true,
@@ -33,6 +44,12 @@ const assistantInquirySchema = new Schema<IAssistantInquiry>(
       type: String,
       trim: true,
       default: null,
+    },
+    inquiryType: {
+      type: String,
+      enum: ["assistant-widget", "property-contact-form"],
+      default: "assistant-widget",
+      index: true,
     },
     sourcePage: {
       type: String,
@@ -49,6 +66,17 @@ const assistantInquirySchema = new Schema<IAssistantInquiry>(
       trim: true,
       default: null,
       index: true,
+    },
+    propertyPublicId: {
+      type: String,
+      trim: true,
+      default: null,
+      index: true,
+    },
+    propertySlug: {
+      type: String,
+      trim: true,
+      default: null,
     },
     propertyName: {
       type: String,

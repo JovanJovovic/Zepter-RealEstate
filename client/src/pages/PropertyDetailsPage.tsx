@@ -1,22 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getPropertyByPublicId } from '../api/properties';
+import { getProperties, getPropertyByPublicId } from '../api/properties';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
+import PropertyCard from '../components/PropertyCard';
+import PropertyFactsList from '../components/PropertyFactsList';
+import PropertyInformationTabs from '../components/PropertyInformationTabs';
+import PropertyInquiryForm from '../components/PropertyInquiryForm';
 import { getCopy } from '../data/localization';
-import { getCategoryLabels, getConditionOptions, getPropertyTypeOptions, getSpecialRequirementOptions } from '../data/propertyOptions';
+import { getCategoryLabels } from '../data/propertyOptions';
 import type { Property, SupportedLanguage } from '../types/property';
 import { getMainImage, resolveMediaUrl } from '../utils/asset';
 import { getAvailableAreaLabel, getOccupancyPercentage, getTotalAreaLabel } from '../utils/propertyArea';
+import { getPropertyListingType } from '../utils/propertyListingType';
 
 interface PropertyDetailsPageProps {
   publicId: string;
   navigate: (path: string) => void;
   language: SupportedLanguage;
 }
-
-const getLabel = (value: string, options: Array<{ value: string; label: string }>) => {
-  return options.find((option) => option.value === value)?.label || value;
-};
 
 const normalizeYoutubeUrl = (url?: string) => {
   if (!url) return '';
@@ -28,9 +29,49 @@ const normalizeYoutubeUrl = (url?: string) => {
   return url;
 };
 
+const normalizeComparisonValue = (value?: string) => value?.trim().toLocaleLowerCase() || '';
+
+const getSimilarProperties = (currentProperty: Property, candidates: Property[]) => {
+  const currentTypes = new Set(currentProperty.types);
+  const currentCity = normalizeComparisonValue(currentProperty.location.city);
+  const currentCountry = normalizeComparisonValue(currentProperty.location.country);
+  const currentMunicipality = normalizeComparisonValue(currentProperty.location.municipality);
+
+  return candidates
+    .filter((candidate) => candidate._id !== currentProperty._id && candidate.publicId !== currentProperty.publicId)
+    .map((candidate) => {
+      const sharedTypes = candidate.types.filter((type) => currentTypes.has(type)).length;
+      const sameCity = currentCity && normalizeComparisonValue(candidate.location.city) === currentCity;
+      const sameCountry = currentCountry && normalizeComparisonValue(candidate.location.country) === currentCountry;
+      const sameMunicipality =
+        currentMunicipality &&
+        normalizeComparisonValue(candidate.location.municipality) === currentMunicipality;
+
+      return {
+        property: candidate,
+        score:
+          sharedTypes * 100 +
+          (sameCity ? 20 : 0) +
+          (sameCountry ? 10 : 0) +
+          (sameMunicipality ? 5 : 0),
+      };
+    })
+    .filter((candidate) => candidate.score > 0)
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score;
+      if (left.property.isFeatured !== right.property.isFeatured) {
+        return Number(right.property.isFeatured) - Number(left.property.isFeatured);
+      }
+      return new Date(right.property.updatedAt).getTime() - new Date(left.property.updatedAt).getTime();
+    })
+    .slice(0, 3)
+    .map((candidate) => candidate.property);
+};
+
 const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPageProps) => {
   const [property, setProperty] = useState<Property | null>(null);
   const [activeImage, setActiveImage] = useState('');
+  const [similarProperties, setSimilarProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const copy = getCopy(language);
@@ -45,6 +86,20 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
         if (!mounted) return;
         setProperty(data);
         setActiveImage(getMainImage(data));
+        setSimilarProperties([]);
+
+        getProperties({
+          category: data.category,
+          language,
+          page: 1,
+          limit: 100,
+        })
+          .then((response) => {
+            if (mounted) setSimilarProperties(getSimilarProperties(data, response.items));
+          })
+          .catch(() => {
+            if (mounted) setSimilarProperties([]);
+          });
       })
       .catch((err) => {
         if (!mounted) return;
@@ -85,11 +140,8 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
   }
 
   const categoryLabels = getCategoryLabels(language);
-  const conditionOptions = getConditionOptions(language);
-  const propertyTypeOptions = getPropertyTypeOptions(language);
-  const specialRequirementOptions = getSpecialRequirementOptions(language);
-  const conditionLabel = getLabel(property.condition, conditionOptions);
-  const typeLabel = property.types.map((type) => getLabel(type, propertyTypeOptions)).join(' / ');
+  const transactionType = getPropertyListingType(property);
+  const transactionLabel = transactionType === 'sale' ? copy.card.sale : copy.card.rent;
   const videoUrl = normalizeYoutubeUrl(property.videoUrl);
   const totalAreaLabel = getTotalAreaLabel(property, copy.details.onRequest, language);
   const availableAreaLabel = getAvailableAreaLabel(property, copy.details.onRequest, language);
@@ -133,8 +185,8 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
                 <strong>{occupancyPercentage}%</strong>
               </div>
               <div>
-                <span>{copy.details.condition}</span>
-                <strong>{conditionLabel}</strong>
+                <span>{copy.details.transactionType}</span>
+                <strong>{transactionLabel}</strong>
               </div>
             </div>
           </div>
@@ -167,21 +219,27 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
       </section>
 
       <section className="section property-details-section">
-        <div className="container details-grid">
-          <div className="details-main">
-            <article className="details-card details-card--lead">
-              <span className="eyebrow">{copy.details.aboutProperty}</span>
-              <h2>{property.shortDescription || property.title}</h2>
-              <p>{property.aboutProperty || property.fullDescription || property.shortDescription}</p>
-            </article>
-
-            {property.fullDescription && property.fullDescription !== property.aboutProperty && (
-              <article className="details-card">
-                <span className="eyebrow">{copy.details.description}</span>
-                <p>{property.fullDescription}</p>
+        <div className="container property-details-content">
+          <div className="details-grid">
+            <div className="details-main">
+              <article className="details-card details-card--lead">
+                <span className="eyebrow">{copy.details.aboutProperty}</span>
+                <h2>{property.shortDescription || property.title}</h2>
+                <p>{property.aboutProperty || property.fullDescription || property.shortDescription}</p>
               </article>
-            )}
+            </div>
 
+            <aside className="details-sidebar">
+              <div className="details-sidebar__card">
+                <h2>{copy.details.facts}</h2>
+                <PropertyFactsList property={property} language={language} />
+              </div>
+            </aside>
+          </div>
+
+          <PropertyInformationTabs property={property} language={language} />
+
+          <div className="property-detail-support">
             {videoUrl && (
               <article className="details-card">
                 <span className="eyebrow">{copy.details.video}</span>
@@ -204,15 +262,12 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
                 </div>
               </article>
             )}
+
             {mapQuery && (
               <article className="details-card details-card--map">
-                <span className="eyebrow">{copy.details.map || 'Location'}</span>
+                <span className="eyebrow">{copy.details.map}</span>
                 <h2>{property.location.fullLocation}</h2>
-
-                {property.location.address && (
-                  <p>{property.location.address}</p>
-                )}
-
+                {property.location.address && <p>{property.location.address}</p>}
                 <div className="property-map-frame">
                   <iframe
                     title={`${property.title} map`}
@@ -223,69 +278,33 @@ const PropertyDetailsPage = ({ publicId, navigate, language }: PropertyDetailsPa
                 </div>
               </article>
             )}
-
-
           </div>
-
-          <aside className="details-sidebar">
-            <div className="details-sidebar__card">
-              <h2>{copy.details.facts}</h2>
-              <dl className="facts-list">
-                <div>
-                  <dt>{copy.details.totalArea}</dt>
-                  <dd>{totalAreaLabel}</dd>
-                </div>
-                <div>
-                  <dt>{copy.details.availableArea}</dt>
-                  <dd>{availableAreaLabel}</dd>
-                </div>
-                <div>
-                  <dt>{copy.details.occupancy}</dt>
-                  <dd>{occupancyPercentage}%</dd>
-                </div>
-                <div>
-                  <dt>{copy.details.type}</dt>
-                  <dd>{typeLabel || copy.details.onRequest}</dd>
-                </div>
-                <div>
-                  <dt>{copy.details.condition}</dt>
-                  <dd>{conditionLabel}</dd>
-                </div>
-                {property.rooms && (
-                  <div>
-                    <dt>{copy.details.rooms}</dt>
-                    <dd>{property.rooms}</dd>
-                  </div>
-                )}
-                {property.floorLabel && (
-                  <div>
-                    <dt>{copy.details.floors}</dt>
-                    <dd>{property.floorLabel}</dd>
-                  </div>
-                )}
-              </dl>
-            </div>
-
-            <div className="details-sidebar__card details-sidebar__card--accent">
-              <h2>{copy.details.contact}</h2>
-              <p>{copy.details.contactText}</p>
-              <a href={`tel:${property.contactPhone || '+381112019170'}`}>{property.contactPhone || '+381 11 20 19 170'}</a>
-              <a href={`mailto:${property.contactEmail || 'realestate@zepter.rs'}`}>{property.contactEmail || 'realestate@zepter.rs'}</a>
-            </div>
-
-            {property.specialRequirements.length > 0 && (
-              <div className="details-sidebar__card">
-                <h2>{copy.details.specialRequirements}</h2>
-                <div className="details-tags">
-                  {property.specialRequirements.map((requirement) => (
-                    <span key={requirement}>{getLabel(requirement, specialRequirementOptions)}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </aside>
         </div>
       </section>
+
+      <PropertyInquiryForm property={property} language={language} />
+
+      {similarProperties.length > 0 && (
+        <section className="section similar-properties-section">
+          <div className="container">
+            <div className="similar-properties-heading">
+              <span className="eyebrow">{copy.details.similarEyebrow}</span>
+              <h2>{copy.details.similarTitle}</h2>
+              <p>{copy.details.similarText}</p>
+            </div>
+            <div className="similar-properties-grid">
+              {similarProperties.map((similarProperty) => (
+                <PropertyCard
+                  key={similarProperty._id}
+                  property={similarProperty}
+                  navigate={navigate}
+                  language={language}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 };

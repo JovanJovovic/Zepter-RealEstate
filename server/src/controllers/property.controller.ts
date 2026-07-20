@@ -7,6 +7,7 @@ import {
   OCCUPANCY_PERCENTAGE_ERROR,
   buildAvailabilityFields,
 } from "../utils/propertyAvailability.js";
+import { normalizePropertyTransactionType } from "../utils/propertyTransactionType.js";
 
 const createSlug = (title: string): string => {
   return slugify(title, {
@@ -274,6 +275,7 @@ export const createProperty = async (req: Request, res: Response) => {
     propertyData = buildPropertyAvailabilityData({
       ...req.body,
       slug,
+      transactionType: normalizePropertyTransactionType(req.body.transactionType),
     });
   } catch (error) {
     return res.status(400).json({
@@ -303,6 +305,10 @@ export const updateProperty = async (req: Request, res: Response) => {
   }
 
   try {
+    updateData.transactionType = normalizePropertyTransactionType(
+      req.body.transactionType,
+      existingProperty.transactionType || "rent"
+    );
     updateData = buildPropertyAvailabilityData(updateData, existingProperty);
   } catch (error) {
     return res.status(400).json({

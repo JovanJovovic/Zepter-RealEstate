@@ -78,11 +78,15 @@ export interface PropertyOffer {
 export interface AssistantInquiry {
   _id: string;
   question: string;
+  name?: string | null;
   email?: string | null;
   phone?: string | null;
+  inquiryType?: 'assistant-widget' | 'property-contact-form';
   sourcePage?: string | null;
   pageTitle?: string | null;
   propertyId?: string | null;
+  propertyPublicId?: string | null;
+  propertySlug?: string | null;
   propertyName?: string | null;
   status: AssistantInquiryStatus;
   createdAt: string;
