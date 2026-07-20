@@ -1,60 +1,74 @@
 import { useMemo, useState } from 'react';
 import type { FormEvent } from 'react';
-import type { PropertyFiltersState } from '../types/property';
-import {
-  getConditionOptions,
-  getPublicSpecialRequirementOptions,
-  getPropertyTypeOptions,
-  roomOptions,
-} from '../data/propertyOptions';
-import type { SupportedLanguage } from '../types/property';
 import { getCopy } from '../data/localization';
+import { getPropertyTypeOptions } from '../data/propertyOptions';
+import type { SupportedLanguage } from '../types/property';
+import type { PropertyLocationOptions } from '../utils/propertyLocation';
+
+export interface PublicPropertyFiltersState {
+  country: string;
+  city: string;
+  types: string[];
+  minAvailableArea: string;
+  maxAvailableArea: string;
+}
 
 interface PropertyFiltersProps {
-  initialFilters: PropertyFiltersState;
-  locations: LocationFilterOption[];
-  onApply: (filters: PropertyFiltersState) => void;
+  initialFilters: PublicPropertyFiltersState;
+  locationOptions: PropertyLocationOptions;
+  onApply: (filters: PublicPropertyFiltersState) => void;
   onReset: () => void;
   mode?: 'commercial' | 'projects';
   language: SupportedLanguage;
 }
 
-export interface LocationFilterOption {
-  key: string;
-  label: string;
-  city: string;
-  municipality: string;
-}
+const PUBLIC_PROPERTY_TYPES = ['retails', 'offices', 'warehouses', 'industrial', 'land', 'apartments'];
 
-const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = 'commercial', language }: PropertyFiltersProps) => {
-  const [filters, setFilters] = useState<PropertyFiltersState>(initialFilters);
-  const propertyTypeOptions = getPropertyTypeOptions(language);
-  const conditionOptions = getConditionOptions(language);
-  const specialRequirementOptions = getPublicSpecialRequirementOptions(language);
+const PropertyFilters = ({
+  initialFilters,
+  locationOptions,
+  onApply,
+  onReset,
+  mode = 'commercial',
+  language,
+}: PropertyFiltersProps) => {
+  const [filters, setFilters] = useState<PublicPropertyFiltersState>(initialFilters);
   const copy = getCopy(language);
+  const allPropertyTypeOptions = getPropertyTypeOptions(language);
+  const propertyTypeOptions = PUBLIC_PROPERTY_TYPES.flatMap((value) => {
+    const option = allPropertyTypeOptions.find((candidate) => candidate.value === value);
+    return option ? [option] : [];
+  });
 
-  const locationOptions = useMemo(() => {
-    return [...locations].sort((a, b) => a.label.localeCompare(b.label));
-  }, [locations]);
+  const cityOptions = useMemo(() => {
+    if (!filters.country) return locationOptions.cities;
+    return locationOptions.cities.filter((city) => city.countryKey === filters.country);
+  }, [filters.country, locationOptions.cities]);
 
-  const selectedLocationKey =
-    filters.city && filters.municipality
-      ? `${filters.city.trim().toLowerCase()}|${filters.municipality.trim().toLowerCase()}`
-      : '';
-
-  const setValue = (key: keyof PropertyFiltersState, value: string) => {
-    setFilters((current) => ({ ...current, [key]: value, page: 1 }));
+  const setValue = (key: keyof PublicPropertyFiltersState, value: string) => {
+    setFilters((current) => ({ ...current, [key]: value }));
   };
 
-  const setLocation = (locationKey: string) => {
-    const selectedLocation = locationOptions.find((option) => option.key === locationKey);
+  const setCountry = (country: string) => {
+    setFilters((current) => {
+      const keepCity =
+        !country ||
+        locationOptions.cities.some((city) => city.key === current.city && city.countryKey === country);
 
+      return {
+        ...current,
+        country,
+        city: keepCity ? current.city : '',
+      };
+    });
+  };
+
+  const toggleType = (value: string) => {
     setFilters((current) => ({
       ...current,
-      city: selectedLocation?.city || undefined,
-      municipality: selectedLocation?.municipality || undefined,
-      location: undefined,
-      page: 1,
+      types: current.types.includes(value)
+        ? current.types.filter((type) => type !== value)
+        : [...current.types, value],
     }));
   };
 
@@ -63,167 +77,111 @@ const PropertyFilters = ({ initialFilters, locations, onApply, onReset, mode = '
     setValue(key, value);
   };
 
-  const toggleRequirement = (value: string) => {
-    setFilters((current) => {
-      const currentValues = current.specialRequirement || [];
-      const nextValues = currentValues.includes(value)
-        ? currentValues.filter((item) => item !== value)
-        : [...currentValues, value];
-
-      return { ...current, specialRequirement: nextValues, page: 1 };
-    });
-  };
-
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     onApply(filters);
   };
 
-  return (
-    <aside className="filters-panel">
-      <form onSubmit={handleSubmit}>
-        <div className="filters-panel__heading">
-          <span className="eyebrow">{copy.filters.refine}</span>
-          <h2>{mode === 'projects' ? copy.filters.projectFilters : copy.filters.commercialFilters}</h2>
-        </div>
+  const resetFilters = () => {
+    setFilters(initialFilters);
+    onReset();
+  };
 
-        <div className="field-group">
-          <label htmlFor="search">{copy.filters.search}</label>
-          <input
-            id="search"
-            type="text"
-            value={filters.search || ''}
-            placeholder={copy.filters.searchPlaceholder}
-            onChange={(event) => setValue('search', event.target.value)}
-          />
+  return (
+    <div className="property-search-filters">
+      <form onSubmit={handleSubmit}>
+        <div className="property-search-filters__locations">
+          <div className="property-search-field">
+            <label htmlFor="property-country">{copy.filters.country}</label>
+            <select
+              id="property-country"
+              value={filters.country}
+              onChange={(event) => setCountry(event.target.value)}
+            >
+              <option value="">{copy.filters.allCountries}</option>
+              {locationOptions.countries.map((country) => (
+                <option key={country.key} value={country.key}>{country.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="property-search-field">
+            <label htmlFor="property-city">{copy.filters.city}</label>
+            <select
+              id="property-city"
+              value={filters.city}
+              onChange={(event) => setValue('city', event.target.value)}
+              disabled={cityOptions.length === 0}
+            >
+              <option value="">{copy.filters.allCities}</option>
+              {cityOptions.map((city) => (
+                <option key={`${city.countryKey}-${city.key}`} value={city.key}>{city.label}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {mode === 'commercial' && (
-          <div className="filter-chips">
-            {propertyTypeOptions.slice(0, 6).map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={filters.type === option.value ? 'filter-chip filter-chip--active' : 'filter-chip'}
-                onClick={() => setValue('type', filters.type === option.value ? '' : option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
+          <div className="property-search-filters__types">
+            <span className="property-search-filters__label">{copy.filters.propertyType}</span>
+            <div className="property-search-filter-chips">
+              {propertyTypeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={filters.types.includes(option.value) ? 'property-filter-chip property-filter-chip--active' : 'property-filter-chip'}
+                  aria-pressed={filters.types.includes(option.value)}
+                  onClick={() => toggleType(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        <div className="field-grid">
-          <div className="field-group">
-            <label htmlFor="location">{copy.filters.location}</label>
-            <select id="location" value={selectedLocationKey} onChange={(event) => setLocation(event.target.value)}>
-              <option value="">{copy.filters.allLocations}</option>
-              {locationOptions.map((location) => (
-                <option key={location.key} value={location.key}>
-                  {location.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="field-group">
-            <label>{copy.filters.availableArea}</label>
-            <div className="area-range-fields">
-              <label>
-                <span>{copy.filters.from}</span>
-                <div className="area-range-input">
-                  <input
-                    aria-label={`${copy.filters.availableArea} ${copy.filters.from}`}
-                    inputMode="decimal"
-                    min="0"
-                    type="number"
-                    value={filters.minAvailableArea || ''}
-                    placeholder={copy.filters.from}
-                    onChange={(event) => setPositiveNumberValue('minAvailableArea', event.target.value)}
-                  />
-                  <small>{copy.filters.sqm}</small>
-                </div>
-              </label>
-              <label>
-                <span>{copy.filters.to}</span>
-                <div className="area-range-input">
-                  <input
-                    aria-label={`${copy.filters.availableArea} ${copy.filters.to}`}
-                    inputMode="decimal"
-                    min="0"
-                    type="number"
-                    value={filters.maxAvailableArea || ''}
-                    placeholder={copy.filters.to}
-                    onChange={(event) => setPositiveNumberValue('maxAvailableArea', event.target.value)}
-                  />
-                  <small>{copy.filters.sqm}</small>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div className="field-group">
-            <label htmlFor="condition">{copy.filters.condition}</label>
-            <select id="condition" value={filters.condition || ''} onChange={(event) => setValue('condition', event.target.value)}>
-              <option value="">{copy.filters.anyCondition}</option>
-              {conditionOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="field-group">
-            <label htmlFor="rooms">{copy.filters.rooms}</label>
-            <select id="rooms" value={filters.rooms || ''} onChange={(event) => setValue('rooms', event.target.value)}>
-              <option value="">{copy.filters.anyNumber}</option>
-              {roomOptions.map((room) => (
-                <option key={room} value={room}>
-                  {room}
-                </option>
-              ))}
-            </select>
+        <div className="property-search-filters__area">
+          <span className="property-search-filters__label">{copy.filters.availableArea}</span>
+          <div className="property-area-range">
+            <label>
+              <span>{copy.filters.from}</span>
+              <span className="property-area-input">
+                <input
+                  aria-label={`${copy.filters.availableArea} ${copy.filters.from}`}
+                  inputMode="decimal"
+                  min="0"
+                  type="number"
+                  value={filters.minAvailableArea}
+                  placeholder="0"
+                  onChange={(event) => setPositiveNumberValue('minAvailableArea', event.target.value)}
+                />
+                <small>{copy.filters.sqm}</small>
+              </span>
+            </label>
+            <label>
+              <span>{copy.filters.to}</span>
+              <span className="property-area-input">
+                <input
+                  aria-label={`${copy.filters.availableArea} ${copy.filters.to}`}
+                  inputMode="decimal"
+                  min="0"
+                  type="number"
+                  value={filters.maxAvailableArea}
+                  placeholder="-"
+                  onChange={(event) => setPositiveNumberValue('maxAvailableArea', event.target.value)}
+                />
+                <small>{copy.filters.sqm}</small>
+              </span>
+            </label>
           </div>
         </div>
 
-        <div className="requirements-group">
-          <label>{copy.filters.specialRequirements}</label>
-          <div className="requirements-grid">
-            {specialRequirementOptions.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={
-                  filters.specialRequirement?.includes(option.value)
-                    ? 'requirement-toggle requirement-toggle--active'
-                    : 'requirement-toggle'
-                }
-                onClick={() => toggleRequirement(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="filters-actions">
-          <button className="btn btn--primary" type="submit">
-            {copy.filters.submit}
-          </button>
-          <button
-            className="btn btn--ghost"
-            type="button"
-            onClick={() => {
-              setFilters(initialFilters);
-              onReset();
-            }}
-          >
-            {copy.filters.reset}
-          </button>
+        <div className="property-search-filters__actions">
+          <button className="btn btn--primary" type="submit">{copy.filters.submit}</button>
+          <button className="btn btn--ghost" type="button" onClick={resetFilters}>{copy.filters.reset}</button>
         </div>
       </form>
-    </aside>
+    </div>
   );
 };
 

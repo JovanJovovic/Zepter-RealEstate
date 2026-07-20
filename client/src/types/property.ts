@@ -39,6 +39,7 @@ export interface FloorPlan {
 }
 
 export interface PropertyLocation {
+  country?: string;
   city?: string;
   municipality?: string;
   fullLocation: string;

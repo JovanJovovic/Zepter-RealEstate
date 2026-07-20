@@ -12,112 +12,48 @@ interface HomePageProps {
   language: SupportedLanguage;
 }
 
-const HERO_ROTATION_MS = 6000;
-
-type HeroSlide = {
-  image: string;
-  alt: string;
-  eyebrow: string;
-  title: string;
-  text: string;
-  primaryStat: string;
-  primaryText: string;
-  secondaryStat: string;
-  secondaryText: string;
-};
-
-const heroSlides: Record<'en' | 'sr', HeroSlide[]> = {
-  en: [
-    {
-      image: publicImage('what we do Zepter Real Estate.jpg'),
-      alt: 'Zepter Real Estate business portfolio presentation',
-      eyebrow: 'WELCOME TO ZEPTER REAL ESTATE',
-      title: 'Regional real estate portfolio with a premium business standard.',
-      text: 'We strive to create value for both sides through efficient and reliable transactions, and to build long-term cooperation with our clients.',
-      primaryStat: '380,000+',
-      primaryText: 'sqm portfolio',
-      secondaryStat: 'Since 2008',
-      secondaryText: 'ownership, management and development',
-    },
-    {
-      image: publicImage('portfolio Zepter Real Estate.jpg'),
-      alt: 'Zepter Real Estate professional property management',
-      eyebrow: 'WHAT WE DO',
-      title: 'Professional management, development and presentation of Zepter properties.',
-      text: 'We connect business needs with quality spaces, clear information and a reliable leasing or sales process.',
-      primaryStat: 'Commercial spaces',
-      primaryText: 'retail units, offices and business properties',
-      secondaryStat: 'Clear process',
-      secondaryText: 'viewing, contact and team support',
-    },
-    {
-      image: publicImage('who we are Zepter-Real Estate.jpg'),
-      alt: 'Zepter Real Estate selected premium locations',
-      eyebrow: 'ZEPTER PORTFOLIO',
-      title: 'Carefully selected properties in attractive business locations.',
-      text: 'Our portfolio includes spaces for different uses, from office and commercial properties to retail units, land and other investment opportunities.',
-      primaryStat: 'Multiple categories',
-      primaryText: 'commercial and residential properties',
-      secondaryStat: 'Premium locations',
-      secondaryText: 'visibility, access and market potential',
-    },
-  ],
-  sr: [
-    {
-      image: publicImage('what we do Zepter Real Estate.jpg'),
-      alt: 'Zepter Real Estate poslovni portfolio nekretnina',
-      eyebrow: 'WELCOME TO ZEPTER REAL ESTATE',
-      title: 'Regionalni portfolio nekretnina sa premium poslovnim standardom.',
-      text: 'Težimo tome da kroz efikasne i pouzdane transakcije ostvarimo korist za obe strane i izgradimo dugoročnu saradnju sa klijentima.',
-      primaryStat: '380.000+',
-      primaryText: 'm² portfolija',
-      secondaryStat: 'Od 2008.',
-      secondaryText: 'vlasništvo, upravljanje i razvoj',
-    },
-    {
-      image: publicImage('portfolio Zepter Real Estate.jpg'),
-      alt: 'Zepter Real Estate profesionalno upravljanje nekretninama',
-      eyebrow: 'WHAT WE DO',
-      title: 'Profesionalno upravljanje, razvoj i prezentacija Zepter nekretnina.',
-      text: 'Povezujemo poslovne potrebe korisnika sa kvalitetnim prostorima, jasnim informacijama i pouzdanim procesom zakupa ili prodaje.',
-      primaryStat: 'Komercijalni prostori',
-      primaryText: 'lokali, kancelarije i poslovni objekti',
-      secondaryStat: 'Jasan proces',
-      secondaryText: 'pregled, kontakt i podrška tima',
-    },
-    {
-      image: publicImage('who we are Zepter-Real Estate.jpg'),
-      alt: 'Zepter Real Estate odabrane premium lokacije',
-      eyebrow: 'ZEPTER PORTFOLIO',
-      title: 'Pažljivo odabrane nekretnine na atraktivnim poslovnim lokacijama.',
-      text: 'Naš portfolio obuhvata prostore različitih namena, od kancelarijskih i komercijalnih objekata do lokala, zemljišta i drugih investicionih prilika.',
-      primaryStat: 'Više kategorija',
-      primaryText: 'komercijalne i rezidencijalne nekretnine',
-      secondaryStat: 'Premium lokacije',
-      secondaryText: 'vidljivost, pristup i tržišni potencijal',
-    },
-  ],
+const homeImages = {
+  hero: publicImage('what we do Zepter Real Estate.jpg'),
+  about: publicImage('portfolio Zepter Real Estate.jpg'),
+  modern: publicImage('who we are Zepter-Real Estate.jpg'),
 };
 
 const HomePage = ({ navigate, language }: HomePageProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const copy = getCopy(language);
-  const slides = language === 'sr' ? heroSlides.sr : heroSlides.en;
-  const activeSlide = slides[activeSlideIndex];
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActiveSlideIndex((current) => (current + 1) % slides.length);
-    }, HERO_ROTATION_MS);
-
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
-
-  useEffect(() => {
-    setActiveSlideIndex(0);
-  }, [language]);
+  const serviceCards = [
+    {
+      image: homeImages.modern,
+      title: copy.home.serviceOfficesTitle,
+      text: copy.home.serviceOfficesText,
+    },
+    {
+      image: homeImages.hero,
+      title: copy.home.serviceRetailTitle,
+      text: copy.home.serviceRetailText,
+    },
+    {
+      image: homeImages.about,
+      title: copy.home.serviceIndustrialTitle,
+      text: copy.home.serviceIndustrialText,
+    },
+    {
+      image: homeImages.about,
+      title: copy.home.serviceProjectsTitle,
+      text: copy.home.serviceProjectsText,
+    },
+    {
+      image: homeImages.hero,
+      title: copy.home.serviceManagementTitle,
+      text: copy.home.serviceManagementText,
+    },
+    {
+      image: homeImages.modern,
+      title: copy.home.serviceInvestmentTitle,
+      text: copy.home.serviceInvestmentText,
+    },
+  ];
 
   useEffect(() => {
     let mounted = true;
@@ -140,124 +76,82 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
   }, [language]);
 
   return (
-    <main>
-      <section className="home-hero">
-        <div className="home-hero__bg" />
-        <div className="container home-hero__grid">
-          <div className="home-hero__content reveal-on-load">
-            <div className="home-hero__text-slider" aria-live="polite">
-              {slides.map((slide, index) => (
-                <div
-                  className={`home-hero__text-slide ${index === activeSlideIndex ? 'home-hero__text-slide--active' : ''}`}
-                  key={slide.title}
-                  aria-hidden={index !== activeSlideIndex}
-                >
-                  <h1>{slide.title}</h1>
-                  <p>{slide.text}</p>
-                </div>
-              ))}
-            </div>
-            <div className="hero-actions">
-              <button className="btn btn--primary btn--large" onClick={() => navigate('/commercial')}>
-                {copy.home.explore}
-              </button>
-              <button className="btn btn--light btn--large" onClick={() => navigate('/about')}>
-                {copy.home.about}
-              </button>
-            </div>
-            <div className="hero-slider-dots" aria-label="Hero slides">
-              {slides.map((slide, index) => (
-                <button
-                  className={`hero-slider-dot ${index === activeSlideIndex ? 'hero-slider-dot--active' : ''}`}
-                  key={slide.eyebrow}
-                  type="button"
-                  aria-label={`Show slide ${index + 1}: ${slide.eyebrow}`}
-                  aria-current={index === activeSlideIndex}
-                  onClick={() => setActiveSlideIndex(index)}
-                />
-              ))}
-            </div>
+    <main className="home-page">
+      <section className="home-hero home-hero--editorial">
+        <img className="home-hero__image" src={homeImages.hero} alt={copy.home.heroImageAlt} />
+        <div className="home-hero__overlay" />
+        <div className="container home-hero__center reveal-on-load">
+          <h1>{copy.home.heroTitle}</h1>
+          <p>{copy.home.heroSubtitle}</p>
+          <div className="hero-actions">
+            <button className="btn btn--primary btn--large" onClick={() => navigate('/contact')}>
+              {copy.home.heroPrimaryCta}
+            </button>
+            <button className="btn btn--light btn--large" onClick={() => navigate('/commercial')}>
+              {copy.home.heroSecondaryCta}
+            </button>
           </div>
+        </div>
+        <div className="home-hero__wave" aria-hidden="true" />
+      </section>
 
-          <div className="hero-showcase reveal-on-load reveal-delay-1">
-            {slides.map((slide, index) => (
-              <img
-                className={`hero-showcase__image ${index === activeSlideIndex ? 'hero-showcase__image--active' : ''}`}
-                src={slide.image}
-                alt={slide.alt}
-                key={slide.image}
-                aria-hidden={index !== activeSlideIndex}
-              />
+      <section className="home-about-section" id="home-about">
+        <div className="container home-about">
+          <figure className="home-about__image">
+            <img src={homeImages.about} alt={copy.home.aboutImageAlt} />
+          </figure>
+          <div className="home-about__content">
+            <h2>{copy.home.aboutHeading}</h2>
+            <p>{copy.home.aboutText}</p>
+            <p>{copy.home.aboutTextSecond}</p>
+            <button className="home-dark-button" onClick={() => navigate('/about')}>
+              {copy.home.aboutCta}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="home-services-section" id="home-services">
+        <div className="container home-section-heading">
+          <h2>{copy.home.servicesHeading}</h2>
+          <p>{copy.home.servicesIntro}</p>
+        </div>
+
+        <div className="container home-services-grid">
+          {serviceCards.map((service) => (
+            <article className="home-service-card" key={service.title}>
+              <img src={service.image} alt="" />
+              <div>
+                <h3>{service.title}</h3>
+                <p>{service.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="home-latest-section">
+        <div className="container home-section-heading">
+          <h2>{copy.home.latestHeading}</h2>
+          <p>{copy.home.latestIntro}</p>
+        </div>
+
+        {loading ? (
+          <LoadingState text={copy.home.loadingFeatured} />
+        ) : properties.length > 0 ? (
+          <div className="container property-grid home-latest-grid">
+            {properties.map((property) => (
+              <PropertyCard key={property._id} property={property} navigate={navigate} language={language} />
             ))}
-            <div className="hero-stat hero-stat--top">
-              <div className="hero-stat__content" key={`primary-${activeSlideIndex}`}>
-                <strong>{activeSlide.primaryStat}</strong>
-                <span>{activeSlide.primaryText}</span>
-              </div>
-            </div>
-            <div className="hero-stat hero-stat--bottom">
-              <div className="hero-stat__content" key={`secondary-${activeSlideIndex}`}>
-                <strong>{activeSlide.secondaryStat}</strong>
-                <span>{activeSlide.secondaryText}</span>
-              </div>
-            </div>
           </div>
-        </div>
-      </section>
+        ) : (
+          <p className="home-empty-state">{copy.home.noLatestProperties}</p>
+        )}
 
-      <section className="section intro-section">
-        <div className="container split-intro">
-          <div>
-            <span className="eyebrow">{copy.home.introEyebrow}</span>
-            <h2>{copy.home.introTitle}</h2>
-          </div>
-          <p>{copy.home.introText}</p>
-        </div>
-      </section>
-
-      <section className="section featured-section">
-        <div className="container section-heading-row">
-          <div>
-            <span className="eyebrow">{copy.home.featuredEyebrow}</span>
-            <h2>{copy.home.featuredTitle}</h2>
-          </div>
-          <button className="btn btn--ghost" onClick={() => navigate('/commercial')}>
-            {copy.home.viewAll}
+        <div className="home-latest-action">
+          <button className="home-dark-button" onClick={() => navigate('/commercial')}>
+            {copy.home.latestCta}
           </button>
-        </div>
-
-        <div className="container property-grid property-grid--featured">
-          {loading ? (
-            <LoadingState text={copy.home.loadingFeatured} />
-          ) : (
-            properties.map((property) => <PropertyCard key={property._id} property={property} navigate={navigate} language={language} />)
-          )}
-        </div>
-      </section>
-
-      <section className="section services-section">
-        <div className="container services-grid">
-          <div className="service-card service-card--large">
-            <span className="eyebrow">{copy.home.servicesEyebrow}</span>
-            <h2>{copy.home.servicesTitle}</h2>
-            <p>{copy.home.servicesText}</p>
-          </div>
-          <div className="service-card">
-            <h3>{copy.home.commercialSpaces}</h3>
-            <p>{copy.home.commercialSpacesText}</p>
-          </div>
-          <div className="service-card">
-            <h3>{copy.home.portfolioManagement}</h3>
-            <p>{copy.home.portfolioManagementText}</p>
-          </div>
-          <div className="service-card">
-            <h3>{copy.home.clientRelationships}</h3>
-            <p>{copy.home.clientRelationshipsText}</p>
-          </div>
-          <div className="service-card">
-            <h3>{copy.home.investmentAdvisory}</h3>
-            <p>{copy.home.investmentAdvisoryText}</p>
-          </div>
         </div>
       </section>
 

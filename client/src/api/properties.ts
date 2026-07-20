@@ -40,6 +40,20 @@ export const getProperties = (params: PropertyFiltersState = {}) => {
   return request<PaginatedPropertiesResponse>(`${API_URL}/properties${buildQuery(params)}`);
 };
 
+export const getAllProperties = async (params: PropertyFiltersState = {}) => {
+  const firstPage = await getProperties({ ...params, page: 1, limit: 100 });
+
+  if (firstPage.pagination.pages <= 1) return firstPage.items;
+
+  const remainingPages = await Promise.all(
+    Array.from({ length: firstPage.pagination.pages - 1 }, (_, index) =>
+      getProperties({ ...params, page: index + 2, limit: 100 })
+    )
+  );
+
+  return [firstPage, ...remainingPages].flatMap((response) => response.items);
+};
+
 export const getFeaturedProperties = (language?: SupportedLanguage) => {
   return request<Property[]>(`${API_URL}/properties/featured${buildQuery({ language })}`);
 };
