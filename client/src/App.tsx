@@ -6,6 +6,7 @@ import AssistantWidget from './components/AssistantWidget';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import LoadingState from './components/LoadingState';
+import SiteIntro from './components/SiteIntro';
 import { defaultLanguage, normalizeLanguage } from './data/languages';
 import { getCopy } from './data/localization';
 import AboutPage from './pages/AboutPage';
@@ -22,6 +23,8 @@ import HomePage from './pages/HomePage';
 import OfferPropertyPage from './pages/OfferPropertyPage';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailsPage from './pages/PropertyDetailsPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
+import ServicesPage from './pages/ServicesPage';
 import type { AdminUser } from './types/admin';
 import type { SupportedLanguage } from './types/property';
 
@@ -138,6 +141,11 @@ function App() {
   const publicPage = useMemo(() => {
     if (currentPath === '/') return <HomePage navigate={navigate} language={language} />;
     if (currentPath === '/about') return <AboutPage language={language} />;
+    if (currentPath === '/services') return <ServicesPage navigate={navigate} language={language} />;
+    if (currentPath.startsWith('/services/')) {
+      const serviceSlug = decodeURIComponent(currentPath.replace('/services/', ''));
+      return <ServiceDetailPage slug={serviceSlug} navigate={navigate} language={language} />;
+    }
     if (currentPath === '/commercial') return <PropertiesPage navigate={navigate} mode="commercial" language={language} />;
     if (currentPath === '/projects-in-development') return <PropertiesPage navigate={navigate} mode="projects" language={language} />;
     if (currentPath === '/offer-property') return <OfferPropertyPage language={language} />;
@@ -157,6 +165,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <SiteIntro />
       <Header currentPath={currentPath} navigate={navigate} language={language} onLanguageChange={setLanguage} />
       {publicPage}
       <Footer navigate={navigate} language={language} />

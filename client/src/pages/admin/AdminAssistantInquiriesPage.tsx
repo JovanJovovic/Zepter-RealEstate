@@ -201,20 +201,19 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
       )}
 
       {!loading && data.items.length > 0 && (
-        <section className="admin-table-card">
-          <div className="admin-table admin-inquiries-table">
-            <div className="admin-table__head">
+        <section className="admin-table-card admin-inquiries-card">
+          <div className="admin-inquiries-list">
+            <div className="admin-inquiries-list__head" aria-hidden="true">
               <span>{inquiryCopy.question}</span>
               <span>{inquiryCopy.contact}</span>
               <span>{inquiryCopy.context}</span>
-              <span>{copy.common.status}</span>
-              <span>{inquiryCopy.received}</span>
-              <span>{copy.common.actions}</span>
+              <span>{copy.common.status} / {inquiryCopy.received}</span>
             </div>
 
             {data.items.map((inquiry) => (
-              <div className="admin-table__row" key={inquiry._id}>
+              <article className="admin-inquiry-row" key={inquiry._id}>
                 <div className="admin-inquiry-question">
+                  <span className="admin-inquiry-cell-label">{inquiryCopy.question}</span>
                   <button onClick={() => setSelectedInquiry(inquiry)}>
                     <strong>{inquiry.question}</strong>
                   </button>
@@ -225,31 +224,42 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
                   )}
                 </div>
                 <div className="admin-inquiry-contact">
+                  <span className="admin-inquiry-cell-label">{inquiryCopy.contact}</span>
                   {inquiry.name && <strong>{inquiry.name}</strong>}
                   {inquiry.email && <a href={`mailto:${inquiry.email}`}>{inquiry.email}</a>}
                   {inquiry.phone && <a href={`tel:${inquiry.phone}`}>{inquiry.phone}</a>}
+                  {!inquiry.name && !inquiry.email && !inquiry.phone && (
+                    <span className="admin-inquiry-empty">{copy.common.notSet}</span>
+                  )}
                 </div>
                 <div className="admin-inquiry-context">
-                  <span>{inquiry.propertyName || inquiry.pageTitle || copy.common.notSet}</span>
+                  <span className="admin-inquiry-cell-label">{inquiryCopy.context}</span>
+                  <strong>{inquiry.propertyName || inquiry.pageTitle || copy.common.notSet}</strong>
                   {(inquiry.propertyPublicId || inquiry.propertyId) && (
                     <small>{inquiry.propertyPublicId || inquiry.propertyId}</small>
                   )}
                 </div>
-                <div className="admin-status-select-wrap">
-                  <AdminStatusBadge value={inquiry.status} language={language} />
-                  <select value={inquiry.status} onChange={(event) => changeStatus(inquiry._id, event.target.value as AssistantInquiryStatus)}>
-                    {statusOptions.slice(1).map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                <div className="admin-inquiry-management">
+                  <span className="admin-inquiry-cell-label">{copy.common.status}</span>
+                  <div className="admin-status-select-wrap">
+                    <AdminStatusBadge value={inquiry.status} language={language} />
+                    <select value={inquiry.status} onChange={(event) => changeStatus(inquiry._id, event.target.value as AssistantInquiryStatus)}>
+                      {statusOptions.slice(1).map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="admin-inquiry-received">
+                    <span>{inquiryCopy.received}</span>
+                    <time dateTime={inquiry.createdAt}>{formatDateTime(inquiry.createdAt)}</time>
+                  </div>
+                  <button className="admin-row-detail-button" onClick={() => setSelectedInquiry(inquiry)}>
+                    {detailLabels.viewDetails}
+                  </button>
                 </div>
-                <span>{new Date(inquiry.createdAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}</span>
-                <button className="admin-row-detail-button" onClick={() => setSelectedInquiry(inquiry)}>
-                  {detailLabels.viewDetails}
-                </button>
-              </div>
+              </article>
             ))}
           </div>
         </section>

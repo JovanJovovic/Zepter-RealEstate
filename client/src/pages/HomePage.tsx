@@ -3,7 +3,9 @@ import { getFeaturedProperties } from '../api/properties';
 import LoadingState from '../components/LoadingState';
 import NewsletterBlock from '../components/NewsletterBlock';
 import PropertyCard from '../components/PropertyCard';
+import ServiceCard from '../components/ServiceCard';
 import { getCopy } from '../data/localization';
+import { getLocalizedServices, getServicesPageCopy } from '../data/services';
 import type { Property, SupportedLanguage } from '../types/property';
 import { publicImage } from '../utils/asset';
 
@@ -15,45 +17,14 @@ interface HomePageProps {
 const homeImages = {
   hero: publicImage('what we do Zepter Real Estate.jpg'),
   about: publicImage('portfolio Zepter Real Estate.jpg'),
-  modern: publicImage('who we are Zepter-Real Estate.jpg'),
 };
 
 const HomePage = ({ navigate, language }: HomePageProps) => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const copy = getCopy(language);
-  const serviceCards = [
-    {
-      image: homeImages.modern,
-      title: copy.home.serviceOfficesTitle,
-      text: copy.home.serviceOfficesText,
-    },
-    {
-      image: homeImages.hero,
-      title: copy.home.serviceRetailTitle,
-      text: copy.home.serviceRetailText,
-    },
-    {
-      image: homeImages.about,
-      title: copy.home.serviceIndustrialTitle,
-      text: copy.home.serviceIndustrialText,
-    },
-    {
-      image: homeImages.about,
-      title: copy.home.serviceProjectsTitle,
-      text: copy.home.serviceProjectsText,
-    },
-    {
-      image: homeImages.hero,
-      title: copy.home.serviceManagementTitle,
-      text: copy.home.serviceManagementText,
-    },
-    {
-      image: homeImages.modern,
-      title: copy.home.serviceInvestmentTitle,
-      text: copy.home.serviceInvestmentText,
-    },
-  ];
+  const serviceCards = getLocalizedServices(language);
+  const servicesCopy = getServicesPageCopy(language);
 
   useEffect(() => {
     let mounted = true;
@@ -119,14 +90,20 @@ const HomePage = ({ navigate, language }: HomePageProps) => {
 
         <div className="container home-services-grid">
           {serviceCards.map((service) => (
-            <article className="home-service-card" key={service.title}>
-              <img src={service.image} alt="" />
-              <div>
-                <h3>{service.title}</h3>
-                <p>{service.text}</p>
-              </div>
-            </article>
+            <ServiceCard
+              key={service.slug}
+              service={service}
+              readMoreLabel={servicesCopy.readMore}
+              navigate={navigate}
+              compact
+            />
           ))}
+        </div>
+
+        <div className="home-services-action">
+          <button className="home-dark-button" onClick={() => navigate('/services')}>
+            {servicesCopy.backToServices}
+          </button>
         </div>
       </section>
 

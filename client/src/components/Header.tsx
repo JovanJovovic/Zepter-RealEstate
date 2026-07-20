@@ -24,7 +24,7 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
   const navItems: HeaderNavItem[] = [
     { label: copy.nav.home, path: '/' },
     { label: copy.nav.about, path: '/about' },
-    { label: copy.nav.services, anchor: 'home-services' },
+    { label: copy.nav.services, path: '/services' },
     { label: copy.nav.properties, path: '/commercial' },
     { label: copy.nav.offerProperty, path: '/offer-property' },
     { label: copy.nav.contact, path: '/contact' },
@@ -69,6 +69,9 @@ const Header = ({ currentPath, navigate, language, onLanguageChange }: HeaderPro
 
   const isNavItemActive = (item: HeaderNavItem) => {
     if (!item.path) return false;
+    if (item.path === '/services') {
+      return currentPath === '/services' || currentPath.startsWith('/services/');
+    }
     if (item.path === '/commercial') {
       return currentPath === '/commercial' || currentPath === '/projects-in-development' || currentPath.startsWith('/properties/');
     }

@@ -188,7 +188,7 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
                     <small>{property.publicId} · {property.location.fullLocation}</small>
                   </div>
                 </div>
-                <span>{categoryLabels[property.category]}</span>
+                <span className="admin-property-meta-cell">{categoryLabels[property.category]}</span>
                 <div className="admin-status-select-wrap">
                   <AdminStatusBadge value={property.status} language={language} />
                   <select value={property.status} onChange={(event) => changeStatus(property._id, event.target.value as PropertyStatus)}>
@@ -200,7 +200,9 @@ const AdminPropertiesPage = ({ navigate, language }: AdminPropertiesPageProps) =
                 <button className={property.isFeatured ? 'admin-feature-toggle admin-feature-toggle--on' : 'admin-feature-toggle'} onClick={() => toggleFeatured(property._id, property.isFeatured)}>
                   {property.isFeatured ? copy.common.featured : copy.common.standard}
                 </button>
-                <span>{new Date(property.updatedAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}</span>
+                <time className="admin-property-date" dateTime={property.updatedAt}>
+                  {new Date(property.updatedAt).toLocaleDateString(language === 'sr' ? 'sr-RS' : 'en-GB')}
+                </time>
                 <div className="admin-row-actions">
                   <button onClick={() => navigate(`/properties/${property.publicId}`)}>{copy.common.view}</button>
                   <button onClick={() => navigate(`/admin/properties/${property._id}/edit`)}>{copy.common.edit}</button>
