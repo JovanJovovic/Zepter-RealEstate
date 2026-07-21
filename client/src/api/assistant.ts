@@ -5,7 +5,7 @@ export interface AssistantInquiryPayload {
   name?: string;
   email?: string;
   phone?: string;
-  inquiryType?: 'assistant-widget' | 'property-contact-form';
+  inquiryType?: 'assistant-widget' | 'property-contact-form' | 'contact-page-form';
   sourcePage?: string;
   pageTitle?: string;
   propertyId?: string;

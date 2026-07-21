@@ -117,6 +117,7 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
         inquiryType: 'Izvor upita',
         assistantWidget: 'Plutajući asistent',
         propertyForm: 'Forma za nekretninu',
+        contactPage: 'Kontakt strana',
         email: 'Email',
         phone: 'Telefon',
         sourcePage: 'Izvorna strana',
@@ -139,6 +140,7 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
         inquiryType: 'Inquiry source',
         assistantWidget: 'Floating assistant',
         propertyForm: 'Property contact form',
+        contactPage: 'Contact page',
         email: 'Email',
         phone: 'Phone',
         sourcePage: 'Source page',
@@ -297,7 +299,9 @@ const AdminAssistantInquiriesPage = ({ language }: AdminAssistantInquiriesPagePr
               <DetailField label={detailLabels.inquiryType}>
                 {selectedInquiry.inquiryType === 'property-contact-form'
                   ? detailLabels.propertyForm
-                  : detailLabels.assistantWidget}
+                  : selectedInquiry.inquiryType === 'contact-page-form'
+                    ? detailLabels.contactPage
+                    : detailLabels.assistantWidget}
               </DetailField>
               <DetailField label={detailLabels.email}>
                 {selectedInquiry.email ? <a href={`mailto:${selectedInquiry.email}`}>{selectedInquiry.email}</a> : copy.common.notSet}

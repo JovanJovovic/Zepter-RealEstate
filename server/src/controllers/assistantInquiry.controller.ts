@@ -19,7 +19,11 @@ const normalizeNullableString = (value: unknown) => {
   return trimmed || null;
 };
 
-const inquiryTypes: AssistantInquiryType[] = ["assistant-widget", "property-contact-form"];
+const inquiryTypes: AssistantInquiryType[] = [
+  "assistant-widget",
+  "property-contact-form",
+  "contact-page-form",
+];
 
 export const createAssistantInquiry = async (req: Request, res: Response) => {
   const question = normalizeNullableString(req.body.question);
@@ -40,7 +44,7 @@ export const createAssistantInquiry = async (req: Request, res: Response) => {
     });
   }
 
-  if (inquiryType === "property-contact-form" && !name) {
+  if (inquiryType !== "assistant-widget" && !name) {
     return res.status(400).json({
       message: "Name is required.",
     });

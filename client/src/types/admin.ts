@@ -81,7 +81,7 @@ export interface AssistantInquiry {
   name?: string | null;
   email?: string | null;
   phone?: string | null;
-  inquiryType?: 'assistant-widget' | 'property-contact-form';
+  inquiryType?: 'assistant-widget' | 'property-contact-form' | 'contact-page-form';
   sourcePage?: string | null;
   pageTitle?: string | null;
   propertyId?: string | null;

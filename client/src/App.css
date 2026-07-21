@@ -8186,3 +8186,215 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Contact page inquiry form */
+.contact-message-section {
+  padding: 88px 0;
+  border-top: 1px solid #eadfcd;
+  border-bottom: 1px solid #eadfcd;
+  background: #f7f1e6;
+}
+
+.contact-message-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+  align-items: center;
+  gap: clamp(42px, 6vw, 82px);
+}
+
+.contact-message-intro h2 {
+  max-width: 560px;
+  margin: 14px 0 20px;
+  color: #1f2d4d;
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 4.4vw, 4.6rem);
+  font-weight: 600;
+  line-height: 1.02;
+}
+
+.contact-message-intro > p {
+  max-width: 590px;
+  margin: 0;
+  color: #5c6878;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.contact-message-reminder {
+  display: grid;
+  gap: 7px;
+  margin-top: 30px;
+  padding: 3px 0 3px 20px;
+  border-left: 3px solid #b8913f;
+}
+
+.contact-message-reminder span {
+  margin-bottom: 3px;
+  color: #6b7280;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.contact-message-reminder a {
+  justify-self: start;
+  color: #1f2d4d;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.contact-message-reminder a:hover {
+  color: #9a742b;
+}
+
+.contact-message-card {
+  min-width: 0;
+  border: 1px solid #e0d7c8;
+  border-radius: 8px;
+  padding: clamp(24px, 3vw, 38px);
+  background: #fff;
+  box-shadow: 0 20px 54px rgba(31, 45, 77, 0.1);
+}
+
+.contact-message-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.contact-message-field {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  color: #29354a;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.contact-message-field--wide,
+.contact-message-error,
+.contact-message-submit {
+  grid-column: 1 / -1;
+}
+
+.contact-message-field input,
+.contact-message-field textarea {
+  width: 100%;
+  border: 1px solid #d4d9e1;
+  border-radius: 6px;
+  padding: 13px 14px;
+  outline: 0;
+  color: #1f2d4d;
+  background: #fffdfa;
+  font: inherit;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.contact-message-field input {
+  min-height: 49px;
+}
+
+.contact-message-field textarea {
+  min-height: 148px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.contact-message-field input:focus,
+.contact-message-field textarea:focus {
+  border-color: #b8913f;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(184, 145, 63, 0.15);
+}
+
+.contact-message-error {
+  margin: 0;
+  color: #a8322b;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.contact-message-submit {
+  justify-self: start;
+  min-width: 190px;
+  min-height: 48px;
+  border-radius: 6px;
+  color: #fff;
+  background: #b8913f;
+  box-shadow: 0 12px 26px rgba(184, 145, 63, 0.24);
+}
+
+.contact-message-submit:hover {
+  background: #9a742b;
+}
+
+.contact-message-submit:disabled {
+  cursor: wait;
+  opacity: 0.66;
+}
+
+.contact-message-success {
+  display: grid;
+  min-height: 330px;
+  place-items: center;
+  align-content: center;
+  gap: 20px;
+  padding: 32px;
+  text-align: center;
+}
+
+.contact-message-success span {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: #b8913f;
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
+.contact-message-success strong {
+  max-width: 480px;
+  color: #1f2d4d;
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+  .contact-message-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .contact-message-intro h2,
+  .contact-message-intro > p {
+    max-width: 720px;
+  }
+}
+
+@media (max-width: 580px) {
+  .contact-message-section {
+    padding: 64px 0;
+  }
+
+  .contact-message-form {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-message-field--wide,
+  .contact-message-error,
+  .contact-message-submit {
+    grid-column: auto;
+  }
+
+  .contact-message-submit {
+    width: 100%;
+  }
+
+  .contact-message-success {
+    min-height: 260px;
+    padding: 20px;
+  }
+}

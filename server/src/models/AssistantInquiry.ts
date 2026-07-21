@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export type AssistantInquiryStatus = "new" | "in-progress" | "answered" | "archived";
-export type AssistantInquiryType = "assistant-widget" | "property-contact-form";
+export type AssistantInquiryType = "assistant-widget" | "property-contact-form" | "contact-page-form";
 
 export interface IAssistantInquiry extends Document {
   question: string;
@@ -47,7 +47,7 @@ const assistantInquirySchema = new Schema<IAssistantInquiry>(
     },
     inquiryType: {
       type: String,
-      enum: ["assistant-widget", "property-contact-form"],
+      enum: ["assistant-widget", "property-contact-form", "contact-page-form"],
       default: "assistant-widget",
       index: true,
     },

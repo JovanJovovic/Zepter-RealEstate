@@ -1,4 +1,5 @@
 import NewsletterBlock from '../components/NewsletterBlock';
+import ContactInquiryForm from '../components/ContactInquiryForm';
 import PageHero from '../components/PageHero';
 import { getCopy } from '../data/localization';
 import type { SupportedLanguage } from '../types/property';
@@ -12,7 +13,7 @@ const ContactPage = ({ language }: ContactPageProps) => {
   const copy = getCopy(language);
 
   return (
-    <main>
+    <main className="contact-page">
       <PageHero
         compact
         eyebrow={copy.contact.eyebrow}
@@ -54,6 +55,8 @@ const ContactPage = ({ language }: ContactPageProps) => {
           </div>
         </div>
       </section>
+
+      <ContactInquiryForm language={language} />
 
       <NewsletterBlock language={language} />
     </main>
