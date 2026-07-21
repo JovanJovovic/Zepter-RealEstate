@@ -15,14 +15,15 @@ const aboutImages = [
 
 const AboutPage = ({ language }: AboutPageProps) => {
   const copy = getCopy(language);
+  const valueStats = ['380.000+', '2008', copy.about.regionName, 'Zepter'];
 
   return (
-    <main>
+    <main className="about-page">
       <PageHero
         eyebrow={copy.about.eyebrow}
         title={copy.about.title}
         text={copy.about.text}
-        image={publicImage('portfolio Zepter Real Estate.jpg')}
+        image={publicImage('who we are Zepter-Real Estate.jpg')}
       />
 
       <section className="section about-stack">
@@ -42,23 +43,21 @@ const AboutPage = ({ language }: AboutPageProps) => {
         </div>
       </section>
 
-      <section className="section values-band">
-        <div className="container values-grid">
-          <div>
-            <strong>380.000+</strong>
-            <span>{copy.about.squareMeters}</span>
+      <section className="values-band" aria-label={copy.about.valuesLabel}>
+        <div className="container">
+          <div className="about-values-heading">
+            <span className="eyebrow">{copy.about.valuesEyebrow}</span>
+            <h2>{copy.about.valuesTitle}</h2>
           </div>
-          <div>
-            <strong>2008</strong>
-            <span>{copy.about.established}</span>
-          </div>
-          <div>
-            <strong>{copy.about.regionName}</strong>
-            <span>{copy.about.regionalPortfolio}</span>
-          </div>
-          <div>
-            <strong>Zepter</strong>
-            <span>{copy.about.groupStandard}</span>
+          <div className="values-grid">
+            {copy.about.valueCards.map((card, index) => (
+              <article key={card.title}>
+                <strong>{valueStats[index]}</strong>
+                <span>{card.label}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

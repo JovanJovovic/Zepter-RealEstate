@@ -1812,20 +1812,74 @@
   line-height: 1.8;
 }
 
+.about-page {
+  color: #1f2d4d;
+  background:
+    linear-gradient(180deg, #fff9ee 0%, #ffffff 22%, #f7f1e6 100%);
+}
+
+.app-shell:not(.app-shell--admin) .about-page .page-hero {
+  min-height: 560px;
+  align-items: center;
+  padding: 164px 0 118px;
+  text-align: center;
+}
+
+.app-shell:not(.app-shell--admin) .about-page .page-hero__image {
+  opacity: 0.72;
+  filter: saturate(0.92) contrast(1.05);
+}
+
+.app-shell:not(.app-shell--admin) .about-page .page-hero__overlay {
+  background:
+    linear-gradient(90deg, rgba(15, 26, 48, 0.74), rgba(15, 26, 48, 0.38), rgba(15, 26, 48, 0.74)),
+    linear-gradient(180deg, rgba(15, 26, 48, 0.22), rgba(15, 26, 48, 0.84));
+}
+
+.app-shell:not(.app-shell--admin) .about-page .page-hero__content {
+  display: grid;
+  justify-items: center;
+}
+
+.app-shell:not(.app-shell--admin) .about-page .page-hero h1 {
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: var(--font-body);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.app-shell:not(.app-shell--admin) .about-page .page-hero p {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  color: rgba(255, 255, 255, 0.86);
+}
+
 .about-stack {
-  background: #fff;
+  position: relative;
+  padding: 112px 0 88px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #ffffff 70%, #fff9ee 100%);
+}
+
+.about-stack .container {
+  display: grid;
+  gap: 78px;
 }
 
 .about-block {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1fr);
-  gap: 56px;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1fr);
+  gap: clamp(42px, 6vw, 92px);
   align-items: center;
-  padding: 46px 0;
 }
 
 .about-block+.about-block {
-  border-top: 1px solid var(--line);
+  padding-top: 78px;
+  border-top: 1px solid #e8decc;
 }
 
 .about-block--reverse .about-block__image {
@@ -1833,29 +1887,88 @@
 }
 
 .about-block__image {
-  min-height: 360px;
-  border-radius: 34px;
+  position: relative;
+  min-height: 420px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
+  box-shadow: 0 28px 70px rgba(15, 26, 48, 0.13);
+}
+
+.about-block__image::after {
+  position: absolute;
+  inset: auto 22px 22px auto;
+  width: 86px;
+  height: 4px;
+  content: '';
+  background: #b8913f;
 }
 
 .about-block__image img {
+  display: block;
   width: 100%;
   height: 100%;
-  min-height: 360px;
+  min-height: 420px;
   object-fit: cover;
 }
 
-.about-block__content p {
-  color: var(--muted);
-  font-size: 1.04rem;
-  line-height: 1.85;
+.about-block__content {
+  max-width: 680px;
 }
 
-.values-band {
-  padding: 58px 0;
-  color: #fff;
-  background: linear-gradient(135deg, var(--blue-950), var(--blue-700));
+.about-page .about-block__content h2 {
+  margin: 18px 0 0;
+  color: #1f2d4d;
+  font-family: var(--font-body);
+  font-size: clamp(2.05rem, 3.2vw, 3.65rem);
+  font-weight: 900;
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.about-page .about-block__content h2::after {
+  display: block;
+  width: 72px;
+  height: 3px;
+  margin-top: 22px;
+  content: '';
+  background: #b8913f;
+}
+
+.about-page .about-block__content p {
+  max-width: 650px;
+  margin: 28px 0 0;
+  color: #5f6675;
+  font-size: 1.05rem;
+  line-height: 1.86;
+}
+
+.app-shell:not(.app-shell--admin) .about-page .values-band {
+  padding: 86px 0 108px;
+  background:
+    radial-gradient(circle at 84% 10%, rgba(184, 145, 63, 0.16), transparent 24rem),
+    linear-gradient(180deg, #fff9ee 0%, #f7f1e6 100%);
+}
+
+.about-values-heading {
+  max-width: 760px;
+  margin: 0 auto 42px;
+  text-align: center;
+}
+
+.about-values-heading .eyebrow {
+  justify-content: center;
+  color: #a67d2b;
+}
+
+.about-values-heading h2 {
+  margin: 18px 0 0;
+  color: #1f2d4d;
+  font-family: var(--font-body);
+  font-size: clamp(2rem, 3.5vw, 3.25rem);
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
 }
 
 .values-grid {
@@ -1864,21 +1977,91 @@
   gap: 18px;
 }
 
-.values-grid div {
-  padding: 22px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+.app-shell:not(.app-shell--admin) .about-page .values-grid article {
+  display: grid;
+  align-content: start;
+  min-height: 245px;
+  padding: 28px;
+  border: 1px solid #e6d7b8;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 46px rgba(31, 27, 23, 0.08);
 }
 
-.values-grid strong {
+.app-shell:not(.app-shell--admin) .about-page .values-grid strong {
   display: block;
+  color: #1f2d4d;
   font-size: 2rem;
+  line-height: 1;
   letter-spacing: 0;
 }
 
-.values-grid span {
-  color: rgba(255, 255, 255, 0.75);
+.app-shell:not(.app-shell--admin) .about-page .values-grid span {
+  display: block;
+  margin-top: 8px;
+  color: #9a742b;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.app-shell:not(.app-shell--admin) .about-page .values-grid h3 {
+  margin: 26px 0 0;
+  color: #1f2d4d;
+  font-size: 1.18rem;
+  line-height: 1.25;
+}
+
+.app-shell:not(.app-shell--admin) .about-page .values-grid p {
+  margin: 12px 0 0;
+  color: #5f6675;
+  line-height: 1.68;
+}
+
+@media (max-width: 860px) {
+  .app-shell:not(.app-shell--admin) .about-page .page-hero {
+    min-height: 500px;
+    padding: 138px 0 88px;
+  }
+
+  .about-stack {
+    padding: 78px 0 64px;
+  }
+
+  .about-stack .container {
+    gap: 56px;
+  }
+
+  .about-block+.about-block {
+    padding-top: 56px;
+  }
+
+  .about-block__image,
+  .about-block__image img {
+    min-height: 320px;
+  }
+
+  .app-shell:not(.app-shell--admin) .about-page .values-band {
+    padding: 68px 0 82px;
+  }
+
+  .app-shell:not(.app-shell--admin) .about-page .values-grid article {
+    min-height: auto;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell:not(.app-shell--admin) .about-page .page-hero h1,
+  .about-page .about-block__content h2 {
+    letter-spacing: 0;
+  }
+
+  .about-block__image,
+  .about-block__image img {
+    min-height: 285px;
+  }
 }
 
 .properties-layout-section {

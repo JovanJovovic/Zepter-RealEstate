@@ -111,6 +111,31 @@ const en = {
     regionName: "Serbia",
     regionalPortfolio: "regional portfolio",
     groupStandard: "group standard",
+    valuesLabel: "Zepter Real Estate values",
+    valuesEyebrow: "Portfolio strengths",
+    valuesTitle: "A portfolio built for visibility, stability and long-term value.",
+    valueCards: [
+      {
+        label: "square meters",
+        title: "Portfolio",
+        text: "A broad real estate base prepared for commercial, residential and mixed-use opportunities.",
+      },
+      {
+        label: "established",
+        title: "Locations",
+        text: "Presence in Belgrade and other important markets with spaces selected for practical business use.",
+      },
+      {
+        label: "regional portfolio",
+        title: "Professional support",
+        text: "Clear presentation, structured information and direct communication through each property process.",
+      },
+      {
+        label: "group standard",
+        title: "Long-term value",
+        text: "A stable Zepter approach focused on property potential, activation and sustainable portfolio growth.",
+      },
+    ],
   },
   properties: {
     portfolioEyebrow: "Zepter portfolio",
@@ -774,6 +799,31 @@ const sr: typeof en = {
     regionName: "Srbija",
     regionalPortfolio: "regionalni portfolio",
     groupStandard: "standard grupe",
+    valuesLabel: "Vrednosti Zepter Real Estate",
+    valuesEyebrow: "Snaga portfolija",
+    valuesTitle: "Portfolio građen za vidljivost, stabilnost i dugoročnu vrednost.",
+    valueCards: [
+      {
+        label: "kvadratnih metara",
+        title: "Portfolio",
+        text: "Široka baza nekretnina pripremljena za komercijalne, stambene i višenamenske potrebe.",
+      },
+      {
+        label: "osnovano",
+        title: "Lokacije",
+        text: "Prisustvo u Beogradu i drugim važnim tržištima, sa prostorima odabranim za praktičnu poslovnu upotrebu.",
+      },
+      {
+        label: "regionalni portfolio",
+        title: "Profesionalna podrška",
+        text: "Jasna prezentacija, strukturisane informacije i direktna komunikacija kroz svaki proces vezan za nekretninu.",
+      },
+      {
+        label: "standard grupe",
+        title: "Dugoročna vrednost",
+        text: "Stabilan Zepter pristup usmeren na potencijal nekretnina, aktivaciju i održiv rast portfolija.",
+      },
+    ],
   },
   properties: {
     portfolioEyebrow: "Zepter portfolio",
