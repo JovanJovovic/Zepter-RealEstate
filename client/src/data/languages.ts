@@ -1,6 +1,8 @@
 import type { SupportedLanguage } from '../types/property';
 
-export const defaultLanguage: SupportedLanguage = 'sr';
+export const publicDefaultLanguage: SupportedLanguage = 'en';
+export const adminDefaultLanguage: SupportedLanguage = 'sr';
+export const defaultLanguage = publicDefaultLanguage;
 
 export const languageOptions: Array<{ value: SupportedLanguage; label: string }> = [
   { value: 'sr', label: 'Serbian' },
@@ -9,6 +11,6 @@ export const languageOptions: Array<{ value: SupportedLanguage; label: string }>
   { value: 'de', label: 'German' },
 ];
 
-export const normalizeLanguage = (value: string | null): SupportedLanguage => {
-  return languageOptions.some((option) => option.value === value) ? (value as SupportedLanguage) : defaultLanguage;
+export const normalizeLanguage = (value: string | null, fallback: SupportedLanguage = publicDefaultLanguage): SupportedLanguage => {
+  return languageOptions.some((option) => option.value === value) ? (value as SupportedLanguage) : fallback;
 };

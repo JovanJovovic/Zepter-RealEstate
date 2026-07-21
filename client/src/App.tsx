@@ -7,7 +7,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import LoadingState from './components/LoadingState';
 import SiteIntro from './components/SiteIntro';
-import { defaultLanguage, normalizeLanguage } from './data/languages';
+import { adminDefaultLanguage, normalizeLanguage } from './data/languages';
 import { getCopy } from './data/localization';
 import AboutPage from './pages/AboutPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
@@ -42,8 +42,11 @@ function App() {
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [language, setLanguageState] = useState<SupportedLanguage>(() => normalizeLanguage(localStorage.getItem('zre_language')));
-  const [adminLanguage, setAdminLanguageState] = useState<SupportedLanguage>(() => normalizeLanguage(localStorage.getItem('zre_admin_language') || defaultLanguage));
+  const [adminLanguage, setAdminLanguageState] = useState<SupportedLanguage>(() =>
+    normalizeLanguage(localStorage.getItem('zre_admin_language'), adminDefaultLanguage)
+  );
   const adminCopy = getCopy(adminLanguage).admin;
+  const isAdminPath = currentPath === '/admin' || currentPath.startsWith('/admin/');
 
   useEffect(() => {
     const handlePopState = () => setCurrentPath(normalizePath(window.location.pathname));
@@ -71,8 +74,8 @@ function App() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.lang = language;
-  }, [language]);
+    document.documentElement.lang = isAdminPath ? adminLanguage : language;
+  }, [adminLanguage, isAdminPath, language]);
 
   const navigate = (path: string) => {
     const normalized = normalizePath(path);
@@ -96,8 +99,6 @@ function App() {
     setAdmin(null);
     navigate('/admin/login');
   };
-
-  const isAdminPath = currentPath === '/admin' || currentPath.startsWith('/admin/');
 
   const adminPage = useMemo(() => {
     if (!isAdminPath) return null;
