@@ -1,8 +1,12 @@
 import { getArticleCopy } from '../data/articleCopy';
 import type { ArticleType, PublicArticle } from '../types/article';
 import type { SupportedLanguage } from '../types/property';
-import { articleImageUrl, formatArticleDate } from '../utils/article';
-import { publicImage } from '../utils/asset';
+import {
+  applyArticleImageFallback,
+  articleImageUrl,
+  formatArticleDate,
+  getArticleFallbackImage,
+} from '../utils/article';
 
 interface ArticleCardProps {
   article: PublicArticle;
@@ -13,15 +17,17 @@ interface ArticleCardProps {
 
 const ArticleCard = ({ article, type, language, onOpen }: ArticleCardProps) => {
   const copy = getArticleCopy(language);
-  const fallback = type === 'blog'
-    ? publicImage('portfolio Zepter Real Estate.jpg')
-    : publicImage('who we are Zepter-Real Estate.jpg');
+  const fallback = getArticleFallbackImage(type);
 
   return (
     <article className={`article-card article-card--${type}`}>
       <button onClick={onOpen} aria-label={`${copy.readMore}: ${article.title}`}>
         <div className="article-card__media">
-          <img src={articleImageUrl(article.coverImage) || fallback} alt="" />
+          <img
+            src={articleImageUrl(article.coverImage, fallback)}
+            alt=""
+            onError={(event) => applyArticleImageFallback(event.currentTarget, fallback)}
+          />
           {article.featured && <span className="article-card__featured">ZRE</span>}
         </div>
         <div className="article-card__content">

@@ -7,8 +7,13 @@ import LoadingState from '../components/LoadingState';
 import { getArticleCopy } from '../data/articleCopy';
 import type { ArticleType, PublicArticle } from '../types/article';
 import type { SupportedLanguage } from '../types/property';
-import { articleImageUrl, formatArticleDate, toYouTubeEmbedUrl } from '../utils/article';
-import { publicImage } from '../utils/asset';
+import {
+  applyArticleImageFallback,
+  articleImageUrl,
+  formatArticleDate,
+  getArticleFallbackImage,
+  toYouTubeEmbedUrl,
+} from '../utils/article';
 
 interface ArticleDetailPageProps {
   type: ArticleType;
@@ -58,9 +63,7 @@ const ArticleDetailPage = ({ type, slug, navigate, language }: ArticleDetailPage
 
   const paragraphs = useMemo(() => article?.content.split(/\n\s*\n/).filter(Boolean) || [], [article]);
   const youtubeUrl = toYouTubeEmbedUrl(article?.videoUrl);
-  const fallback = type === 'blog'
-    ? publicImage('portfolio Zepter Real Estate.jpg')
-    : publicImage('who we are Zepter-Real Estate.jpg');
+  const fallback = getArticleFallbackImage(type);
 
   if (loading) return <main className="article-detail-page article-detail-page--loading"><LoadingState text={copy.loading} /></main>;
   if (error || !article) {
@@ -75,7 +78,11 @@ const ArticleDetailPage = ({ type, slug, navigate, language }: ArticleDetailPage
   return (
     <main className={`article-detail-page article-detail-page--${type}`}>
       <section className="article-detail-hero">
-        <img src={articleImageUrl(article.coverImage) || fallback} alt="" />
+        <img
+          src={articleImageUrl(article.coverImage, fallback)}
+          alt=""
+          onError={(event) => applyArticleImageFallback(event.currentTarget, fallback)}
+        />
         <div className="article-detail-hero__overlay" />
         <div className="article-detail-hero__content">
           <button onClick={() => navigate(`/${type}`)}>← {sectionCopy.back}</button>
@@ -102,11 +109,19 @@ const ArticleDetailPage = ({ type, slug, navigate, language }: ArticleDetailPage
 
           {article.galleryImages.length > 0 && (
             <div className="article-detail-gallery">
-              {article.galleryImages.map((image, index) => (
-                <a href={articleImageUrl(image)} target="_blank" rel="noreferrer" key={`${image}-${index}`}>
-                  <img src={articleImageUrl(image)} alt={`${article.title} ${index + 1}`} />
-                </a>
-              ))}
+              {article.galleryImages.map((image, index) => {
+                const imageUrl = articleImageUrl(image, fallback);
+
+                return (
+                  <a href={imageUrl} target="_blank" rel="noreferrer" key={`${image}-${index}`}>
+                    <img
+                      src={imageUrl}
+                      alt={`${article.title} ${index + 1}`}
+                      onError={(event) => applyArticleImageFallback(event.currentTarget, fallback)}
+                    />
+                  </a>
+                );
+              })}
             </div>
           )}
 
