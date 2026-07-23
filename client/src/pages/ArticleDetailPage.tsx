@@ -2,18 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { getPublicArticle, getPublicArticles } from '../api/articles';
 import ArticleCard from '../components/ArticleCard';
+import ArticleImage from '../components/ArticleImage';
 import EmptyState from '../components/EmptyState';
 import LoadingState from '../components/LoadingState';
 import { getArticleCopy } from '../data/articleCopy';
 import type { ArticleType, PublicArticle } from '../types/article';
 import type { SupportedLanguage } from '../types/property';
-import {
-  applyArticleImageFallback,
-  articleImageUrl,
-  formatArticleDate,
-  getArticleFallbackImage,
-  toYouTubeEmbedUrl,
-} from '../utils/article';
+import { formatArticleDate, toYouTubeEmbedUrl } from '../utils/article';
 
 interface ArticleDetailPageProps {
   type: ArticleType;
@@ -63,7 +58,6 @@ const ArticleDetailPage = ({ type, slug, navigate, language }: ArticleDetailPage
 
   const paragraphs = useMemo(() => article?.content.split(/\n\s*\n/).filter(Boolean) || [], [article]);
   const youtubeUrl = toYouTubeEmbedUrl(article?.videoUrl);
-  const fallback = getArticleFallbackImage(type);
 
   if (loading) return <main className="article-detail-page article-detail-page--loading"><LoadingState text={copy.loading} /></main>;
   if (error || !article) {
@@ -78,10 +72,12 @@ const ArticleDetailPage = ({ type, slug, navigate, language }: ArticleDetailPage
   return (
     <main className={`article-detail-page article-detail-page--${type}`}>
       <section className="article-detail-hero">
-        <img
-          src={articleImageUrl(article.coverImage, fallback)}
+        <ArticleImage
+          source={article.coverImage}
           alt=""
-          onError={(event) => applyArticleImageFallback(event.currentTarget, fallback)}
+          unavailableText={copy.imageUnavailable}
+          emptyText={copy.noImage}
+          unavailableClassName="article-detail-hero__image-unavailable"
         />
         <div className="article-detail-hero__overlay" />
         <div className="article-detail-hero__content">
@@ -109,19 +105,18 @@ const ArticleDetailPage = ({ type, slug, navigate, language }: ArticleDetailPage
 
           {article.galleryImages.length > 0 && (
             <div className="article-detail-gallery">
-              {article.galleryImages.map((image, index) => {
-                const imageUrl = articleImageUrl(image, fallback);
-
-                return (
-                  <a href={imageUrl} target="_blank" rel="noreferrer" key={`${image}-${index}`}>
-                    <img
-                      src={imageUrl}
-                      alt={`${article.title} ${index + 1}`}
-                      onError={(event) => applyArticleImageFallback(event.currentTarget, fallback)}
-                    />
-                  </a>
-                );
-              })}
+              {article.galleryImages.map((image, index) => (
+                <ArticleImage
+                  key={`${image}-${index}`}
+                  source={image}
+                  alt={`${article.title} ${index + 1}`}
+                  unavailableText={copy.imageUnavailable}
+                  unavailableClassName="article-detail-gallery__image-unavailable"
+                  linkToSource
+                  linkClassName="article-detail-gallery__link"
+                  loading="lazy"
+                />
+              ))}
             </div>
           )}
 

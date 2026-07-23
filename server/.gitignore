@@ -10,7 +10,17 @@ dist/
 !.env.example
 
 # Uploads / user files
-uploads/
+# Runtime files in the uploads root remain ignored. Only public media folders
+# that are intentionally deployed with the project are allowlisted.
+uploads/*
+!uploads/blog/
+!uploads/blog/**
+!uploads/news/
+!uploads/news/**
+!uploads/property_images/
+!uploads/property_images/**
+!uploads/property_pdfs/
+!uploads/property_pdfs/**
 
 # Logs
 logs/

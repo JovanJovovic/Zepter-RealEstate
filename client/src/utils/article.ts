@@ -1,4 +1,3 @@
-import type { ArticleType } from '../types/article';
 import type { SupportedLanguage } from '../types/property';
 import { mediaUrl, publicImage } from './asset';
 
@@ -19,15 +18,9 @@ const normalizePublicImagePath = (value: string) => {
   return fileName ? encodeURI(publicImage(fileName)) : '';
 };
 
-export const getArticleFallbackImage = (type?: ArticleType) => (
-  type === 'news'
-    ? encodeURI(publicImage('who we are Zepter-Real Estate.jpg'))
-    : encodeURI(publicImage('portfolio Zepter Real Estate.jpg'))
-);
-
-export const articleImageUrl = (url?: string | null, fallback = '') => {
+export const articleImageUrl = (url?: string | null) => {
   const value = String(url || '').trim();
-  if (!value) return fallback;
+  if (!value) return '';
 
   if (value.startsWith('http://') || value.startsWith('https://')) return value;
 
@@ -44,22 +37,7 @@ export const articleImageUrl = (url?: string | null, fallback = '') => {
     return encodeURI(publicImage(normalized));
   }
 
-  return normalized.startsWith('/') ? encodeURI(normalized) : fallback;
-};
-
-export const applyArticleImageFallback = (
-  image: HTMLImageElement,
-  fallback = getArticleFallbackImage()
-) => {
-  if (image.dataset.fallbackApplied === 'true') return;
-
-  image.dataset.fallbackApplied = 'true';
-  image.src = fallback;
-
-  const parentLink = image.closest('a');
-  if (parentLink instanceof HTMLAnchorElement) {
-    parentLink.href = fallback;
-  }
+  return normalized.startsWith('/') ? encodeURI(normalized) : '';
 };
 
 export const formatArticleDate = (date: string | undefined, language: SupportedLanguage) => {

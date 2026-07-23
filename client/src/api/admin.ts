@@ -22,6 +22,7 @@ import type {
   AdminArticlesResponse,
   ArticlePayload,
   ArticleStatus,
+  ArticleType,
 } from '../types/article';
 import { API_URL } from '../utils/asset';
 
@@ -137,6 +138,16 @@ export const uploadAdminFile = (file: File) => {
   formData.append('file', file);
 
   return adminRequest<UploadFileResponse>(`${API_URL}/admin/upload/single`, {
+    method: 'POST',
+    body: formData,
+  });
+};
+
+export const uploadAdminArticleFile = (file: File, type: ArticleType) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return adminRequest<UploadFileResponse>(`${API_URL}/admin/upload/article/${type}/single`, {
     method: 'POST',
     body: formData,
   });

@@ -25,6 +25,8 @@ const sr = {
   loading: 'Učitavanje sadržaja...',
   loadError: 'Sadržaj trenutno nije moguće učitati.',
   notFound: 'Traženi sadržaj nije pronađen.',
+  noImage: 'Slika nije dodata',
+  imageUnavailable: 'Slika nije dostupna',
   admin: {
     navLabel: 'Blog & News',
     kicker: 'Urednički sadržaj',
@@ -101,6 +103,7 @@ const sr = {
     slugHint: 'Jedinstvena URL oznaka, npr. novi-poslovni-prostor',
     contentHint: 'Prazan red razdvaja pasuse na javnoj stranici.',
     imageHint: 'JPG, PNG ili WebP do 10 MB.',
+    imageUnavailable: 'Slika nije dostupna. Potrebno je ponovo postaviti sliku.',
     draft: 'Nacrt',
     publishedStatus: 'Objavljeno',
     archived: 'Arhivirano',
@@ -132,6 +135,8 @@ const en = {
   loading: 'Loading content...',
   loadError: 'Content is currently unavailable.',
   notFound: 'The requested content could not be found.',
+  noImage: 'No image added',
+  imageUnavailable: 'Image unavailable',
   admin: {
     navLabel: 'Blog & News',
     kicker: 'Editorial content',
@@ -208,6 +213,7 @@ const en = {
     slugHint: 'Unique URL identifier, e.g. new-business-space',
     contentHint: 'A blank line separates paragraphs on the public page.',
     imageHint: 'JPG, PNG or WebP up to 10 MB.',
+    imageUnavailable: 'Image unavailable. Please upload the image again.',
     draft: 'Draft',
     publishedStatus: 'Published',
     archived: 'Archived',

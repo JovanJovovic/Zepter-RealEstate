@@ -5,6 +5,7 @@ import {
   getAdminArticles,
   updateAdminArticleStatus,
 } from '../../api/admin';
+import ArticleImage from '../../components/ArticleImage';
 import AdminNotice from '../../components/admin/AdminNotice';
 import AdminStatusBadge from '../../components/admin/AdminStatusBadge';
 import EmptyState from '../../components/EmptyState';
@@ -18,7 +19,7 @@ import type {
 } from '../../types/article';
 import type { AdminMessage } from '../../types/admin';
 import type { SupportedLanguage } from '../../types/property';
-import { articleImageUrl, formatArticleDate } from '../../utils/article';
+import { formatArticleDate } from '../../utils/article';
 
 interface AdminArticlesPageProps {
   navigate: (path: string) => void;
@@ -156,7 +157,13 @@ const AdminArticlesPage = ({ navigate, language }: AdminArticlesPageProps) => {
               <div className="admin-table__row" key={article._id}>
                 <button className="admin-article-title-cell" onClick={() => setPreview(article)}>
                   {article.coverImage ? (
-                    <img src={articleImageUrl(article.coverImage)} alt="" />
+                    <ArticleImage
+                      source={article.coverImage}
+                      alt=""
+                      unavailableText={copy.imageUnavailable}
+                      unavailableClassName="admin-article-thumb-unavailable"
+                      loading="lazy"
+                    />
                   ) : (
                     <span>{article.type === 'blog' ? 'B' : 'N'}</span>
                   )}
@@ -207,7 +214,15 @@ const AdminArticlesPage = ({ navigate, language }: AdminArticlesPageProps) => {
               </div>
               <button onClick={() => setPreview(null)} aria-label={copy.close}>×</button>
             </header>
-            {preview.coverImage && <img className="admin-article-preview-modal__cover" src={articleImageUrl(preview.coverImage)} alt="" />}
+            {preview.coverImage && (
+              <ArticleImage
+                source={preview.coverImage}
+                className="admin-article-preview-modal__cover"
+                alt=""
+                unavailableText={copy.imageUnavailable}
+                unavailableClassName="admin-article-preview-modal__cover-unavailable"
+              />
+            )}
             <div className="admin-article-preview-modal__meta">
               <AdminStatusBadge value={preview.status} language={language} />
               <span>{localeDate(preview.publishedAt)}</span>

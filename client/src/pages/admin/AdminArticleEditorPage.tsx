@@ -5,15 +5,15 @@ import {
   createAdminArticle,
   getAdminArticleById,
   updateAdminArticle,
-  uploadAdminFile,
+  uploadAdminArticleFile,
 } from '../../api/admin';
+import ArticleImage from '../../components/ArticleImage';
 import AdminNotice from '../../components/admin/AdminNotice';
 import LoadingState from '../../components/LoadingState';
 import { getArticleCopy } from '../../data/articleCopy';
 import type { AdminArticle, ArticlePayload, ArticleStatus, ArticleType } from '../../types/article';
 import type { AdminMessage } from '../../types/admin';
 import type { SupportedLanguage } from '../../types/property';
-import { articleImageUrl } from '../../utils/article';
 
 interface AdminArticleEditorPageProps {
   articleId?: string;
@@ -113,7 +113,7 @@ const AdminArticleEditorPage = ({ articleId, navigate, language }: AdminArticleE
     setUploading(true);
     setMessage(null);
     try {
-      const response = await uploadAdminFile(file);
+      const response = await uploadAdminArticleFile(file, form.type);
       setField('coverImage', response.file.url);
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : copy.saveFailed });
@@ -130,7 +130,7 @@ const AdminArticleEditorPage = ({ articleId, navigate, language }: AdminArticleE
     setUploading(true);
     setMessage(null);
     try {
-      const responses = await Promise.all(files.map(uploadAdminFile));
+      const responses = await Promise.all(files.map((file) => uploadAdminArticleFile(file, form.type)));
       setForm((current) => ({
         ...current,
         galleryImages: [...current.galleryImages, ...responses.map((response) => response.file.url)],
@@ -302,7 +302,12 @@ const AdminArticleEditorPage = ({ articleId, navigate, language }: AdminArticleE
             <span className="admin-kicker">{copy.coverImage}</span>
             {form.coverImage && (
               <div className="admin-article-cover-preview">
-                <img src={articleImageUrl(form.coverImage)} alt="" />
+                <ArticleImage
+                  source={form.coverImage}
+                  alt=""
+                  unavailableText={copy.imageUnavailable}
+                  unavailableClassName="admin-article-cover-preview__unavailable"
+                />
                 <button type="button" onClick={() => setField('coverImage', '')}>{copy.remove}</button>
               </div>
             )}
@@ -323,7 +328,13 @@ const AdminArticleEditorPage = ({ articleId, navigate, language }: AdminArticleE
             <div className="admin-article-gallery-list">
               {form.galleryImages.map((image, index) => (
                 <div key={`${image}-${index}`}>
-                  <img src={articleImageUrl(image)} alt="" />
+                  <ArticleImage
+                    source={image}
+                    alt=""
+                    unavailableText={copy.imageUnavailable}
+                    unavailableClassName="admin-article-gallery-list__unavailable"
+                    loading="lazy"
+                  />
                   <button type="button" onClick={() => setField('galleryImages', form.galleryImages.filter((_, itemIndex) => itemIndex !== index))}>{copy.remove}</button>
                 </div>
               ))}
