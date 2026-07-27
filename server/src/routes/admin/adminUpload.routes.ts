@@ -3,6 +3,10 @@ import type { Request, Response } from "express";
 
 import { protectAdmin } from "../../middlewares/auth.middleware.js";
 import { articleUpload, upload } from "../../middlewares/upload.middleware.js";
+import {
+  persistArticleMedia,
+  type ArticleMediaType,
+} from "../../services/articleMedia.service.js";
 
 const router = Router();
 const ARTICLE_TYPES = ["blog", "news"] as const;
@@ -26,22 +30,28 @@ router.post(
     next();
   },
   articleUpload.single("file"),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response, next) => {
     if (!req.file) {
       return res.status(400).json({
         message: "Slika nije poslata.",
       });
     }
 
-    res.status(201).json({
-      file: {
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        mimeType: req.file.mimetype,
-        size: req.file.size,
-        url: articleUploadPath(req, req.file.filename),
-      },
-    });
+    try {
+      await persistArticleMedia(req.file, req.params.type as ArticleMediaType);
+
+      res.status(201).json({
+        file: {
+          filename: req.file.filename,
+          originalName: req.file.originalname,
+          mimeType: req.file.mimetype,
+          size: req.file.size,
+          url: articleUploadPath(req, req.file.filename),
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 
@@ -56,7 +66,7 @@ router.post(
     next();
   },
   articleUpload.array("files", 20),
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response, next) => {
     const files = req.files as Express.Multer.File[] | undefined;
 
     if (!files || files.length === 0) {
@@ -65,15 +75,25 @@ router.post(
       });
     }
 
-    res.status(201).json({
-      files: files.map((file) => ({
-        filename: file.filename,
-        originalName: file.originalname,
-        mimeType: file.mimetype,
-        size: file.size,
-        url: articleUploadPath(req, file.filename),
-      })),
-    });
+    try {
+      const articleType = req.params.type as ArticleMediaType;
+
+      for (const file of files) {
+        await persistArticleMedia(file, articleType);
+      }
+
+      res.status(201).json({
+        files: files.map((file) => ({
+          filename: file.filename,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size,
+          url: articleUploadPath(req, file.filename),
+        })),
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 );
 

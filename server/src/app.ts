@@ -16,6 +16,7 @@ import propertyOfferRoutes from "./routes/propertyOffer.routes.js";
 import adminPropertyOfferRoutes from "./routes/admin/adminPropertyOffer.routes.js";
 import articleRoutes from "./routes/article.routes.js";
 import adminArticleRoutes from "./routes/admin/adminArticle.routes.js";
+import { serveArticleMedia } from "./controllers/articleMedia.controller.js";
 
 const app = express();
 
@@ -38,6 +39,8 @@ const uploadDirectories = [
 uploadDirectories.forEach((uploadDirectory) => {
   app.use("/uploads", express.static(uploadDirectory));
 });
+
+app.get("/uploads/:type/:filename", serveArticleMedia);
 
 app.get("/api/health", (_req, res) => {
   res.json({

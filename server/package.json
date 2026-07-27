@@ -11,6 +11,7 @@
     "seed:properties": "tsx src/scripts/seedProperties.ts",
     "seed:articles": "tsx src/scripts/seedArticles.ts",
     "migrate:article-upload-folders": "tsx src/scripts/migrateArticleUploadFolders.ts",
+    "migrate:article-media-gridfs": "tsx src/scripts/migrateArticleMediaToGridFs.ts",
     "backfill:property-availability": "tsx src/scripts/backfillPropertyAvailability.ts",
     "migrate:transaction-type": "tsx src/scripts/migrateTransactionType.ts",
     "seed:atlas": "tsx src/seed/atlas.seed.ts"
